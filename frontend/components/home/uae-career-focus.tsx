@@ -11,7 +11,7 @@ import {
   MotionStaggerItem,
   MotionStaggerList,
 } from '@/components/motion/motion-reveal';
-import uaeCareerFocusImage from '@/public/images/home/uae-career-focus.png';
+import uaeCareerFocusImage from '@/public/images/home/uae-career-focus.webp';
 
 export async function UaeCareerFocus() {
   const _copy = await getCopy();

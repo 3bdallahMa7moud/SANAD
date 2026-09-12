@@ -11,7 +11,7 @@ import {
   MotionStaggerItem,
   MotionStaggerList,
 } from '@/components/motion/motion-reveal';
-import careerStoryImage from '@/public/images/home/career-story.png';
+import careerStoryImage from '@/public/images/home/career-story.webp';
 
 export async function CareerStory() {
   const _copy = await getCopy();

@@ -15,7 +15,7 @@ import {
   MotionStaggerItem,
   MotionStaggerList,
 } from '@/components/motion/motion-reveal';
-import heroCareerProfile from '@/public/images/home/hero-career-profile.png';
+import heroCareerProfile from '@/public/images/home/hero-career-profile.webp';
 
 export async function HeroSection() {
   const _copy = await getCopy();

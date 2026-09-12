@@ -11,7 +11,7 @@ interface LanguageSwitcherProps {
   variant?: 'icon' | 'text' | 'full';
 }
 
-/** Switches locale in React state without navigating away from the current page. */
+/** Switches locale in place and refreshes server-rendered translations. */
 export function LanguageSwitcher({
   className,
   variant = 'full',

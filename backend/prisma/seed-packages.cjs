@@ -30,7 +30,7 @@ const packageCatalog = [
     ],
     deliveryDays: 10,
     maxRevisions: 3,
-    imagePath: '/images/packages/golden-signature-package.png',
+    imagePath: '/images/packages/golden-signature-package.webp',
     altText:
       'Premium coordinated collection of professional career documents on an executive desk',
   },
@@ -55,7 +55,7 @@ const packageCatalog = [
     ],
     deliveryDays: 7,
     maxRevisions: 2,
-    imagePath: '/images/packages/career-excellence-package.png',
+    imagePath: '/images/packages/career-excellence-package.webp',
     altText:
       'Coordinated CV, cover letter, and professional profile planning set in a modern office',
   },
@@ -78,7 +78,7 @@ const packageCatalog = [
     ],
     deliveryDays: 5,
     maxRevisions: 1,
-    imagePath: '/images/packages/professional-distinction-package.png',
+    imagePath: '/images/packages/professional-distinction-package.webp',
     altText:
       'Matching professional CV and cover letter presented side by side on an executive desk',
   },
@@ -102,7 +102,7 @@ const packageCatalog = [
     ],
     deliveryDays: 5,
     maxRevisions: 2,
-    imagePath: '/images/packages/professional-cv.png',
+    imagePath: '/images/packages/professional-cv.webp',
     altText:
       'Single professional CV being carefully reviewed on a navy executive desk pad',
   },
@@ -126,7 +126,7 @@ const packageCatalog = [
     ],
     deliveryDays: 4,
     maxRevisions: 1,
-    imagePath: '/images/packages/linkedin-profile-optimization.png',
+    imagePath: '/images/packages/linkedin-profile-optimization.webp',
     altText:
       'Generic professional networking profile dashboard in a contemporary corporate workspace',
   },
@@ -150,7 +150,7 @@ const packageCatalog = [
     ],
     deliveryDays: 3,
     maxRevisions: 1,
-    imagePath: '/images/packages/job-application-service.png',
+    imagePath: '/images/packages/job-application-service.webp',
     altText:
       'Organized professional job application workflow with documents, checklist, and progress dashboard',
   },

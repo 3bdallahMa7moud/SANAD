@@ -30,7 +30,7 @@ export function BrandLogo({
       className={cn(logoSizes[size], 'max-w-full object-contain', className)}
       height={880}
       loading={loading}
-      src="/brand/sanad-logo.jpg"
+      src="/brand/sanad-logo.webp"
       unoptimized
       width={1195}
     />

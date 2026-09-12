@@ -165,7 +165,7 @@ describe('Package selection experience', () => {
         images={[
           {
             id: 1,
-            path: '/images/packages/professional-cv.png',
+            path: '/images/packages/professional-cv.webp',
             altText: 'CV illustration',
             isPrimary: true,
             displayOrder: 0,

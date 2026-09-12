@@ -28,8 +28,8 @@ export const FALLBACK_PACKAGES: CareerPackage[] = [
     images: [
       {
         id: 1,
-        path: '/images/packages/golden-signature-package.png',
-        url: '/images/packages/golden-signature-package.png',
+        path: '/images/packages/golden-signature-package.webp',
+        url: '/images/packages/golden-signature-package.webp',
         altText: 'Premium Full Package',
         isPrimary: true,
         displayOrder: 1,
@@ -71,8 +71,8 @@ export const FALLBACK_PACKAGES: CareerPackage[] = [
     images: [
       {
         id: 2,
-        path: '/images/packages/career-excellence-package.png',
-        url: '/images/packages/career-excellence-package.png',
+        path: '/images/packages/career-excellence-package.webp',
+        url: '/images/packages/career-excellence-package.webp',
         altText: 'Full Package',
         isPrimary: true,
         displayOrder: 1,
@@ -112,8 +112,8 @@ export const FALLBACK_PACKAGES: CareerPackage[] = [
     images: [
       {
         id: 3,
-        path: '/images/packages/professional-distinction-package.png',
-        url: '/images/packages/professional-distinction-package.png',
+        path: '/images/packages/professional-distinction-package.webp',
+        url: '/images/packages/professional-distinction-package.webp',
         altText: 'Professional Package',
         isPrimary: true,
         displayOrder: 1,
@@ -149,8 +149,8 @@ export const FALLBACK_PACKAGES: CareerPackage[] = [
     images: [
       {
         id: 4,
-        path: '/images/packages/professional-cv.png',
-        url: '/images/packages/professional-cv.png',
+        path: '/images/packages/professional-cv.webp',
+        url: '/images/packages/professional-cv.webp',
         altText: 'Professional CV',
         isPrimary: true,
         displayOrder: 1,
@@ -178,8 +178,8 @@ export const FALLBACK_PACKAGES: CareerPackage[] = [
     images: [
       {
         id: 5,
-        path: '/images/packages/linkedin-profile-optimization.png',
-        url: '/images/packages/linkedin-profile-optimization.png',
+        path: '/images/packages/linkedin-profile-optimization.webp',
+        url: '/images/packages/linkedin-profile-optimization.webp',
         altText: 'LinkedIn Profile Optimization',
         isPrimary: true,
         displayOrder: 1,
@@ -207,8 +207,8 @@ export const FALLBACK_PACKAGES: CareerPackage[] = [
     images: [
       {
         id: 6,
-        path: '/images/packages/job-application-service.png',
-        url: '/images/packages/job-application-service.png',
+        path: '/images/packages/job-application-service.webp',
+        url: '/images/packages/job-application-service.webp',
         altText: 'Job Application Service',
         isPrimary: true,
         displayOrder: 1,

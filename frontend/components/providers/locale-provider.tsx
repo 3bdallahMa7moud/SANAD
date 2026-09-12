@@ -11,6 +11,7 @@ import {
   type ReactNode,
 } from 'react';
 import { NextIntlClientProvider, type AbstractIntlMessages } from 'next-intl';
+import { useRouter } from 'next/navigation';
 
 export type AppLocale = 'ar' | 'en';
 
@@ -26,12 +27,13 @@ interface LocaleProviderProps {
   messagesByLocale: Record<AppLocale, AbstractIntlMessages>;
 }
 
-/** Keeps locale in React state; the cookie only restores it on a later visit. */
+/** Keeps client and server-rendered copy in sync when the locale changes. */
 export function LocaleProvider({
   children,
   initialLocale,
   messagesByLocale,
 }: LocaleProviderProps) {
+  const router = useRouter();
   const [locale, setLocaleState] = useState<AppLocale>(initialLocale);
 
   useEffect(() => {
@@ -47,9 +49,14 @@ export function LocaleProvider({
       expires.setFullYear(expires.getFullYear() + 1);
       document.cookie = `SANAD_LOCALE=${nextLocale}; path=/; expires=${expires.toUTCString()}; SameSite=Lax`;
 
-      startTransition(() => setLocaleState(nextLocale));
+      startTransition(() => {
+        setLocaleState(nextLocale);
+        // Server Components read the locale cookie, so refresh their payload
+        // without changing the current URL or doing a full browser reload.
+        router.refresh();
+      });
     },
-    [locale],
+    [locale, router],
   );
 
   const value = useMemo(() => ({ setLocale }), [setLocale]);
