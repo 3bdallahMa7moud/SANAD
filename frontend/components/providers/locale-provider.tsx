@@ -5,13 +5,15 @@ import {
   startTransition,
   useCallback,
   useContext,
-  useEffect,
+  useLayoutEffect,
   useMemo,
   useState,
   type ReactNode,
 } from 'react';
 import { NextIntlClientProvider, type AbstractIntlMessages } from 'next-intl';
 import { useRouter } from 'next/navigation';
+
+import { localizeDocumentCopy } from '@/lib/i18n/document-copy';
 
 export type AppLocale = 'ar' | 'en';
 
@@ -36,9 +38,10 @@ export function LocaleProvider({
   const router = useRouter();
   const [locale, setLocaleState] = useState<AppLocale>(initialLocale);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     document.documentElement.lang = locale;
     document.documentElement.dir = locale === 'ar' ? 'rtl' : 'ltr';
+    localizeDocumentCopy(document.body, locale);
   }, [locale]);
 
   const setLocale = useCallback(
@@ -49,8 +52,11 @@ export function LocaleProvider({
       expires.setFullYear(expires.getFullYear() + 1);
       document.cookie = `SANAD_LOCALE=${nextLocale}; path=/; expires=${expires.toUTCString()}; SameSite=Lax`;
 
+      // This update is urgent: client-rendered and optimistic server copy must
+      // change before the slower Server Component refresh completes.
+      setLocaleState(nextLocale);
+
       startTransition(() => {
-        setLocaleState(nextLocale);
         // Server Components read the locale cookie, so refresh their payload
         // without changing the current URL or doing a full browser reload.
         router.refresh();
@@ -63,7 +69,10 @@ export function LocaleProvider({
 
   return (
     <LocaleContext.Provider value={value}>
-      <NextIntlClientProvider locale={locale} messages={messagesByLocale[locale]}>
+      <NextIntlClientProvider
+        locale={locale}
+        messages={messagesByLocale[locale]}
+      >
         {children}
       </NextIntlClientProvider>
     </LocaleContext.Provider>
@@ -72,6 +81,7 @@ export function LocaleProvider({
 
 export function useLocaleSwitcher() {
   const context = useContext(LocaleContext);
-  if (!context) throw new Error('useLocaleSwitcher must be used inside LocaleProvider');
+  if (!context)
+    throw new Error('useLocaleSwitcher must be used inside LocaleProvider');
   return context;
 }
