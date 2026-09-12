@@ -27,7 +27,11 @@ export function BrandLogo({
   return (
     <Image
       alt={_copy(alt)}
-      className={cn(logoSizes[size], 'max-w-full object-contain', className)}
+      className={cn(
+        logoSizes[size],
+        'max-w-full rounded-lg object-contain',
+        className,
+      )}
       height={880}
       loading={loading}
       src="/brand/sanad-logo.webp"
