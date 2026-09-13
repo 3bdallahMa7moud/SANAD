@@ -689,8 +689,7 @@ html[dir='rtl'] .reviews-loop-track {
 }
 
 .reviews-loop:hover .reviews-loop-track,
-.reviews-loop:focus-within .reviews-loop-track,
-.reviews-loop[data-paused='true'] .reviews-loop-track {
+.reviews-loop:focus-within .reviews-loop-track {
   animation-play-state: paused;
 }
 
@@ -718,10 +717,6 @@ html[dir='rtl'] .reviews-loop-track {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .reviews-loop-control {
-    display: none;
-  }
-
   .reviews-loop {
     overflow-x: auto;
     mask-image: none;
