@@ -27,13 +27,20 @@ export class EmailService {
     private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
   ) {
-    this.emailFrom =
-      this.configService.get<string>('EMAIL_FROM') ||
-      this.configService.get<string>('SMTP_FROM_EMAIL') ||
-      'SANAD <notifications@sanad.ae>';
-
     const resendApiKey = this.configService.get<string>('RESEND_API_KEY');
     const smtpHost = this.configService.get<string>('SMTP_HOST');
+    const smtpUser = this.configService.get<string>('SMTP_USER');
+    const fromAddress = smtpHost
+      ? this.configService.get<string>('SMTP_FROM_EMAIL') ||
+        smtpUser ||
+        this.configService.get<string>('EMAIL_FROM') ||
+        'SANAD <notifications@sanad.ae>'
+      : this.configService.get<string>('EMAIL_FROM') ||
+        this.configService.get<string>('SMTP_FROM_EMAIL') ||
+        'SANAD <notifications@sanad.ae>';
+    this.emailFrom = fromAddress.includes('<')
+      ? fromAddress
+      : `SANAD <${fromAddress}>`;
 
     if (smtpHost) {
       // 1. SMTP Provider (Gmail, SES, Sendgrid, custom SMTP)
@@ -44,7 +51,6 @@ export class EmailService {
       const isSecure =
         this.configService.get<string>('SMTP_SECURE') === 'true' ||
         smtpPort === 465;
-      const smtpUser = this.configService.get<string>('SMTP_USER');
       const smtpPass = this.configService.get<string>('SMTP_PASSWORD');
 
       this.smtpTransporter = nodemailer.createTransport({
@@ -65,11 +71,6 @@ export class EmailService {
       this.providerType = 'resend';
       this.logger.log('Resend email provider initialized successfully');
     } else {
-      if (this.configService.get<string>('NODE_ENV') === 'production') {
-        throw new Error(
-          'Production requires a working email provider configuration',
-        );
-      }
       // 3. Mock fallback in Development
       this.providerType = 'mock';
       this.logger.warn(
@@ -201,19 +202,46 @@ export class EmailService {
 
   async sendOtpEmail(email: string, otp: string) {
     const safeOtp = this.escapeHtml(otp);
-    const subject = 'Your SANAD verification code';
+    const frontendUrl =
+      this.configService.get<string>('FRONTEND_URL') ||
+      'http://localhost:3001';
+    const logoUrl = this.escapeHtml(
+      new URL('/icon.png', frontendUrl).toString(),
+    );
+    const subject = 'SANAD | رمز التحقق';
     const bodyHtml = `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 540px; margin: 0 auto; padding: 32px 24px; color: #1e293b; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
-        <h2 style="margin: 0 0 16px 0; font-size: 20px; font-weight: 700; color: #0f172a;">Your SANAD verification code</h2>
-        <p style="font-size: 15px; line-height: 1.6; margin: 16px 0;">Your verification code is:</p>
-        <div style="margin: 24px 0; padding: 16px; background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;">
-          <span style="font-family: monospace, Courier, monospace; font-size: 32px; font-weight: 700; letter-spacing: 6px; color: #0f172a;">${safeOtp}</span>
-        </div>
-        <p style="font-size: 14px; color: #475569; margin: 16px 0;">This code expires in 10 minutes.</p>
-        <p style="font-size: 13px; color: #94a3b8; margin: 24px 0 0 0;">If you did not request this code, you can ignore this email.</p>
-      </div>
+      <!doctype html>
+      <html lang="ar" dir="rtl">
+        <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+        <body style="margin:0;padding:0;background:#f6f1e9;font-family:Tahoma,Arial,sans-serif;color:#17202a;">
+          <div style="display:none;font-size:1px;color:#f6f1e9;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">رمز التحقق من SANAD صالح لمدة 10 دقائق.</div>
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f6f1e9;">
+            <tr><td align="center" style="padding:32px 16px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:560px;background:#ffffff;border:1px solid #e9ddc8;border-radius:16px;overflow:hidden;">
+                <tr><td align="center" style="background:#0b2744;padding:28px 24px 24px;">
+                  <img src="${logoUrl}" width="88" height="88" alt="SANAD | سند" style="display:block;width:88px;height:88px;border:0;border-radius:12px;background:#fff8ed;">
+                  <p style="margin:14px 0 0;color:#e4ceaa;font-size:13px;letter-spacing:2px;font-weight:700;">SANAD</p>
+                </td></tr>
+                <tr><td style="height:4px;background:#b8955a;font-size:0;line-height:0;">&nbsp;</td></tr>
+                <tr><td align="center" style="padding:34px 28px 30px;">
+                  <h1 style="margin:0 0 12px;color:#0b2744;font-size:25px;line-height:1.5;">رمز التحقق الخاص بك</h1>
+                  <p style="margin:0;color:#526070;font-size:15px;line-height:1.9;">أدخل الرمز التالي لإكمال تسجيل الدخول إلى SANAD</p>
+                  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:24px 0;background:#fff8ed;border:1px solid #e4ceaa;border-radius:12px;">
+                    <tr><td align="center" dir="ltr" style="padding:18px 12px;color:#0b2744;font-family:Arial,sans-serif;font-size:34px;font-weight:700;letter-spacing:8px;">${safeOtp}</td></tr>
+                  </table>
+                  <p style="margin:0;color:#526070;font-size:14px;line-height:1.8;">هذا الرمز صالح لمدة <strong>10 دقائق</strong>.</p>
+                </td></tr>
+                <tr><td align="center" style="padding:20px 28px 26px;background:#f9f6f0;border-top:1px solid #e9ddc8;">
+                  <p style="margin:0;color:#687380;font-size:12px;line-height:1.8;">إذا لم تطلب هذا الرمز، يمكنك تجاهل هذه الرسالة بأمان.</p>
+                  <p style="margin:12px 0 0;color:#0b2744;font-size:12px;font-weight:700;">SANAD · سند</p>
+                </td></tr>
+              </table>
+            </td></tr>
+          </table>
+        </body>
+      </html>
     `;
-    const bodyText = `Your verification code is:\n\n${otp}\n\nThis code expires in 10 minutes.\n\nIf you did not request this code, you can ignore this email.`;
+    const bodyText = `SANAD | رمز التحقق\n\nرمز التحقق الخاص بك: ${otp}\n\nهذا الرمز صالح لمدة 10 دقائق. إذا لم تطلب هذا الرمز، يمكنك تجاهل هذه الرسالة.`;
 
     await this.queueEmail({
       to: email,
@@ -225,7 +253,6 @@ export class EmailService {
       priority: 1,
     });
 
-    await this.sendDirect({ to: email, subject, bodyHtml, bodyText });
   }
 
   private escapeHtml(value: string): string {

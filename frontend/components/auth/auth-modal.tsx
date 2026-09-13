@@ -46,8 +46,8 @@ export function AuthModalProvider({ children }: { children: React.ReactNode }) {
       {_copy(children)}
       <Dialog onOpenChange={setOpen} open={open}>
         <DialogContent
-          className="max-h-[90vh] max-w-[34rem] gap-0 overflow-y-auto rounded-[20px] border-border/70 p-6 shadow-xl shadow-primary/15 sm:p-9"
-          dir="rtl"
+          className="max-h-[90vh] max-w-[34rem] gap-0 overflow-y-auto rounded-[20px] border-border/70 p-4 shadow-xl shadow-primary/15 sm:p-9"
+          dir={_copy.locale === 'ar' ? 'rtl' : 'ltr'}
           onCloseAutoFocus={(event) => {
             event.preventDefault();
             returnFocusRef.current?.focus();
@@ -71,21 +71,19 @@ export function AuthModalProvider({ children }: { children: React.ReactNode }) {
             aria-hidden="true"
             className="pointer-events-none absolute inset-x-10 top-0 h-0.5 bg-accent"
           />
-          <div dir="ltr">
-            {mode === 'sign-in' ? (
-              <SignInFlow
-                nextTarget={nextTarget}
-                onComplete={closeModal}
-                onSwitchToSignUp={() => setMode('sign-up')}
-              />
-            ) : (
-              <SignUpFlow
-                nextTarget={nextTarget}
-                onComplete={closeModal}
-                onSwitchToSignIn={() => setMode('sign-in')}
-              />
-            )}
-          </div>
+          {mode === 'sign-in' ? (
+            <SignInFlow
+              nextTarget={nextTarget}
+              onComplete={closeModal}
+              onSwitchToSignUp={() => setMode('sign-up')}
+            />
+          ) : (
+            <SignUpFlow
+              nextTarget={nextTarget}
+              onComplete={closeModal}
+              onSwitchToSignIn={() => setMode('sign-in')}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </AuthModalContext.Provider>

@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
 import {
+  IsBoolean,
   IsEnum,
   IsInt,
   IsOptional,
@@ -71,4 +72,10 @@ export class ModerateReviewDto {
   @ApiProperty({ enum: [ReviewStatus.PUBLISHED, ReviewStatus.HIDDEN] })
   @IsEnum(ReviewStatus)
   status!: ReviewStatus;
+}
+
+export class FeatureReviewDto {
+  @ApiProperty({ description: 'Show this published review on the home page' })
+  @IsBoolean()
+  featured!: boolean;
 }

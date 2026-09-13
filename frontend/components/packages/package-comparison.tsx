@@ -44,30 +44,36 @@ export function PackageComparison({ packages }: { packages: CareerPackage[] }) {
           tabIndex={0}
           className="relative mt-3 overflow-x-auto rounded-lg border border-border bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <table className="w-full min-w-[42rem] text-start text-sm">
+          <table className="w-full min-w-[48rem] table-fixed text-sm">
             <caption className="sr-only">
               {_copy(
                 'Published deliverables, delivery estimates and revisions',
               )}
             </caption>
+            <colgroup>
+              <col className="w-2/5" />
+              {bundles.map((item) => (
+                <col key={item.id} />
+              ))}
+            </colgroup>
             <thead>
               <tr className="border-b border-border">
-                <th scope="col" className="p-5">
+                <th scope="col" className="p-5 text-start align-middle">
                   {_copy('Included service')}
                 </th>
                 {bundles.map((item) => (
                   <th
                     scope="col"
                     key={item.id}
-                    className="min-w-44 p-5 align-top text-primary"
+                    className="p-5 text-center align-middle text-primary"
                   >
                     <Link
-                      className="underline decoration-border underline-offset-4"
+                      className="inline-flex min-h-10 items-center justify-center underline decoration-border underline-offset-4"
                       href={getPackageHref(item)}
                     >
                       {_copy(item.name, item.nameAr)}
                     </Link>
-                    <span className="mt-3 block text-xl">
+                    <span className="mt-2 block text-xl">
                       {_copy(_copy.money(getPackageCurrentPrice(item)))}
                     </span>
                   </th>
@@ -77,15 +83,15 @@ export function PackageComparison({ packages }: { packages: CareerPackage[] }) {
             <tbody>
               {features.map((feature) => (
                 <tr key={feature} className="border-b border-border">
-                  <th scope="row" className="p-4 font-medium">
+                  <th scope="row" className="p-4 text-start align-middle font-medium">
                     {_copy(feature)}
                   </th>
                   {bundles.map((item) => (
-                    <td key={item.id} className="p-4">
+                    <td key={item.id} className="p-4 text-center align-middle">
                       {item.features.includes(feature) ? (
                         <>
                           <Check
-                            className="size-5 text-secondary"
+                            className="mx-auto size-5 text-secondary"
                             aria-hidden="true"
                           />
                           <span className="sr-only">{_copy('Included')}</span>
@@ -93,7 +99,7 @@ export function PackageComparison({ packages }: { packages: CareerPackage[] }) {
                       ) : (
                         <>
                           <Minus
-                            className="size-5 text-muted-foreground"
+                            className="mx-auto size-5 text-muted-foreground"
                             aria-hidden="true"
                           />
                           <span className="sr-only">{_copy('Not listed')}</span>
@@ -104,31 +110,31 @@ export function PackageComparison({ packages }: { packages: CareerPackage[] }) {
                 </tr>
               ))}
               <tr className="border-b border-border">
-                <th scope="row" className="p-4 font-medium">
+                <th scope="row" className="p-4 text-start align-middle font-medium">
                   {_copy('Estimated delivery')}
                 </th>
                 {bundles.map((item) => (
-                  <td key={item.id} className="p-4">
+                  <td key={item.id} className="p-4 text-center align-middle">
                     {_copy(item.deliveryDays)} {_copy('days')}
                   </td>
                 ))}
               </tr>
               <tr className="border-b border-border">
-                <th scope="row" className="p-4 font-medium">
+                <th scope="row" className="p-4 text-start align-middle font-medium">
                   {_copy('Revision rounds')}
                 </th>
                 {bundles.map((item) => (
-                  <td key={item.id} className="p-4">
+                  <td key={item.id} className="p-4 text-center align-middle">
                     {_copy(item.maxRevisions)}
                   </td>
                 ))}
               </tr>
               <tr>
-                <th scope="row" className="p-4 font-medium">
+                <th scope="row" className="p-4 text-start align-middle font-medium">
                   {_copy('Explore the scope')}
                 </th>
                 {bundles.map((item) => (
-                  <td key={item.id} className="p-4">
+                  <td key={item.id} className="p-4 text-center align-middle">
                     <Button asChild variant="outline">
                       <Link
                         aria-label={_copy(`View ${item.name}`)}

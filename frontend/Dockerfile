@@ -34,7 +34,7 @@ ENV R2_PUBLIC_URL=${R2_PUBLIC_URL}
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN npm run build
+RUN NODE_OPTIONS="--max-old-space-size=768" npm run build
 
 FROM node:22-alpine AS runner
 

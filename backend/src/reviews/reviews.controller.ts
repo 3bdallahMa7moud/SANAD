@@ -15,6 +15,7 @@ import { ReviewStatus, UserRole } from '../common/enums';
 import {
   AdminReviewFilterDto,
   CreateReviewDto,
+  FeatureReviewDto,
   ModerateReviewDto,
   PublicReviewFilterDto,
   UpdateReviewDto,
@@ -31,6 +32,13 @@ export class ReviewsController {
   @ApiOperation({ summary: 'List published verified-purchase reviews' })
   listPublished(@Query() query: PublicReviewFilterDto) {
     return this.reviewsService.listPublished(query);
+  }
+
+  @Public()
+  @Get('featured')
+  @ApiOperation({ summary: 'List reviews selected for the home page' })
+  listFeatured() {
+    return this.reviewsService.listFeatured();
   }
 
   @ApiBearerAuth('bearer')
@@ -92,5 +100,14 @@ export class AdminReviewsController {
       });
     }
     return this.reviewsService.moderate(id, adminId, dto.status);
+  }
+
+  @Patch(':id/home-featured')
+  featureOnHome(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser('id') adminId: number,
+    @Body() dto: FeatureReviewDto,
+  ) {
+    return this.reviewsService.featureOnHome(id, adminId, dto.featured);
   }
 }

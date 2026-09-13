@@ -51,6 +51,10 @@ html[dir='rtl']
   direction: ltr;
   text-align: start;
 }
+html[dir='rtl'] input[data-otp-slot] {
+  direction: ltr;
+  text-align: center;
+}
 html[dir='rtl'] .lucide-arrow-right,
 html[dir='rtl'] .lucide-arrow-left,
 html[dir='rtl'] .lucide-chevron-right,
@@ -625,7 +629,83 @@ html[data-theme='dark']
   }
 }
 
+.reviews-loop {
+  overflow: hidden;
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 1.5rem,
+    #000 calc(100% - 1.5rem),
+    transparent
+  );
+}
+
+.reviews-loop-track,
+.reviews-loop-group {
+  display: flex;
+  width: max-content;
+  align-items: stretch;
+}
+
+.reviews-loop-track {
+  animation: sanad-reviews-left 42s linear infinite;
+}
+
+html[dir='rtl'] .reviews-loop-track {
+  animation-name: sanad-reviews-right;
+}
+
+.reviews-loop-group {
+  gap: 1rem;
+  padding-inline-end: 1rem;
+}
+
+.reviews-loop-card {
+  display: flex;
+  width: clamp(16.5rem, 32vw, 24rem);
+  flex: none;
+}
+
+.reviews-loop[data-count='2'] .reviews-loop-card {
+  width: clamp(16.5rem, 48vw, 37rem);
+}
+
+.reviews-loop-card > * {
+  width: 100%;
+}
+
+.reviews-loop:hover .reviews-loop-track,
+.reviews-loop:focus-within .reviews-loop-track,
+.reviews-loop[data-paused='true'] .reviews-loop-track {
+  animation-play-state: paused;
+}
+
+@keyframes sanad-reviews-left {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes sanad-reviews-right {
+  to {
+    transform: translateX(50%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .reviews-loop-control {
+    display: none;
+  }
+
+  .reviews-loop {
+    overflow-x: auto;
+    mask-image: none;
+  }
+
+  .reviews-loop-copy {
+    display: none;
+  }
+
   [data-motion-reveal],
   [data-motion-reveal] span {
     opacity: 1 !important;

@@ -9,6 +9,7 @@ import {
 } from '@tanstack/react-query';
 import { useState } from 'react';
 import { StarRating } from '@/components/feedback/star-rating';
+import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { StatusBadge } from '@/components/ui/status-badge';
@@ -49,8 +50,21 @@ export function ReviewsView() {
     onSuccess: () => {
       void client.invalidateQueries({ queryKey: ['admin', 'reviews'] });
       void client.invalidateQueries({ queryKey: ['reviews', 'public'] });
+      void client.invalidateQueries({ queryKey: reviewKeys.featured });
       void client.invalidateQueries({ queryKey: ['packages'] });
       setAction(null);
+    },
+  });
+  const featuredQuery = useQuery({
+    queryKey: reviewKeys.featured,
+    queryFn: () => reviewsApi.listFeatured(),
+  });
+  const featuring = useMutation({
+    mutationFn: ({ id, featured }: { id: number; featured: boolean }) =>
+      reviewsApi.featureOnHome(id, featured),
+    onSuccess: () => {
+      void client.invalidateQueries({ queryKey: ['admin', 'reviews'] });
+      void client.invalidateQueries({ queryKey: reviewKeys.featured });
     },
   });
   return (
@@ -58,9 +72,38 @@ export function ReviewsView() {
       <AdminPageHeader
         title={_copy('Reviews')}
         description={_copy(
-          'Moderate verified-purchase feedback without changing the customer’s words.',
+          'Publish verified reviews, then choose up to three for the home page without changing the customer’s words.',
+          'انشر التقييمات الموثقة، ثم اختر حتى ثلاثة منها للصفحة الرئيسية دون تعديل كلام العميل.',
         )}
       />
+      <div className="mb-5 flex flex-wrap items-center gap-3">
+        <p className="text-sm font-semibold text-primary">
+          {_copy('Home page selections', 'المختارة للصفحة الرئيسية')}
+          {featuredQuery.data
+            ? `: ${featuredQuery.data.summary.totalReviews}/3`
+            : null}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          {_copy(
+            'Only published reviews can be selected. Hiding or editing a review removes it from the home page.',
+            'يمكن اختيار التقييمات المنشورة فقط. إخفاء التقييم أو تعديله يزيله من الصفحة الرئيسية.',
+          )}
+        </p>
+      </div>
+      {featuring.error ? (
+        <Alert
+          className="mb-5"
+          description={
+            featuring.error.code === 'HOME_REVIEWS_FULL'
+              ? _copy(
+                  'Remove one of the three selected reviews before adding another.',
+                  'أزل أحد التقييمات الثلاثة المختارة قبل إضافة تقييم آخر.',
+                )
+              : _copy(featuring.error.userMessage)
+          }
+          variant="error"
+        />
+      ) : null}
       <div className="mb-5 grid gap-3 sm:grid-cols-[minmax(0,1fr)_14rem]">
         <Input
           aria-label={_copy('Search reviews')}
@@ -94,7 +137,7 @@ export function ReviewsView() {
         empty={query.data?.items.length === 0}
       >
         <AdminTable>
-          <table className="w-full min-w-[980px] text-start text-sm">
+          <table className="w-full min-w-[1120px] text-start text-sm">
             <thead className="bg-surface-muted text-xs uppercase text-secondary">
               <tr>
                 <th className="px-4 py-3">{_copy('Customer')}</th>
@@ -104,6 +147,9 @@ export function ReviewsView() {
                 <th className="px-4 py-3">{_copy('Order')}</th>
                 <th className="px-4 py-3">{_copy('Date')}</th>
                 <th className="px-4 py-3">{_copy('Status')}</th>
+                <th className="px-4 py-3">
+                  {_copy('Home page', 'الصفحة الرئيسية')}
+                </th>
                 <th className="px-4 py-3">{_copy('Actions')}</th>
               </tr>
             </thead>
@@ -136,6 +182,23 @@ export function ReviewsView() {
                     <StatusBadge intent={statusIntent(r.status)}>
                       {_copy(_copy.status(r.status))}
                     </StatusBadge>
+                  </td>
+                  <td className="px-4 py-4">
+                    <Button
+                      disabled={r.status !== 'published' || featuring.isPending}
+                      onClick={() =>
+                        featuring.mutate({
+                          id: r.id,
+                          featured: !r.isHomeFeatured,
+                        })
+                      }
+                      size="sm"
+                      variant={r.isHomeFeatured ? 'outline' : 'primary'}
+                    >
+                      {r.isHomeFeatured
+                        ? _copy('Remove from home', 'إزالة من الرئيسية')
+                        : _copy('Show on home', 'عرض في الرئيسية')}
+                    </Button>
                   </td>
                   <td className="px-4 py-4">
                     <div className="flex gap-2">

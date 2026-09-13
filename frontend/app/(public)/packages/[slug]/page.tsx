@@ -12,7 +12,6 @@ import {
   MessageCircle,
   RefreshCcw,
   ShieldCheck,
-  Sparkles,
   Target,
 } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -33,6 +32,10 @@ import {
   PackageOrderCard,
 } from '@/components/packages/package-order-card';
 import { PackageRelatedCard } from '@/components/packages/package-related-card';
+import {
+  PackageOfferBanner,
+  PackageOfferFlag,
+} from '@/components/packages/package-offer-visual';
 import {
   Accordion,
   AccordionContent,
@@ -353,18 +356,14 @@ export default async function PackageDetailPage({
                   <Badge className="border-primary-foreground/20 bg-primary-foreground/10 text-primary-foreground">
                     {_copy('Career service', 'خدمة مهنية')}
                   </Badge>
-                  {bestOffer ? (
-                    <Badge className="border-accent/40 bg-accent/20 font-semibold text-accent">
-                      <Sparkles
-                        aria-hidden="true"
-                        className="size-3.5 text-accent"
-                      />
-                      {_copy('Save', 'خصم')}{' '}
-                      {_copy(bestOffer.discountPercentage)}
-                      {_copy('%')}
-                    </Badge>
-                  ) : null}
                 </div>
+
+                {bestOffer ? (
+                  <PackageOfferBanner
+                    className="mt-5 max-w-xl"
+                    offer={bestOffer}
+                  />
+                ) : null}
 
                 <h1 className="type-h1 mt-4 text-primary-foreground">
                   {_copy(packageItem.name, packageItem.nameAr)}
@@ -999,9 +998,17 @@ export default async function PackageDetailPage({
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-8px_24px_rgb(11_39_68_/_0.1)] backdrop-blur-md lg:hidden">
         <div className="mx-auto flex max-w-xl items-center gap-4">
           <div className="min-w-0 flex-1">
-            <p className="truncate text-xs font-semibold text-muted-foreground">
-              {_copy(packageItem.name, packageItem.nameAr)}
-            </p>
+            <div className="flex min-w-0 items-center gap-2">
+              <p className="min-w-0 truncate text-xs font-semibold text-muted-foreground">
+                {_copy(packageItem.name, packageItem.nameAr)}
+              </p>
+              {bestOffer ? (
+                <PackageOfferFlag
+                  className="min-h-0 shrink-0 px-2 py-0.5 text-xs shadow-none"
+                  discountPercentage={bestOffer.discountPercentage}
+                />
+              ) : null}
+            </div>
             <p className="mt-0.5 font-display text-xl leading-none text-primary">
               {_copy(displayPrice)}
             </p>

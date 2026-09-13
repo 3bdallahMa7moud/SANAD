@@ -354,13 +354,6 @@ export function validate(config: Record<string, unknown>) {
         }
       }
     }
-    if (
-      !validatedConfig.SMTP_HOST &&
-      (!validatedConfig.RESEND_API_KEY ||
-        validatedConfig.RESEND_API_KEY === 're_placeholder')
-    ) {
-      throw new Error('Production requires SMTP_HOST or RESEND_API_KEY');
-    }
     if (validatedConfig.PAYMENT_PROVIDER === 'mock') {
       throw new Error(
         'Production cannot use PAYMENT_PROVIDER=mock. Use manual for admin-confirmed external payments, or configure a real payment provider.',

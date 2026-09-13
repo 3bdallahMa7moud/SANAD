@@ -117,53 +117,46 @@ export function OtpInput({
   return (
     <div
       dir="ltr"
-      className="flex items-center justify-center gap-2 sm:gap-3"
+      className="mx-auto grid w-full max-w-[22rem] grid-cols-6 gap-1.5 sm:gap-2"
       role="group"
       aria-label={_copy('Verification code input')}
     >
       {digits.map((digit, index) => {
         const isFilled = Boolean(digit);
         return (
-          <React.Fragment key={index}>
-            <input
-              ref={(element) => {
-                inputRefs.current[index] = element;
-              }}
-              type="text"
-              inputMode="numeric"
-              autoComplete={index === 0 ? 'one-time-code' : 'off'}
-              pattern="[0-9]*"
-              maxLength={1}
-              value={digit}
-              disabled={disabled}
-              aria-invalid={hasError || undefined}
-              aria-label={_copy(
-                `Digit ${index + 1} of ${length}`,
-                `الرقم ${index + 1} من ${length}`,
-              )}
-              onChange={(e) => handleChange(index, e)}
-              onKeyDown={(e) => handleKeyDown(index, e)}
-              onPaste={handlePaste}
-              onFocus={(e) => e.target.select()}
-              className={`h-14 w-10 rounded-md text-center font-mono text-xl font-semibold tracking-tight outline-none transition-[border-color,background-color,box-shadow] duration-200 sm:h-15 sm:w-12 sm:text-2xl
-                ${
-                  hasError
-                    ? 'border border-error bg-error/5 text-error focus:ring-2 focus:ring-error/20'
-                    : isFilled
-                      ? 'border border-accent bg-surface text-primary shadow-xs focus:ring-2 focus:ring-accent/20'
-                      : 'border border-border bg-surface text-primary hover:border-accent/70 focus:border-primary focus:bg-surface focus:shadow-xs focus:ring-2 focus:ring-primary/15'
-                }
-                ${disabled ? 'cursor-not-allowed bg-surface-muted opacity-50' : 'cursor-text'}
-              `}
-            />
-            {/* Elegant midpoint indicator between digits 3 and 4 */}
-            {index === 2 && (
-              <span
-                aria-hidden="true"
-                className="hidden sm:inline-block w-1.5 h-1.5 rounded-full bg-border"
-              />
+          <input
+            key={index}
+            ref={(element) => {
+              inputRefs.current[index] = element;
+            }}
+            type="text"
+            data-otp-slot
+            inputMode="numeric"
+            autoComplete={index === 0 ? 'one-time-code' : 'off'}
+            pattern="[0-9]*"
+            maxLength={1}
+            value={digit}
+            disabled={disabled}
+            aria-invalid={hasError || undefined}
+            aria-label={_copy(
+              `Digit ${index + 1} of ${length}`,
+              `الرقم ${index + 1} من ${length}`,
             )}
-          </React.Fragment>
+            onChange={(e) => handleChange(index, e)}
+            onKeyDown={(e) => handleKeyDown(index, e)}
+            onPaste={handlePaste}
+            onFocus={(e) => e.target.select()}
+            className={`h-12 min-w-0 w-full rounded-lg text-center font-mono text-xl font-semibold tabular-nums outline-none transition-[border-color,background-color,box-shadow] duration-200 sm:h-14 sm:text-2xl
+              ${
+                hasError
+                  ? 'border border-error bg-error/5 text-error focus:ring-2 focus:ring-error/20'
+                  : isFilled
+                    ? 'border border-accent bg-surface text-primary shadow-xs focus:ring-2 focus:ring-accent/20'
+                    : 'border border-border bg-surface text-primary hover:border-accent/70 focus:border-primary focus:bg-surface focus:shadow-xs focus:ring-2 focus:ring-primary/15'
+              }
+              ${disabled ? 'cursor-not-allowed bg-surface-muted opacity-50' : 'cursor-text'}
+            `}
+          />
         );
       })}
     </div>

@@ -129,7 +129,6 @@ export function SignUpFlow({
     setOtp('');
     setStep('otp');
     setCooldownRemaining(60);
-    setInfo('A 6-digit verification code has been sent to your email.');
   };
 
   const submitDetails = async (values: SignUpValues) => {
@@ -261,9 +260,14 @@ export function SignUpFlow({
           )}
         </p>
         {step === 'otp' ? (
-          <p className="mt-2 font-semibold text-primary" dir="ltr">
-            {_copy(maskedEmail || pendingValues?.email || '')}
-          </p>
+          <div className="mt-4 flex justify-center">
+            <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-border bg-surface-muted px-3 py-2 text-sm font-semibold text-primary">
+              <Mail aria-hidden="true" className="size-4 shrink-0 text-accent" />
+              <span className="min-w-0 break-all" dir="ltr">
+                {maskedEmail || pendingValues?.email || ''}
+              </span>
+            </span>
+          </div>
         ) : null}
       </div>
 
@@ -291,7 +295,7 @@ export function SignUpFlow({
 
       {step === 'otp' ? (
         <div className="space-y-5">
-          <div className="rounded-lg border border-border/70 bg-surface-muted/35 px-3 py-5 sm:px-5">
+          <div className="rounded-xl border border-border bg-surface-muted/35 px-2 py-5 sm:px-5 sm:py-6">
             <OtpInput
               disabled={isVerifying}
               hasError={Boolean(error)}
@@ -315,9 +319,9 @@ export function SignUpFlow({
             {_copy('Verify & Create Account')}
             <CheckCircle2 className="size-4" />
           </Button>
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4 text-xs">
+          <div className="flex flex-col gap-2 border-t border-border pt-4 text-sm sm:flex-row sm:items-center sm:justify-between">
             <button
-              className="font-semibold text-secondary disabled:text-muted-foreground"
+              className="inline-flex min-h-10 items-center justify-center rounded-md px-2 font-semibold text-secondary hover:bg-surface-muted disabled:text-muted-foreground sm:justify-start"
               disabled={cooldownRemaining > 0}
               onClick={resendCode}
               type="button"
@@ -330,7 +334,7 @@ export function SignUpFlow({
               )}
             </button>
             <button
-              className="text-muted-foreground underline hover:text-primary"
+              className="inline-flex min-h-10 items-center justify-center rounded-md px-2 text-muted-foreground underline underline-offset-4 hover:bg-surface-muted hover:text-primary sm:justify-end"
               onClick={() => {
                 setStep('details');
                 setOtp('');

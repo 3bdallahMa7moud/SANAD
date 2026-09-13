@@ -16,6 +16,7 @@ const reviewSchema = z.object({
   rating: z.number().int().min(1).max(5),
   comment: z.string(),
   status: z.enum(['pending', 'published', 'hidden']),
+  is_home_featured: z.boolean().optional(),
   created_at: z.string().nullish(),
   updated_at: z.string().nullish(),
   customer_display_name: z.string().optional(),
@@ -48,6 +49,7 @@ function toReview(value: z.infer<typeof reviewSchema>): PackageReview {
     rating: value.rating,
     comment: value.comment,
     status: value.status,
+    isHomeFeatured: value.is_home_featured ?? false,
     createdAt: value.created_at ?? null,
     updatedAt: value.updated_at ?? null,
     customerDisplayName: value.customer_display_name,
@@ -77,6 +79,30 @@ const publicListSchema = z.object({
 });
 const nullableReviewSchema = reviewSchema.nullable();
 
+function parsePublicReviews(
+  payload: unknown,
+): PaginatedData<PackageReview> & { summary: ReviewSummary } {
+  const result = publicListSchema.safeParse(payload);
+  if (!result.success)
+    throw new ApiError({
+      kind: 'unknown',
+      message: 'Unexpected public reviews response',
+    });
+  return {
+    items: result.data.items.map(toReview),
+    meta: result.data.meta,
+    summary: {
+      averageRating: result.data.summary.average_rating,
+      totalReviews: result.data.summary.total_reviews,
+      distribution: Object.fromEntries(
+        Object.entries(result.data.summary.distribution).map(
+          ([key, value]) => [Number(key), value],
+        ),
+      ),
+    },
+  };
+}
+
 function parseReview(payload: unknown, endpoint: string): PackageReview {
   const result = reviewSchema.safeParse(payload);
   if (!result.success)
@@ -90,6 +116,7 @@ function parseReview(payload: unknown, endpoint: string): PackageReview {
 export const reviewKeys = {
   public: (packageId?: number) =>
     ['reviews', 'public', packageId ?? 'all'] as const,
+  featured: ['reviews', 'featured'] as const,
   order: (orderId: number) => ['reviews', 'order', orderId] as const,
   admin: (filters: Record<string, unknown>) =>
     ['admin', 'reviews', filters] as const,
@@ -109,25 +136,14 @@ export const reviewsApi = {
         package_id: params.packageId,
       },
     });
-    const result = publicListSchema.safeParse(payload);
-    if (!result.success)
-      throw new ApiError({
-        kind: 'unknown',
-        message: 'Unexpected public reviews response',
-      });
-    return {
-      items: result.data.items.map(toReview),
-      meta: result.data.meta,
-      summary: {
-        averageRating: result.data.summary.average_rating,
-        totalReviews: result.data.summary.total_reviews,
-        distribution: Object.fromEntries(
-          Object.entries(result.data.summary.distribution).map(
-            ([key, value]) => [Number(key), value],
-          ),
-        ),
-      },
-    };
+    return parsePublicReviews(payload);
+  },
+  async listFeatured(): Promise<
+    PaginatedData<PackageReview> & { summary: ReviewSummary }
+  > {
+    return parsePublicReviews(
+      await api.get<unknown>('/reviews/featured', { authMode: 'none' }),
+    );
   },
   async getForOrder(
     orderId: number,
@@ -196,6 +212,14 @@ export const reviewsApi = {
     return parseReview(
       await api.patch<unknown>(`/admin/reviews/${id}/status`, { status }),
       `PATCH /admin/reviews/${id}/status`,
+    );
+  },
+  async featureOnHome(id: number, featured: boolean): Promise<PackageReview> {
+    return parseReview(
+      await api.patch<unknown>(`/admin/reviews/${id}/home-featured`, {
+        featured,
+      }),
+      `PATCH /admin/reviews/${id}/home-featured`,
     );
   },
 };

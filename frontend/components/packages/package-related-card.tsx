@@ -4,9 +4,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import { PackagePrice } from '@/components/packages/package-price';
+import { PackageOfferFlag } from '@/components/packages/package-offer-visual';
 import { PackageSocialProof } from '@/components/packages/package-social-proof';
 import {
   getPackageHref,
+  getBestPackageOffer,
   getPackagePrimaryImage,
   getPackageShortDescription,
   getPackageShortTitle,
@@ -21,6 +23,7 @@ export function PackageRelatedCard({ packageItem }: PackageRelatedCardProps) {
   const _copy = useCopy();
 
   const image = getPackagePrimaryImage(packageItem);
+  const offer = getBestPackageOffer(packageItem);
 
   return (
     <Link
@@ -41,6 +44,12 @@ export function PackageRelatedCard({ packageItem }: PackageRelatedCardProps) {
             <Check aria-hidden="true" className="size-10" strokeWidth={1.25} />
           </div>
         )}
+        {offer ? (
+          <PackageOfferFlag
+            className="absolute start-3 top-3 z-10"
+            discountPercentage={offer.discountPercentage}
+          />
+        ) : null}
       </div>
       <div className="p-5">
         <div className="flex items-center justify-between gap-4">

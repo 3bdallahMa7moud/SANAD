@@ -11,6 +11,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import { PackagePrice } from '@/components/packages/package-price';
+import { PackageOfferFlag } from '@/components/packages/package-offer-visual';
 import { PackageSocialProof } from '@/components/packages/package-social-proof';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -24,6 +25,7 @@ import {
 } from '@/components/ui/card';
 import {
   getPackageHref,
+  getBestPackageOffer,
   getPackagePrimaryImage,
   getPackageShortDescription,
   getPackageShortTitle,
@@ -46,6 +48,7 @@ export function PackageCard({
   const _copy = useCopy();
 
   const primaryImage = getPackagePrimaryImage(packageItem);
+  const offer = getBestPackageOffer(packageItem);
   const shortTitle = providedShortTitle ?? getPackageShortTitle(packageItem);
   const companionOffer = [...(packageItem.companionOffers ?? [])].sort(
     (first, second) => second.discountPercentage - first.discountPercentage,
@@ -82,6 +85,12 @@ export function PackageCard({
             />
           </div>
         )}
+        {offer ? (
+          <PackageOfferFlag
+            className="absolute start-3 top-3 z-10"
+            discountPercentage={offer.discountPercentage}
+          />
+        ) : null}
         <span
           aria-hidden="true"
           className="absolute inset-x-0 bottom-0 h-1 bg-accent"

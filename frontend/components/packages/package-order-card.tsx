@@ -10,7 +10,10 @@ import {
 import Link from 'next/link';
 
 import { PackagePrice } from '@/components/packages/package-price';
-import { Badge } from '@/components/ui/badge';
+import {
+  PackageOfferBanner,
+  PackageOfferFlag,
+} from '@/components/packages/package-offer-visual';
 import { Button } from '@/components/ui/button';
 import {
   getBestPackageOffer,
@@ -61,17 +64,14 @@ export function PackageOrderCard({
         {pricing ? (
           <>
             {pricing.offerDiscountPercentage > 0 ? (
-              <Badge className="mb-4" variant="warning">
-                <Tag aria-hidden="true" className="size-3.5" />
-                {_copy(
-                  bestOffer?.name ?? 'Active offer',
-                  bestOffer?.nameAr,
-                )}{' '}
-                {_copy('·')}
-                {_copy(' ')}
-                {_copy(pricing.offerDiscountPercentage)}
-                {_copy('% off')}
-              </Badge>
+              bestOffer ? (
+                <PackageOfferBanner className="mb-4" offer={bestOffer} />
+              ) : (
+                <PackageOfferFlag
+                  className="mb-4"
+                  discountPercentage={pricing.offerDiscountPercentage}
+                />
+              )
             ) : null}
             <p className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
               {_copy('Total')}

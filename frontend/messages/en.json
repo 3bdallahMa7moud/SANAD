@@ -177,12 +177,9 @@
     },
     "testimonials": {
       "eyebrow": "Client feedback",
-      "heading": "Feedback, Shared Responsibly",
-      "body": "Real words from clients who used SANAD to present their experience with more clarity.",
-      "publishedFeedback": "Published client feedback",
-      "serviceSpecific": "Service-specific reviews",
-      "serviceSpecificBody": "Browse feedback by service and see what each experience helped clients improve.",
-      "noFeedback": "Published feedback will appear here as clients approve their reviews for sharing.",
+      "heading": "Our clients' experiences",
+      "body": "Read real reviews from clients who shared their experience after using SANAD services.",
+      "noFeedback": "Published reviews selected by the SANAD team will appear here.",
       "viewAll": "View all client feedback"
     },
     "finalCta": {

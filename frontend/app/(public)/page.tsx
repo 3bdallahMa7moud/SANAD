@@ -13,6 +13,8 @@ import { WhySanad } from '@/components/home/why-sanad';
 
 import { getCopy } from '@/lib/i18n/server-copy';
 
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata(): Promise<Metadata> {
   const _copy = await getCopy();
   return await getLocalizedMetadata({

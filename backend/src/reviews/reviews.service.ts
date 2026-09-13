@@ -27,17 +27,18 @@ export class ReviewsService {
     first_name: string | null;
     last_name: string | null;
   }): string {
-    const firstName =
-      user.first_name?.trim() || user.name.trim().split(/\s+/)[0];
-    const lastName = user.last_name?.trim() || user.name.trim().split(/\s+/)[1];
-    return lastName
-      ? `${firstName} ${lastName.charAt(0).toUpperCase()}.`
-      : firstName;
+    return (
+      user.name.trim() ||
+      [user.first_name?.trim(), user.last_name?.trim()]
+        .filter(Boolean)
+        .join(' ')
+    );
   }
 
-  async listPublished(query: PublicReviewFilterDto) {
+  async listPublished(query: PublicReviewFilterDto, featuredOnly = false) {
     const where: Prisma.package_reviewsWhereInput = {
       status: ReviewStatus.PUBLISHED,
+      ...(featuredOnly ? { is_home_featured: true } : {}),
       ...(query.package_id ? { package_id: query.package_id } : {}),
     };
     const [rows, total, aggregate, grouped] = await Promise.all([
@@ -87,6 +88,14 @@ export class ReviewsService {
         },
       },
     };
+  }
+
+  listFeatured() {
+    const query = Object.assign(new PublicReviewFilterDto(), {
+      page: 1,
+      limit: 3,
+    });
+    return this.listPublished(query, true);
   }
 
   async findForOrder(orderId: number, userId: number) {
@@ -195,6 +204,7 @@ export class ReviewsService {
         ...(dto.rating === undefined ? {} : { rating: dto.rating }),
         ...(dto.comment === undefined ? {} : { comment: dto.comment.trim() }),
         status: ReviewStatus.PENDING,
+        is_home_featured: false,
         updated_at: new Date(),
       },
     });
@@ -254,7 +264,13 @@ export class ReviewsService {
     const updated = await this.prisma.$transaction(async (tx) => {
       const result = await tx.package_reviews.update({
         where: { id },
-        data: { status, updated_at: new Date() },
+        data: {
+          status,
+          ...(status === ReviewStatus.HIDDEN
+            ? { is_home_featured: false }
+            : {}),
+          updated_at: new Date(),
+        },
       });
       await tx.admin_activity_log.create({
         data: {
@@ -272,5 +288,45 @@ export class ReviewsService {
       return result;
     });
     return updated;
+  }
+
+  async featureOnHome(id: number, adminId: number, featured: boolean) {
+    return this.prisma.$transaction(async (tx) => {
+      const review = await tx.package_reviews.findUnique({ where: { id } });
+      if (!review) throw new NotFoundException('Review not found');
+      if (featured && review.status !== ReviewStatus.PUBLISHED) {
+        throw new BadRequestException({
+          message: 'Only published reviews can appear on the home page',
+          code: 'REVIEW_NOT_PUBLISHED',
+        });
+      }
+      if (review.is_home_featured === featured) return review;
+      if (featured) {
+        const count = await tx.package_reviews.count({
+          where: { is_home_featured: true, status: ReviewStatus.PUBLISHED },
+        });
+        if (count >= 3) {
+          throw new ConflictException({
+            message: 'The home page can show up to three reviews',
+            code: 'HOME_REVIEWS_FULL',
+          });
+        }
+      }
+      const updated = await tx.package_reviews.update({
+        where: { id },
+        data: { is_home_featured: featured, updated_at: new Date() },
+      });
+      await tx.admin_activity_log.create({
+        data: {
+          admin_id: adminId,
+          action: featured ? 'feature_review' : 'unfeature_review',
+          table_name: 'package_reviews',
+          record_id: id,
+          description: `${featured ? 'Featured' : 'Removed'} review #${id} ${featured ? 'on' : 'from'} the home page`,
+          changes: { from: review.is_home_featured, to: featured },
+        },
+      });
+      return updated;
+    });
   }
 }

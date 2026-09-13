@@ -1,5 +1,5 @@
 import { useCopy } from '@/lib/i18n/use-copy';
-import { Badge } from '@/components/ui/badge';
+import { PackageOfferBanner } from '@/components/packages/package-offer-visual';
 import {
   getBestPackageOffer,
   getPackageCurrentPrice,
@@ -22,41 +22,53 @@ export function PackagePrice({
 
   const offer = getBestPackageOffer(packageItem);
   const currentPrice = getPackageCurrentPrice(packageItem);
-  const offerNameIncludesDiscount = offer
-    ? offer.name.includes(`${offer.discountPercentage}%`)
-    : false;
 
   return (
-    <div className={className}>
+    <div
+      className={cn(
+        className,
+        offer && 'overflow-hidden rounded-lg border-2 border-accent shadow-sm',
+      )}
+    >
       {offer ? (
-        <Badge className="mb-3" variant="warning">
-          {_copy(offer.name, offer.nameAr)}
-          {!offerNameIncludesDiscount ? (
-            <>
-              {_copy(' · ')}
-              {_copy(offer.discountPercentage)}
-              {_copy('% off')}
-            </>
-          ) : null}
-        </Badge>
+        <PackageOfferBanner className="rounded-none shadow-none" offer={offer} />
       ) : null}
 
-      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <p
-          className={cn(
-            'font-display leading-none text-primary',
-            size === 'hero' ? 'text-4xl sm:text-5xl' : 'text-3xl',
-          )}
-        >
-          <span className="sr-only">{_copy('Current price:')}</span>
-          {_copy(_copy.money(currentPrice))}
-        </p>
+      <div
+        className={cn(
+          'flex flex-wrap items-end justify-between gap-x-4 gap-y-3',
+          offer && 'bg-surface-muted px-4 py-3',
+        )}
+      >
+        <div>
+          {offer ? (
+            <span className="block text-xs font-semibold text-muted-foreground">
+              {_copy('Offer price', 'السعر بعد الخصم')}
+            </span>
+          ) : null}
+          <p
+            className={cn(
+              'font-display leading-none text-primary',
+              offer && 'mt-1',
+              size === 'hero' ? 'text-4xl sm:text-5xl' : 'text-3xl',
+            )}
+          >
+            {!offer ? (
+              <span className="sr-only">{_copy('Current price:')}</span>
+            ) : null}
+            {_copy(_copy.money(currentPrice))}
+          </p>
+        </div>
 
         {offer ? (
-          <p className="text-sm text-muted-foreground line-through">
-            <span className="sr-only">{_copy('Original price:')}</span>
-            {_copy(_copy.money(packageItem.price))}
-          </p>
+          <div>
+            <span className="block text-xs text-muted-foreground">
+              {_copy('Original price', 'السعر قبل الخصم')}
+            </span>
+            <p className="mt-1 text-base text-muted-foreground line-through">
+              {_copy(_copy.money(packageItem.price))}
+            </p>
+          </div>
         ) : null}
       </div>
     </div>

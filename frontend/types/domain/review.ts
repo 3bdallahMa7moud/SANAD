@@ -8,6 +8,7 @@ export interface PackageReview {
   rating: number;
   comment: string;
   status: ReviewStatus;
+  isHomeFeatured: boolean;
   createdAt: string | null;
   updatedAt: string | null;
   customerDisplayName?: string;

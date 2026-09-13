@@ -54,6 +54,12 @@ describe('ReviewsService', () => {
       ),
     ).toBe(true);
     expect(
+      Reflect.getMetadata(
+        IS_PUBLIC_KEY,
+        ReviewsController.prototype.listFeatured,
+      ),
+    ).toBe(true);
+    expect(
       Reflect.getMetadata(IS_PUBLIC_KEY, ReviewsController.prototype.create),
     ).not.toBe(true);
   });
@@ -175,8 +181,21 @@ describe('ReviewsService', () => {
       status: ReviewStatus.PUBLISHED,
     });
     expect(result.data.summary.average_rating).toBe(5);
-    expect(result.data.items[0].customer_display_name).toBe('Ahmed M.');
+    expect(result.data.items[0].customer_display_name).toBe('Ahmed Mansour');
     expect(result.data.items[0].verified_customer).toBe(true);
+  });
+
+  it('returns only reviews selected for the home page', async () => {
+    await service.listFeatured();
+    expect(prisma.package_reviews.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          status: ReviewStatus.PUBLISHED,
+          is_home_featured: true,
+        },
+        take: 3,
+      }),
+    );
   });
 
   it('resets an edited review to pending moderation', async () => {
@@ -188,7 +207,10 @@ describe('ReviewsService', () => {
     prisma.package_reviews.update.mockResolvedValue({ id: 1 });
     await service.update(1, 3, { rating: 4, comment: 'Updated' });
     expect(prisma.package_reviews.update.mock.calls[0][0].data).toEqual(
-      expect.objectContaining({ status: ReviewStatus.PENDING }),
+      expect.objectContaining({
+        status: ReviewStatus.PENDING,
+        is_home_featured: false,
+      }),
     );
   });
 
@@ -207,6 +229,54 @@ describe('ReviewsService', () => {
       expect(prisma.package_reviews.update.mock.calls[0][0].data.status).toBe(
         status,
       );
+      if (status === ReviewStatus.HIDDEN) {
+        expect(prisma.package_reviews.update.mock.calls[0][0].data).toEqual(
+          expect.objectContaining({ is_home_featured: false }),
+        );
+      }
     },
   );
+
+  it('rejects featuring an unpublished review', async () => {
+    prisma.package_reviews.findUnique.mockResolvedValue({
+      id: 1,
+      status: ReviewStatus.PENDING,
+      is_home_featured: false,
+    });
+    await expect(service.featureOnHome(1, 7, true)).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
+    expect(prisma.package_reviews.update).not.toHaveBeenCalled();
+  });
+
+  it('limits the home page selection to three reviews', async () => {
+    prisma.package_reviews.findUnique.mockResolvedValue({
+      id: 1,
+      status: ReviewStatus.PUBLISHED,
+      is_home_featured: false,
+    });
+    prisma.package_reviews.count.mockResolvedValue(3);
+    await expect(service.featureOnHome(1, 7, true)).rejects.toBeInstanceOf(
+      ConflictException,
+    );
+    expect(prisma.package_reviews.update).not.toHaveBeenCalled();
+  });
+
+  it('records the admin choice without changing the customer review', async () => {
+    prisma.package_reviews.findUnique.mockResolvedValue({
+      id: 1,
+      status: ReviewStatus.PUBLISHED,
+      is_home_featured: false,
+    });
+    prisma.package_reviews.update.mockResolvedValue({
+      id: 1,
+      is_home_featured: true,
+    });
+    await service.featureOnHome(1, 7, true);
+    expect(prisma.package_reviews.update).toHaveBeenCalledWith({
+      where: { id: 1 },
+      data: { is_home_featured: true, updated_at: expect.any(Date) },
+    });
+    expect(prisma.admin_activity_log.create).toHaveBeenCalled();
+  });
 });
