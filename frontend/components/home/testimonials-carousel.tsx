@@ -14,7 +14,8 @@ export function TestimonialsCarousel({
 }) {
   const _copy = useCopy();
   const [paused, setPaused] = useState(false);
-  const canMove = reviews.length > 1;
+  const canMove = reviews.length > 0;
+  const canLoop = reviews.length > 1;
 
   return (
     <div className="mt-9 sm:mt-10">
@@ -52,7 +53,7 @@ export function TestimonialsCarousel({
               </li>
             ))}
           </ul>
-          {canMove ? (
+          {canLoop ? (
             <ul
               aria-hidden="true"
               className="reviews-loop-group reviews-loop-copy"
