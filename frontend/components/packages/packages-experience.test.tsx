@@ -168,7 +168,7 @@ describe('Package selection experience', () => {
     expect(screen.getByText('1 revision')).toBeVisible();
     expect(screen.getByText('4.8')).toBeVisible();
     expect(screen.getByText('45 confirmed buyers')).toBeVisible();
-    expect(screen.getByText('AED 250')).toBeVisible();
+    expect(screen.getByText(/AED\s*250/)).toBeVisible();
     expect(screen.getByText('Second-service offer')).toBeVisible();
     expect(screen.getByText('20%')).toBeVisible();
   });

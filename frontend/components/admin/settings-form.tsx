@@ -74,9 +74,17 @@ const labels: Record<string, string> = {
   hero_title_en: 'Home Page Title (English)',
   hero_subtitle_ar: 'Home Page Subtitle (Arabic)',
   hero_subtitle_en: 'Home Page Subtitle (English)',
+  banner_enabled: 'Show promotional banner',
+  banner_text_ar: 'Promotional banner text (Arabic)',
+  banner_text_en: 'Promotional banner text (English)',
 };
 
 const siteSettingKeys = Object.keys(labels);
+const defaultSettingValues: Record<string, string> = {
+  banner_enabled: 'true',
+  banner_text_ar: 'خصم 50 درهم لأول 50 عميل',
+  banner_text_en: 'AED 50 off for the first 50 customers',
+};
 
 function settingsFields(existing: SiteSetting[]): SiteSetting[] {
   const siteSettings = existing.filter((item) =>
@@ -90,7 +98,7 @@ function settingsFields(existing: SiteSetting[]): SiteSetting[] {
       .map((key, index) => ({
         id: -(index + 1),
         setting_key: key,
-        setting_value: '',
+        setting_value: defaultSettingValues[key] ?? '',
         setting_type: 'string',
         description:
           key === 'whatsapp_number'
@@ -182,10 +190,20 @@ export function SettingsForm() {
                         .replaceAll('_', ' ')
                         .replace(/\b\w/g, (c) => c.toUpperCase()),
                   )}
-                  <Input
-                    dir={item.setting_key === 'site_name' ? 'rtl' : undefined}
-                    {...register(item.setting_key)}
-                  />
+                  {item.setting_key === 'banner_enabled' ? (
+                    <select
+                      className="h-10 rounded-md border border-[var(--control-border)] bg-surface px-3 text-sm text-foreground shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      {...register(item.setting_key)}
+                    >
+                      <option value="true">{_copy('Visible')}</option>
+                      <option value="false">{_copy('Hidden')}</option>
+                    </select>
+                  ) : (
+                    <Input
+                      dir={item.setting_key.endsWith('_ar') ? 'rtl' : undefined}
+                      {...register(item.setting_key)}
+                    />
+                  )}
                   {errors[item.setting_key]?.message ? (
                     <span className="font-normal text-xs text-error">
                       {_copy(String(errors[item.setting_key]?.message))}

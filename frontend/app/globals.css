@@ -419,6 +419,16 @@ html[data-theme='dark']
   animation: sanad-sheet-bottom-out var(--motion-fast) var(--ease-standard) both;
 }
 
+@keyframes sanad-announcement-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
 @keyframes sanad-accordion-open {
   from {
     height: 0;

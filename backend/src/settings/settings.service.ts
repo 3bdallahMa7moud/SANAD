@@ -19,6 +19,9 @@ const PUBLIC_SETTING_KEYS = [
   'hero_title_en',
   'hero_subtitle_ar',
   'hero_subtitle_en',
+  'banner_enabled',
+  'banner_text_ar',
+  'banner_text_en',
 ];
 
 const ADMIN_EDITABLE_SETTING_KEYS = PUBLIC_SETTING_KEYS.filter(
@@ -131,6 +134,12 @@ export class SettingsService {
       throw new BadRequestException(
         'Currency must be a 3-letter uppercase code',
       );
+    }
+    if (
+      key === 'banner_enabled' &&
+      !['true', 'false'].includes(String(value))
+    ) {
+      throw new BadRequestException('Banner enabled must be true or false');
     }
     if (key === 'whatsapp_number' && String(value).trim()) {
       const raw = String(value).trim();

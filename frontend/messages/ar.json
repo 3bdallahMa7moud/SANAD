@@ -69,6 +69,12 @@
         "benefit2": "قسم الخبرة منسجم مع محتوى سيرتك الذاتية",
         "benefit3": "الملف موضوع لاستقطاب الفرص المناسبة"
       },
+      "professional": {
+        "category": "الباقة الاحترافية"
+      },
+      "full": {
+        "category": "الباقة المتكاملة"
+      },
       "linkedinJobs": {
         "category": "وظائف LinkedIn",
         "title": "طلبات التوظيف عبر LinkedIn",

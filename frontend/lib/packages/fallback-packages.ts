@@ -164,8 +164,11 @@ export const FALLBACK_PACKAGES: CareerPackage[] = [
   {
     id: 5,
     name: 'LinkedIn Profile Optimization',
+    nameAr: 'تحسين الملف الشخصي على لينكدإن',
     description:
       'A standalone professional LinkedIn profile optimization service for a clearer, more consistent professional presence.',
+    descriptionAr:
+      'خدمة مستقلة لتحسين العنوان والنبذة والخبرات وبناء حضور مهني أكثر اتساقًا على لينكدإن.',
     price: 149,
     features: [
       'Headline and About section optimization',
@@ -185,7 +188,15 @@ export const FALLBACK_PACKAGES: CareerPackage[] = [
         displayOrder: 1,
       },
     ],
-    offers: [],
+    offers: [
+      {
+        id: 5,
+        name: '50% OFF (Limited Offer)',
+        nameAr: 'خصم 50% (عرض محدود)',
+        description: 'Limited-time 50% discount on the package base price.',
+        discountPercentage: 50,
+      },
+    ],
     buyerCount: 130,
     ratingAverage: 4.8,
     ratingCount: 31,

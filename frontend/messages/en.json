@@ -69,6 +69,12 @@
         "benefit2": "Experience section aligned with your CV content",
         "benefit3": "Profile positioned to attract the right opportunities"
       },
+      "professional": {
+        "category": "Professional Package"
+      },
+      "full": {
+        "category": "Full Package"
+      },
       "linkedinJobs": {
         "category": "LinkedIn Jobs",
         "title": "LinkedIn Job Applications",

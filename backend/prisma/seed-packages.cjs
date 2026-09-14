@@ -225,7 +225,12 @@ async function main() {
   const offerEndDate = new Date(offerStartDate);
   offerEndDate.setDate(offerEndDate.getDate() + 30);
 
-  for (const packageId of activePackageIds.slice(0, 3)) {
+  // Keep the launch offer aligned with the three services promoted on the home page.
+  for (const packageId of [
+    activePackageIds[1], // Full Package
+    activePackageIds[2], // Professional Package
+    activePackageIds[4], // LinkedIn Profile Optimization
+  ]) {
     const existingOffer = await prisma.offers.findFirst({
       where: {
         package_id: packageId,
@@ -306,6 +311,21 @@ async function main() {
       setting_key: 'twitter_url',
       setting_value: 'https://x.com',
       description: 'X / Twitter profile URL',
+    },
+    {
+      setting_key: 'banner_enabled',
+      setting_value: 'true',
+      description: 'Whether the promotional banner is visible',
+    },
+    {
+      setting_key: 'banner_text_ar',
+      setting_value: 'خصم 50 درهم لأول 50 عميل',
+      description: 'Promotional banner text (Arabic)',
+    },
+    {
+      setting_key: 'banner_text_en',
+      setting_value: 'AED 50 off for the first 50 customers',
+      description: 'Promotional banner text (English)',
     },
   ];
 

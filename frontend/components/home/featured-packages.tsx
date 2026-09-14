@@ -10,6 +10,7 @@ import { getTranslations } from 'next-intl/server';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { PackagePrice } from '@/components/packages/package-price';
 import {
   MotionAccentLine,
   MotionHeading,
@@ -24,35 +25,43 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { packagesApi } from '@/lib/api';
+import { FALLBACK_PACKAGES } from '@/lib/packages/fallback-packages';
+import { getPackageHref } from '@/lib/packages/presentation';
+import type { CareerPackage } from '@/types/domain';
+
+const featuredPackageNames = [
+  'Professional Package',
+  'Full Package',
+  'LinkedIn Profile Optimization',
+] as const;
+
+function selectFeaturedPackages(catalog: CareerPackage[]): CareerPackage[] {
+  return featuredPackageNames
+    .map((name) => catalog.find((item) => item.name === name))
+    .filter((item): item is CareerPackage => item !== undefined);
+}
 
 export async function FeaturedPackages() {
   const _copy = await getCopy();
 
   const t = await getTranslations('home.featuredPackages');
 
-  const featuredPackages = [
-    {
-      category: t('cv.category'),
-      title: t('cv.title'),
-      description: t('cv.description'),
-      icon: FileCheck2,
-      href: '/packages',
-    },
-    {
-      category: t('linkedin.category'),
-      title: t('linkedin.title'),
-      description: t('linkedin.description'),
-      icon: UserRoundCheck,
-      href: '/packages',
-    },
-    {
-      category: t('linkedinJobs.category'),
-      title: t('linkedinJobs.title'),
-      description: t('linkedinJobs.description'),
-      icon: LayoutTemplate,
-      href: '/packages',
-    },
-  ];
+  const catalog = await packagesApi.list({ limit: 100 }).catch(() => null);
+  const selected = selectFeaturedPackages(catalog?.items ?? []);
+  const packages =
+    selected.length === featuredPackageNames.length
+      ? selected
+      : selectFeaturedPackages(FALLBACK_PACKAGES);
+  const featuredPackages = packages.map((packageItem, index) => ({
+    packageItem,
+    category: [
+      t('professional.category'),
+      t('full.category'),
+      t('linkedin.category'),
+    ][index],
+    icon: [FileCheck2, LayoutTemplate, UserRoundCheck][index],
+  }));
 
   return (
     <section
@@ -88,64 +97,67 @@ export async function FeaturedPackages() {
         </div>
 
         <MotionStaggerList className="mt-10 grid gap-5 md:grid-cols-2 lg:mt-12 lg:grid-cols-3 lg:gap-6">
-          {featuredPackages.map(
-            ({ category, description, href, icon: Icon, title }) => (
-              <MotionStaggerItem
-                className="md:last:col-span-2 md:last:mx-auto md:last:w-[calc(50%-0.625rem)] lg:last:col-span-1 lg:last:mx-0 lg:last:w-auto"
-                hoverLift
-                key={title}
-              >
-                <Card className="group relative flex h-full flex-col overflow-hidden border-t-2 border-t-accent shadow-xs transition-[box-shadow,transform] duration-300 hover:-translate-y-1 hover:shadow-md focus-within:shadow-md motion-reduce:transform-none motion-reduce:transition-none">
-                  <span
-                    aria-hidden="true"
-                    className="absolute inset-x-0 top-0 z-10 h-0.5 origin-left scale-x-0 bg-primary transition-transform duration-500 ease-[var(--ease-standard)] motion-safe:group-hover:scale-x-100 motion-safe:group-focus-within:scale-x-100 motion-reduce:transition-none"
-                  />
-                  <CardHeader className="gap-0">
-                    <div className="flex items-center justify-between gap-4">
-                      <Badge
-                        className="tracking-[0.08em] uppercase"
-                        variant="secondary"
-                      >
-                        {_copy(category)}
-                      </Badge>
-                      <span className="grid size-10 shrink-0 place-items-center rounded-sm bg-surface-muted text-secondary transition-transform duration-300 ease-[var(--ease-standard)] motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:rotate-3 motion-reduce:transition-none">
-                        <Icon
-                          aria-hidden="true"
-                          className="size-5"
-                          strokeWidth={1.7}
-                        />
-                      </span>
-                    </div>
-
-                    <CardTitle className="mt-5 text-primary text-xl font-bold">
-                      {_copy(title)}
-                    </CardTitle>
-                    <CardDescription className="mt-3 text-sm leading-6 text-muted-foreground">
-                      {_copy(description)}
-                    </CardDescription>
-                  </CardHeader>
-
-                  <CardFooter className="mt-auto pt-4 border-t border-border/60">
-                    <Button
-                      asChild
-                      className="group/btn w-full justify-between"
-                      variant="ghost"
+          {featuredPackages.map(({ category, icon: Icon, packageItem }) => (
+            <MotionStaggerItem
+              className="md:last:col-span-2 md:last:mx-auto md:last:w-[calc(50%-0.625rem)] lg:last:col-span-1 lg:last:mx-0 lg:last:w-auto"
+              hoverLift
+              key={packageItem.id}
+            >
+              <Card className="group relative flex h-full flex-col overflow-hidden border-t-2 border-t-accent shadow-xs transition-[box-shadow,transform] duration-300 hover:-translate-y-1 hover:shadow-md focus-within:shadow-md motion-reduce:transform-none motion-reduce:transition-none">
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-x-0 top-0 z-10 h-0.5 origin-left scale-x-0 bg-primary transition-transform duration-500 ease-[var(--ease-standard)] motion-safe:group-hover:scale-x-100 motion-safe:group-focus-within:scale-x-100 motion-reduce:transition-none"
+                />
+                <CardHeader className="gap-0">
+                  <div className="flex items-center justify-between gap-4">
+                    <Badge
+                      className="tracking-[0.08em] uppercase"
+                      variant="secondary"
                     >
-                      <Link href={href}>
-                        <span className="font-semibold text-primary group-hover/btn:text-accent-foreground">
-                          {_copy(t('exploreService'))}
-                        </span>
-                        <ArrowRight
-                          aria-hidden="true"
-                          className="size-4 rtl:rotate-180 transition-transform duration-200 motion-safe:group-hover/btn:translate-x-1 rtl:motion-safe:group-hover/btn:-translate-x-1"
-                        />
-                      </Link>
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </MotionStaggerItem>
-            ),
-          )}
+                      {_copy(category)}
+                    </Badge>
+                    <span className="grid size-10 shrink-0 place-items-center rounded-sm bg-surface-muted text-secondary transition-transform duration-300 ease-[var(--ease-standard)] motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:rotate-3 motion-reduce:transition-none">
+                      <Icon
+                        aria-hidden="true"
+                        className="size-5"
+                        strokeWidth={1.7}
+                      />
+                    </span>
+                  </div>
+
+                  <CardTitle className="mt-5 text-primary text-xl font-bold">
+                    {_copy(packageItem.name, packageItem.nameAr)}
+                  </CardTitle>
+                  <CardDescription className="mt-3 text-sm leading-6 text-muted-foreground">
+                    {_copy(
+                      packageItem.description ??
+                        'A focused professional service tailored to your career goals.',
+                      packageItem.descriptionAr,
+                    )}
+                  </CardDescription>
+                  <PackagePrice className="mt-5" packageItem={packageItem} />
+                </CardHeader>
+
+                <CardFooter className="mt-auto pt-4 border-t border-border/60">
+                  <Button
+                    asChild
+                    className="group/btn w-full justify-between"
+                    variant="ghost"
+                  >
+                    <Link href={getPackageHref(packageItem)}>
+                      <span className="font-semibold text-primary group-hover/btn:text-accent-foreground">
+                        {_copy(t('exploreService'))}
+                      </span>
+                      <ArrowRight
+                        aria-hidden="true"
+                        className="size-4 rtl:rotate-180 transition-transform duration-200 motion-safe:group-hover/btn:translate-x-1 rtl:motion-safe:group-hover/btn:-translate-x-1"
+                      />
+                    </Link>
+                  </Button>
+                </CardFooter>
+              </Card>
+            </MotionStaggerItem>
+          ))}
         </MotionStaggerList>
       </div>
     </section>

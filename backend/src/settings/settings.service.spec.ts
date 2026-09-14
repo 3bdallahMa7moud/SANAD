@@ -115,6 +115,17 @@ describe('SettingsService', () => {
       ).rejects.toBeInstanceOf(BadRequestException);
     });
 
+    it('only accepts true or false for promotional banner visibility', async () => {
+      await expect(
+        service.bulkUpdate({ settings: { banner_enabled: 'yes' } } as never),
+      ).rejects.toBeInstanceOf(BadRequestException);
+
+      await service.bulkUpdate({
+        settings: { banner_enabled: 'false' },
+      } as never);
+      expect(prisma.$transaction).toHaveBeenCalledTimes(1);
+    });
+
     it('rejects an invalid central WhatsApp number', async () => {
       await expect(
         service.bulkUpdate({
