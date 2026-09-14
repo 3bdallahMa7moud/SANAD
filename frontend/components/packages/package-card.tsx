@@ -25,6 +25,7 @@ import {
   getPackageHref,
   getBestPackageOffer,
   getPackagePrimaryImage,
+  getPackageShortDescription,
   getPackageShortTitle,
 } from '@/lib/packages/presentation';
 import type { CareerPackage } from '@/types/domain';
@@ -47,6 +48,10 @@ export function PackageCard({
   const primaryImage = getPackagePrimaryImage(packageItem);
   const offer = getBestPackageOffer(packageItem);
   const shortTitle = providedShortTitle ?? getPackageShortTitle(packageItem);
+  const shortDescription = getPackageShortDescription(packageItem);
+  const shortDescriptionAr =
+    packageItem.descriptionAr?.replace(/\s+/g, ' ').trim() ||
+    'راجع المخرجات المشمولة وموعد التسليم والتعديلات.';
   const companionOffer = [...(packageItem.companionOffers ?? [])].sort(
     (first, second) => second.discountPercentage - first.discountPercentage,
   )[0];
@@ -118,6 +123,9 @@ export function PackageCard({
             {_copy(shortTitle, packageItem.nameAr)}
           </Link>
         </CardTitle>
+        <p className="mt-3 min-h-12 text-sm leading-6 text-muted-foreground">
+          {_copy(shortDescription, shortDescriptionAr)}
+        </p>
       </CardHeader>
 
       <CardContent className="flex flex-1 flex-col border-t border-border/70 pt-5">

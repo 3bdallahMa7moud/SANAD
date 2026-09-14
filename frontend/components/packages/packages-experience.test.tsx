@@ -128,7 +128,7 @@ describe('Package selection experience', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('keeps service cards limited to a concise title, service facts, price, offer and a link to details', () => {
+  it('shows each service description alongside its key facts, price, offer and detail link', () => {
     render(
       <ServicesCatalog
         packages={[
@@ -161,8 +161,8 @@ describe('Package selection experience', () => {
       screen.getByRole('link', { name: 'Explore Professional Package' }),
     ).toHaveAttribute('href', '/packages/professional-package-1');
     expect(
-      screen.queryByText('Support for your next job and professional profile.'),
-    ).not.toBeInTheDocument();
+      screen.getByText('Support for your next job and professional profile.'),
+    ).toBeVisible();
     expect(screen.queryByText('Professional CV')).not.toBeInTheDocument();
     expect(screen.getByText('5 days estimated')).toBeVisible();
     expect(screen.getByText('1 revision')).toBeVisible();
