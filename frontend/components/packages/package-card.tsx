@@ -1,10 +1,9 @@
 import { useCopy } from '@/lib/i18n/use-copy';
 import {
   ArrowRight,
-  FileText,
   Clock3,
+  FileText,
   RefreshCcw,
-  Check,
   Sparkles,
 } from 'lucide-react';
 import Image from 'next/image';
@@ -18,7 +17,6 @@ import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -27,7 +25,6 @@ import {
   getPackageHref,
   getBestPackageOffer,
   getPackagePrimaryImage,
-  getPackageShortDescription,
   getPackageShortTitle,
 } from '@/lib/packages/presentation';
 import type { CareerPackage } from '@/types/domain';
@@ -97,7 +94,7 @@ export function PackageCard({
         />
       </Link>
 
-      <CardHeader className="gap-0 pb-5">
+      <CardHeader className="gap-0">
         <div className="flex items-center justify-between gap-4">
           <Badge className="tracking-[0.06em] uppercase" variant="secondary">
             {_copy(categoryLabel)}
@@ -121,25 +118,9 @@ export function PackageCard({
             {_copy(shortTitle, packageItem.nameAr)}
           </Link>
         </CardTitle>
-        <CardDescription className="mt-3 line-clamp-2 min-h-12 text-base leading-6">
-          {_copy(getPackageShortDescription(packageItem))}
-        </CardDescription>
       </CardHeader>
 
       <CardContent className="flex flex-1 flex-col border-t border-border/70 pt-5">
-        <ul className="mb-5 grid gap-2 text-sm text-foreground">
-          {packageItem.features.slice(0, 3).map((feature, featureIndex) => (
-            <li key={feature} className="flex items-start gap-2">
-              <Check
-                className="mt-0.5 size-4 shrink-0 text-secondary"
-                aria-hidden="true"
-              />
-              <span>
-                {_copy(feature, packageItem.featuresAr?.[featureIndex])}
-              </span>
-            </li>
-          ))}
-        </ul>
         <div className="mb-5 flex flex-wrap gap-3 text-sm text-muted-foreground">
           <span className="inline-flex items-center gap-1.5">
             <Clock3 className="size-4" aria-hidden="true" />
@@ -147,8 +128,7 @@ export function PackageCard({
           </span>
           <span className="inline-flex items-center gap-1.5">
             <RefreshCcw className="size-4" aria-hidden="true" />
-            {_copy(packageItem.maxRevisions)}
-            {_copy(' ')}
+            {_copy(packageItem.maxRevisions)}{' '}
             {_copy(packageItem.maxRevisions === 1 ? 'revision' : 'revisions')}
           </span>
         </div>
@@ -183,7 +163,7 @@ export function PackageCard({
         />
       </CardContent>
 
-      <CardFooter className="mt-auto">
+      <CardFooter className="mt-auto pt-3">
         <Button asChild className="group/button w-full" size="lg">
           <Link
             aria-label={_copy(`Explore ${packageItem.name}`)}

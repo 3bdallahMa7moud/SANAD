@@ -128,12 +128,15 @@ describe('Package selection experience', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('advertises an available second-service offer in the catalog', () => {
+  it('keeps service cards limited to a concise title, service facts, price, offer and a link to details', () => {
     render(
       <ServicesCatalog
         packages={[
           {
             ...packages[0],
+            buyerCount: 45,
+            ratingAverage: 4.8,
+            ratingCount: 9,
             companionOffers: [
               {
                 id: 9,
@@ -151,10 +154,23 @@ describe('Package selection experience', () => {
       />,
     );
 
-    const offer = screen.getByText('Second-service offer').parentElement;
-    expect(offer).toBeVisible();
-    expect(offer).toHaveTextContent('20%');
-    expect(offer).toHaveTextContent('LinkedIn Profile Optimization');
+    expect(
+      screen.getByRole('heading', { name: 'Professional Package' }),
+    ).toBeVisible();
+    expect(
+      screen.getByRole('link', { name: 'Explore Professional Package' }),
+    ).toHaveAttribute('href', '/packages/professional-package-1');
+    expect(
+      screen.queryByText('Support for your next job and professional profile.'),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText('Professional CV')).not.toBeInTheDocument();
+    expect(screen.getByText('5 days estimated')).toBeVisible();
+    expect(screen.getByText('1 revision')).toBeVisible();
+    expect(screen.getByText('4.8')).toBeVisible();
+    expect(screen.getByText('45 confirmed buyers')).toBeVisible();
+    expect(screen.getByText('AED 250')).toBeVisible();
+    expect(screen.getByText('Second-service offer')).toBeVisible();
+    expect(screen.getByText('20%')).toBeVisible();
   });
 
   it('opens a service illustration and restores keyboard focus after Escape', async () => {
