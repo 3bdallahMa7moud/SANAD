@@ -29,6 +29,7 @@
     "db:migrate": "prisma migrate deploy",
     "db:backup": "node scripts/db-backup.cjs",
     "db:restore:check": "node scripts/db-restore-check.cjs",
+    "images:migrate-webp": "node scripts/convert-package-images-to-webp.cjs",
     "db:seed-admin": "prisma db seed",
     "db:seed-packages": "node -r dotenv/config prisma/seed-packages.cjs"
   },
@@ -59,12 +60,14 @@
     "reflect-metadata": "^0.2.2",
     "resend": "^6.24.0",
     "rxjs": "^7.8.1",
+    "sharp": "^0.35.4",
     "uuid": "^14.0.2"
   },
   "devDependencies": {
     "@nestjs/cli": "^12.0.0",
     "@nestjs/schematics": "^12.0.0",
     "@nestjs/testing": "^12.0.1",
+    "@img/sharp-libvips-dev": "^1.3.3",
     "@types/express": "^5.0.0",
     "@types/multer": "^2.2.0",
     "@types/node": "^24.0.0",
@@ -73,6 +76,8 @@
     "@types/supertest": "^7.0.0",
     "@types/uuid": "^10.0.0",
     "@vitest/coverage-v8": "^4.1.2",
+    "node-addon-api": "^8.5.0",
+    "node-gyp": "^12.1.0",
     "oxlint": "^1.58.0",
     "prettier": "^3.4.2",
     "supertest": "^7.0.0",

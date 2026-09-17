@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { beforeEach, describe, it, expect, vi } from 'vitest';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { EmailService } from './email.service';
@@ -24,6 +24,12 @@ describe('EmailService provider delivery', () => {
   const createService = (
     values: Record<string, string> = { RESEND_API_KEY: 're_test' },
   ) => new EmailService(new ConfigService(values), {} as PrismaService);
+
+  beforeEach(() => {
+    send.mockReset();
+    smtpSend.mockReset();
+    createTransport.mockClear();
+  });
 
   it('reports a resolved provider error as failure so the worker retries', async () => {
     send.mockResolvedValueOnce({
@@ -77,8 +83,27 @@ describe('EmailService provider delivery', () => {
     );
   });
 
-  it('queues one branded OTP email with a public logo and SANAD sender', async () => {
-    const create = vi.fn().mockResolvedValue({ id: 1 });
+  it('falls back to Resend when SMTP delivery fails', async () => {
+    smtpSend.mockRejectedValueOnce(new Error('Invalid SMTP credentials'));
+    send.mockResolvedValueOnce({ data: { id: 'resend-1' }, error: null });
+    const service = createService({
+      SMTP_HOST: 'smtp.gmail.com',
+      SMTP_PORT: '465',
+      SMTP_SECURE: 'true',
+      SMTP_USER: 'sender@gmail.com',
+      SMTP_PASSWORD: 'app-password',
+      RESEND_API_KEY: 're_test',
+    });
+
+    await expect(service.sendDirect(message)).resolves.toEqual({
+      success: true,
+      id: 'resend-1',
+    });
+    expect(smtpSend).toHaveBeenCalledOnce();
+    expect(send).toHaveBeenCalledOnce();
+  });
+
+  it('delivers one branded OTP email synchronously with a public logo', async () => {
     const service = new EmailService(
       new ConfigService({
         FRONTEND_URL: 'https://sanad.example',
@@ -86,20 +111,21 @@ describe('EmailService provider delivery', () => {
         SMTP_USER: 'sender@gmail.com',
         SMTP_PASSWORD: 'app-password',
       }),
-      { email_queue: { create } } as unknown as PrismaService,
+      {} as PrismaService,
     );
-    smtpSend.mockClear();
+    smtpSend.mockResolvedValueOnce({ messageId: 'otp-1' });
 
-    await service.sendOtpEmail('customer@example.com', '123456');
+    await expect(
+      service.sendOtpEmail('customer@example.com', '123456'),
+    ).resolves.toEqual({ success: true, id: 'otp-1' });
 
-    expect(create).toHaveBeenCalledOnce();
-    const queued = create.mock.calls[0][0].data;
-    expect(queued.subject).toBe('SANAD | رمز التحقق');
-    expect(queued.body_html).toContain('https://sanad.example/icon.png');
-    expect(queued.body_html).toContain('123456');
-    expect(queued.body_html).toContain('رمز التحقق الخاص بك');
-    expect(queued.body_text).toContain('123456');
-    expect(smtpSend).not.toHaveBeenCalled();
+    expect(smtpSend).toHaveBeenCalledOnce();
+    const sent = smtpSend.mock.calls[0][0];
+    expect(sent.subject).toBe('SANAD | رمز التحقق');
+    expect(sent.html).toContain('https://sanad.example/icon.png');
+    expect(sent.html).toContain('123456');
+    expect(sent.html).toContain('رمز التحقق الخاص بك');
+    expect(sent.text).toContain('123456');
   });
 
   it('refuses simulated delivery in production, including placeholder credentials', () => {

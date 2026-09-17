@@ -82,8 +82,9 @@ const labels: Record<string, string> = {
 const siteSettingKeys = Object.keys(labels);
 const defaultSettingValues: Record<string, string> = {
   banner_enabled: 'true',
-  banner_text_ar: 'خصم 50 درهم لأول 50 عميل',
-  banner_text_en: 'AED 50 off for the first 50 customers',
+  banner_text_ar: 'خصم 50% على باقات مختارة لفترة محدودة — اكتشف العروض الآن',
+  banner_text_en:
+    '50% off selected packages for a limited time — explore the offers now',
 };
 
 function settingsFields(existing: SiteSetting[]): SiteSetting[] {

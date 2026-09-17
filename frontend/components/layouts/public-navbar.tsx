@@ -19,7 +19,7 @@ export function PublicNavbar() {
   const _copy = useCopy();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/80 bg-surface/95 shadow-xs backdrop-blur-md">
+    <header className="border-b border-border/80 bg-surface/95 shadow-xs backdrop-blur-md">
       <div className="layout-container flex min-h-20 items-center gap-4 sm:min-h-[5.25rem]">
         <Link
           aria-label={_copy('SANAD home')}

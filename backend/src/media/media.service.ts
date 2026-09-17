@@ -14,12 +14,12 @@ import {
 } from './dto';
 import { MulterFile } from '../common/interfaces';
 import { v4 as uuidv4 } from 'uuid';
-import * as path from 'path';
 import {
   IMAGE_MIME_TYPES,
   MAX_UPLOAD_BYTES,
   validateFileSignature,
 } from '../files/file-validation';
+import { ImageOptimizationService } from './image-optimization.service';
 
 @Injectable()
 export class MediaService {
@@ -27,6 +27,7 @@ export class MediaService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storageService: StorageService,
+    private readonly imageOptimizationService: ImageOptimizationService,
   ) {}
 
   private validateImage(file: MulterFile) {
@@ -91,14 +92,15 @@ export class MediaService {
     const previous = await this.prisma.site_media.findUnique({
       where: { media_key: safeKey },
     });
+    const optimizedImage =
+      await this.imageOptimizationService.convertToWebp(file);
 
-    const ext = path.extname(file.originalname).toLowerCase();
-    const storageKey = `media/site/${safeKey}_${uuidv4().substring(0, 8)}${ext}`;
+    const storageKey = `media/site/${safeKey}_${uuidv4().substring(0, 8)}${optimizedImage.extension}`;
 
     const uploadRes = await this.storageService.upload(
       storageKey,
-      file.buffer,
-      file.mimetype,
+      optimizedImage.buffer,
+      optimizedImage.mimetype,
     );
 
     let media;
@@ -108,7 +110,7 @@ export class MediaService {
           where: { media_key: safeKey },
           update: {
             media_path: uploadRes.key,
-            media_type: file.mimetype,
+            media_type: optimizedImage.mimetype,
             alt_text_ar: dto.alt_text_ar,
             alt_text_en: dto.alt_text_en,
             is_active: true,
@@ -116,7 +118,7 @@ export class MediaService {
           create: {
             media_key: safeKey,
             media_path: uploadRes.key,
-            media_type: file.mimetype,
+            media_type: optimizedImage.mimetype,
             alt_text_ar: dto.alt_text_ar,
             alt_text_en: dto.alt_text_en,
             is_active: true,
@@ -223,14 +225,15 @@ export class MediaService {
     if (!pkg) throw new NotFoundException('Package not found');
 
     this.validateImage(file);
+    const optimizedImage =
+      await this.imageOptimizationService.convertToWebp(file);
 
-    const ext = path.extname(file.originalname).toLowerCase();
-    const storageKey = `packages/${packageId}/${uuidv4()}${ext}`;
+    const storageKey = `packages/${packageId}/${uuidv4()}${optimizedImage.extension}`;
 
     const uploadRes = await this.storageService.upload(
       storageKey,
-      file.buffer,
-      file.mimetype,
+      optimizedImage.buffer,
+      optimizedImage.mimetype,
     );
 
     let image;

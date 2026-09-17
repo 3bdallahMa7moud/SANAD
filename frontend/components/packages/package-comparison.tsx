@@ -8,8 +8,16 @@ import {
 } from '@/lib/packages/presentation';
 import type { CareerPackage } from '@/types/domain';
 import { Button } from '@/components/ui/button';
+import { SecondaryPrices } from '@/components/packages/secondary-prices';
+import type { SecondaryExchangeRates } from '@/lib/packages/exchange-rates';
 
-export function PackageComparison({ packages }: { packages: CareerPackage[] }) {
+export function PackageComparison({
+  packages,
+  rates = null,
+}: {
+  packages: CareerPackage[];
+  rates?: SecondaryExchangeRates | null;
+}) {
   const _copy = useCopy();
 
   const bundles = packages.filter(
@@ -76,6 +84,10 @@ export function PackageComparison({ packages }: { packages: CareerPackage[] }) {
                     <span className="mt-2 block text-xl">
                       {_copy(_copy.money(getPackageCurrentPrice(item)))}
                     </span>
+                    <SecondaryPrices
+                      amount={getPackageCurrentPrice(item)}
+                      rates={rates}
+                    />
                   </th>
                 ))}
               </tr>

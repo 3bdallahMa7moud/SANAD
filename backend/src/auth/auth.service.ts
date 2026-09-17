@@ -815,7 +815,7 @@ export class AuthService {
 
     // 1. Rate-limiting: Enforce 60-second cooldown per email
     const latestChallenge = await this.prisma.email_otp_challenges.findFirst({
-      where: { email },
+      where: { email, consumed_at: null },
       orderBy: { created_at: 'desc' },
     });
 
@@ -847,7 +847,7 @@ export class AuthService {
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
     // 4. Save challenge record
-    await this.prisma.email_otp_challenges.create({
+    const challenge = await this.prisma.email_otp_challenges.create({
       data: {
         email,
         otp_hash: otpHash,
@@ -880,6 +880,18 @@ export class AuthService {
       }
     } catch (error) {
       this.logger.error(`Failed to send OTP email to ${email}`, error);
+      await this.prisma.email_otp_challenges.updateMany({
+        where: { id: challenge.id, consumed_at: null },
+        data: { consumed_at: new Date() },
+      });
+      throw new HttpException(
+        {
+          message:
+            'We could not send the verification code. Please try again shortly.',
+          code: 'EMAIL_DELIVERY_FAILED',
+        },
+        HttpStatus.SERVICE_UNAVAILABLE,
+      );
     }
 
     // 6. Generic response - never leaks whether the account exists

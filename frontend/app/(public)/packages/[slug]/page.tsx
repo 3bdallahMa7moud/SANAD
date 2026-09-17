@@ -20,6 +20,8 @@ import { notFound, redirect } from 'next/navigation';
 import { cache } from 'react';
 
 import { PackageGallery } from '@/components/packages/package-gallery';
+import { SecondaryPrices } from '@/components/packages/secondary-prices';
+import { getSecondaryExchangeRates } from '@/lib/packages/exchange-rates';
 import { PackageFeedbackUnavailable } from '@/components/packages/package-feedback-unavailable';
 import { StarRating } from '@/components/feedback/star-rating';
 import { getServiceCategory } from '@/lib/packages/categories';
@@ -221,8 +223,8 @@ export default async function PackageDetailPage({
     redirect(getPackageHref(packageItem));
   }
 
-  const { feedback, pricing, relatedPackages, contactNumber } =
-    await getOptionalPageData(packageItem);
+  const [{ feedback, pricing, relatedPackages, contactNumber }, rates] =
+    await Promise.all([getOptionalPageData(packageItem), getSecondaryExchangeRates()]);
   const feedbackItems = feedback?.items ?? [];
   const feedbackRating = feedback?.summary.averageRating ?? 0;
   const content = getPackageDetailContent(packageItem);
@@ -475,6 +477,13 @@ export default async function PackageDetailPage({
                         ) : null}
                       </div>
 
+                      <SecondaryPrices
+                        amount={pricing.finalAmount}
+                        currency={pricing.currency}
+                        rates={rates}
+                        onDark
+                      />
+
                       <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-primary-foreground/10 pt-2.5 text-xs text-primary-foreground/75">
                         <span>
                           {_copy('Subtotal', 'المجموع الفرعي')}:{' '}
@@ -502,6 +511,11 @@ export default async function PackageDetailPage({
                       <span className="mt-1 block font-display text-3xl font-bold tracking-tight text-primary-foreground sm:text-4xl">
                         {displayPrice}
                       </span>
+                      <SecondaryPrices
+                        amount={getPackageCurrentPrice(packageItem)}
+                        rates={rates}
+                        onDark
+                      />
                     </div>
                   )}
                 </div>
@@ -883,6 +897,7 @@ export default async function PackageDetailPage({
                 checkoutHref={checkoutHref}
                 packageItem={packageItem}
                 pricing={pricing}
+                rates={rates}
               />
               <Button asChild variant="outline" className="mt-4 w-full">
                 <Link href="/packages#compare-packages">
@@ -957,6 +972,7 @@ export default async function PackageDetailPage({
                 <PackageRelatedCard
                   key={relatedPackage.id}
                   packageItem={relatedPackage}
+                  rates={rates}
                 />
               ))}
             </div>

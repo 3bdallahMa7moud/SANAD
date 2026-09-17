@@ -1,0 +1,30 @@
+[Unit]
+Description=SANAD Web
+After=network-online.target sanad-api.service
+Wants=network-online.target
+Requires=sanad-api.service
+
+[Service]
+Type=simple
+User=sanad
+Group=sanad
+WorkingDirectory=/opt/SANAD/.native-runtime/web
+ExecStart=/opt/SANAD/deploy/native/start-web.sh
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=60
+TimeoutStopSec=30
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+# `.next` is always part of a standalone deployment, while `.next/cache` may
+# not exist until Next.js serves its first request. Mount the existing parent
+# writable so systemd namespace setup cannot fail before Node starts.
+ReadWritePaths=/opt/SANAD/.native-runtime/web/.next
+CapabilityBoundingSet=
+LockPersonality=true
+RestrictSUIDSGID=true
+
+[Install]
+WantedBy=multi-user.target

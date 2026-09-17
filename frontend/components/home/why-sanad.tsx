@@ -1,11 +1,4 @@
 import { getCopy } from '@/lib/i18n/server-copy';
-import {
-  MotionAccentLine,
-  MotionHeading,
-  MotionReveal,
-  MotionStaggerItem,
-  MotionStaggerList,
-} from '@/components/motion/motion-reveal';
 import { getTranslations } from 'next-intl/server';
 
 export async function WhySanad() {
@@ -28,32 +21,26 @@ export async function WhySanad() {
       <div className="layout-container layout-section">
         <div className="grid gap-12 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)] lg:gap-16 xl:gap-24">
           <div className="lg:pe-4">
-            <MotionReveal direction="none">
-              <p className="flex items-center gap-3 text-xs font-semibold tracking-[0.18em] text-secondary uppercase sm:text-sm">
-                <MotionAccentLine className="h-px w-8 origin-left bg-accent" />
-                {_copy(t('eyebrow'))}
-              </p>
-            </MotionReveal>
-            <MotionHeading
+            <p className="flex items-center gap-3 text-xs font-semibold tracking-[0.18em] text-secondary uppercase sm:text-sm">
+              <span aria-hidden="true" className="h-px w-8 bg-accent" />
+              {_copy(t('eyebrow'))}
+            </p>
+            <h2
               className="type-h2 mt-5 max-w-[16ch]"
               id="why-sanad-heading"
-              text={_copy(t('heading'))}
-            />
-            <MotionReveal delay={0.12} distance={14}>
-              <p className="mt-6 max-w-[34rem] text-base leading-7 text-foreground/75 sm:text-lg sm:leading-8">
-                {_copy(t('body'))}
-              </p>
-            </MotionReveal>
+            >
+              {_copy(t('heading'))}
+            </h2>
+            <p className="mt-6 max-w-[34rem] text-base leading-7 text-foreground/75 sm:text-lg sm:leading-8">
+              {_copy(t('body'))}
+            </p>
           </div>
 
-          <MotionStaggerList
+          <ol
             className="border-y border-border"
-            delay={0.08}
-            ordered
-            stagger={0.09}
           >
             {reasons.map(({ description, title }, index) => (
-              <MotionStaggerItem
+              <li
                 className="grid gap-4 border-b border-border py-6 transition-colors duration-200 hover:bg-background/60 last:border-b-0 sm:grid-cols-[4rem_minmax(0,1fr)] sm:gap-6 sm:py-7"
                 key={title}
               >
@@ -72,9 +59,9 @@ export async function WhySanad() {
                     {_copy(description)}
                   </p>
                 </div>
-              </MotionStaggerItem>
+              </li>
             ))}
-          </MotionStaggerList>
+          </ol>
         </div>
       </div>
     </section>

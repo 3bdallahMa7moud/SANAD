@@ -10,6 +10,7 @@ import { PackageComparison } from '@/components/packages/package-comparison';
 import { Button } from '@/components/ui/button';
 import { packagesApi, settingsApi } from '@/lib/api';
 import { whatsappHref } from '@/lib/orders/presentation';
+import { getSecondaryExchangeRates } from '@/lib/packages/exchange-rates';
 
 export const dynamic = 'force-dynamic';
 export async function generateMetadata(): Promise<Metadata> {
@@ -27,9 +28,10 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function PackagesPage() {
   const _copy = await getCopy();
 
-  const [catalog, settingsResult] = await Promise.all([
+  const [catalog, settingsResult, rates] = await Promise.all([
     packagesApi.list({ limit: 100 }),
     settingsApi.getPublic().catch(() => null),
+    getSecondaryExchangeRates(),
   ]);
   const rawPackages = catalog?.items ?? [];
   const packages = [...rawPackages].sort((a, b) => a.sortOrder - b.sortOrder);
@@ -91,8 +93,8 @@ export default async function PackagesPage() {
           </div>
         </div>
       </section>
-      <ServicesCatalog packages={packages} />
-      <PackageComparison packages={packages} />
+      <ServicesCatalog packages={packages} rates={rates} />
+      <PackageComparison packages={packages} rates={rates} />
       <section className="bg-surface" aria-labelledby="next-steps-heading">
         <div className="layout-container layout-section">
           <h2 id="next-steps-heading" className="type-h3 text-primary">

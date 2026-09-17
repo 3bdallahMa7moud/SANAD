@@ -3,6 +3,9 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import PackagesPage from './page';
 import { NextIntlClientProvider } from 'next-intl';
 vi.mock('next-intl/server', () => ({ getLocale: async () => 'en' }));
+vi.mock('@/lib/packages/exchange-rates', () => ({
+  getSecondaryExchangeRates: async () => null,
+}));
 
 const { list } = vi.hoisted(() => ({ list: vi.fn() }));
 vi.mock('@/lib/api', () => ({

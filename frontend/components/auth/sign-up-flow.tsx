@@ -3,8 +3,9 @@
 import * as React from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CheckCircle2, Mail, Phone, RefreshCw } from 'lucide-react';
-import { useForm } from 'react-hook-form';
+import { CheckCircle2, Mail, RefreshCw } from 'lucide-react';
+import { Controller, useForm } from 'react-hook-form';
+import { isPossiblePhoneNumber } from 'react-phone-number-input';
 import { z } from 'zod';
 
 import type { AuthTokens, User } from '@/types/domain';
@@ -18,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { FormField } from '@/components/ui/form-field';
 import { Input } from '@/components/ui/input';
 import { GoogleAuthButton } from './google-auth-button';
+import { InternationalPhoneInput } from './international-phone-input';
 import { OtpInput } from './otp-input';
 
 const signUpSchema = z.object({
@@ -34,7 +36,11 @@ const signUpSchema = z.object({
     .trim()
     .min(5, 'Please enter a valid phone number')
     .max(20, 'Phone number is too long')
-    .regex(/^[\d\s+\-()]+$/, 'Invalid phone number format'),
+    .regex(/^[\d\s+\-()]+$/, 'Invalid phone number format')
+    .refine(
+      (value) => isPossiblePhoneNumber(value),
+      'Please enter a valid phone number',
+    ),
   gender: z.enum(['male', 'female'], {
     message: 'Please select your gender',
   }),
@@ -71,6 +77,7 @@ export function SignUpFlow({
   const [isGoogleLoading, setIsGoogleLoading] = React.useState(false);
 
   const {
+    control,
     register,
     handleSubmit,
     reset,
@@ -238,7 +245,7 @@ export function SignUpFlow({
   const isGoogleDetails = step === 'google-details';
 
   return (
-    <div className="mx-auto w-full max-w-md pt-2">
+    <div className="mx-auto w-full max-w-[400px] pt-2">
       <div className="mb-7 text-center">
         <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-accent">
           {_copy('Create your SANAD account')}
@@ -262,7 +269,10 @@ export function SignUpFlow({
         {step === 'otp' ? (
           <div className="mt-4 flex justify-center">
             <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-border bg-surface-muted px-3 py-2 text-sm font-semibold text-primary">
-              <Mail aria-hidden="true" className="size-4 shrink-0 text-accent" />
+              <Mail
+                aria-hidden="true"
+                className="size-4 shrink-0 text-accent"
+              />
               <span className="min-w-0 break-all" dir="ltr">
                 {maskedEmail || pendingValues?.email || ''}
               </span>
@@ -421,22 +431,28 @@ export function SignUpFlow({
               </div>
             </FormField>
 
-            <FormField
-              error={_copy(errors.phone?.message)}
-              label={_copy('Phone number')}
-              required
-            >
-              <div className="relative">
-                <Input
-                  {...register('phone')}
-                  autoComplete="tel"
-                  className="dir-ltr ps-10 text-start"
-                  placeholder={_copy('+971 50 123 4567')}
-                  type="tel"
-                />
-                <Phone className="pointer-events-none absolute inset-y-0 left-3 my-auto size-4 text-muted-foreground" />
-              </div>
-            </FormField>
+            <Controller
+              control={control}
+              name="phone"
+              render={({ field }) => (
+                <FormField
+                  error={_copy(errors.phone?.message)}
+                  label={_copy('Phone number')}
+                  required
+                >
+                  <InternationalPhoneInput
+                    autoComplete="tel"
+                    disabled={isSubmitting}
+                    invalid={Boolean(errors.phone)}
+                    name={field.name}
+                    onBlur={field.onBlur}
+                    onChange={field.onChange}
+                    placeholder="50 123 4567"
+                    value={field.value}
+                  />
+                </FormField>
+              )}
+            />
 
             <FormField
               error={_copy(errors.gender?.message)}

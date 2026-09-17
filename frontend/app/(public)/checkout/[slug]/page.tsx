@@ -7,6 +7,7 @@ import { notFound, redirect } from 'next/navigation';
 import { cache } from 'react';
 
 import { CheckoutExperience } from '@/components/checkout/checkout-experience';
+import { getSecondaryExchangeRates } from '@/lib/packages/exchange-rates';
 import { checkoutApi, isApiError, packagesApi } from '@/lib/api';
 import { getCheckoutMode } from '@/lib/env/public-env';
 import {
@@ -68,10 +69,10 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
   }
 
   const offer = getBestPackageOffer(packageItem);
-  const pricing = await checkoutApi.preview({
-    packageId: packageItem.id,
-    offerId: offer?.id,
-  });
+  const [pricing, rates] = await Promise.all([
+    checkoutApi.preview({ packageId: packageItem.id, offerId: offer?.id }),
+    getSecondaryExchangeRates(),
+  ]);
 
   return (
     <div className="bg-background">
@@ -129,6 +130,7 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
           checkoutMode={checkoutMode}
           packageItem={packageItem}
           pricing={pricing}
+          rates={rates}
         />
       </section>
     </div>

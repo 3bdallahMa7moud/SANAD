@@ -129,6 +129,27 @@ describe('AuthService - Passwordless Authentication', () => {
       expect(prisma.email_otp_challenges.create).not.toHaveBeenCalled();
     });
 
+    it('sends an OTP when a new customer explicitly starts sign-up', async () => {
+      prisma.users.findUnique.mockResolvedValue(null);
+      prisma.email_otp_challenges.findFirst.mockResolvedValue(null);
+
+      await service.requestPasswordlessOtp({
+        email: 'newuser@example.com',
+        flow: 'sign_up',
+      });
+
+      expect(prisma.email_otp_challenges.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          email: 'newuser@example.com',
+          otp_hash: expect.not.stringMatching(/^\d{6}$/),
+        }),
+      });
+      expect(emailService.sendOtpEmail).toHaveBeenCalledWith(
+        'newuser@example.com',
+        expect.stringMatching(/^\d{6}$/),
+      );
+    });
+
     it('creates a hashed challenge, sends email, and returns generic response with masked email', async () => {
       prisma.email_otp_challenges.findFirst.mockResolvedValue(null);
 

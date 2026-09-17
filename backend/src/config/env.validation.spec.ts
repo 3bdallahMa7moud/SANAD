@@ -76,6 +76,18 @@ describe('environment validation', () => {
     ).toThrow(/SMTP_HOST or RESEND_API_KEY/);
   });
 
+  it('rejects an incomplete SMTP configuration in production', () => {
+    expect(() =>
+      validate({
+        ...valid,
+        NODE_ENV: 'production',
+        TRUST_PROXY: 'false',
+        PAYMENT_PROVIDER: 'manual',
+        SMTP_HOST: 'smtp.gmail.com',
+      }),
+    ).toThrow(/SMTP configuration is incomplete/);
+  });
+
   it('requires an explicit trust-proxy decision in production', () => {
     expect(() => validate({ ...valid, NODE_ENV: 'production' })).toThrow(
       /explicit TRUST_PROXY/,

@@ -102,7 +102,16 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   output: 'standalone',
   poweredByHeader: false,
-  images: { remotePatterns },
+  experimental: {
+    // Keep every webpack compiler in the same build process. On small hosts,
+    // worker builds can finish their manifests out of order and produce HTML
+    // that references static chunks missing from the standalone deployment.
+    webpackBuildWorker: false,
+  },
+  images: {
+    maximumDiskCacheSize: 128_000_000,
+    remotePatterns,
+  },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }];
   },

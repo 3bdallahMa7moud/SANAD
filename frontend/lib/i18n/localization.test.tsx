@@ -21,6 +21,16 @@ describe('i18n copy and next-intl context integration', () => {
     expect(result).toBe('الرئيسية');
   });
 
+  it('translates the employment guarantee answer completely', () => {
+    const result = translateCopy(
+      'No. SANAD provides professional career-document services that improve the clarity and quality of your professional presentation. Interviews, job offers, and employment decisions remain with individual employers and cannot be guaranteed.',
+      'ar',
+    );
+
+    expect(result).toContain('لا. تقدم سند');
+    expect(result).not.toContain('No. SANAD');
+  });
+
   it('preserves English copy when locale is en', () => {
     const result = translateCopy('Home', 'en');
     expect(result).toBe('Home');

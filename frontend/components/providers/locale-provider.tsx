@@ -2,22 +2,19 @@
 
 import {
   createContext,
-  startTransition,
   useCallback,
   useContext,
-  useLayoutEffect,
   useMemo,
-  useState,
+  useTransition,
   type ReactNode,
 } from 'react';
 import { NextIntlClientProvider, type AbstractIntlMessages } from 'next-intl';
 import { useRouter } from 'next/navigation';
 
-import { localizeDocumentCopy } from '@/lib/i18n/document-copy';
-
 export type AppLocale = 'ar' | 'en';
 
 interface LocaleContextValue {
+  isPending: boolean;
   setLocale: (locale: AppLocale) => void;
 }
 
@@ -36,42 +33,36 @@ export function LocaleProvider({
   messagesByLocale,
 }: LocaleProviderProps) {
   const router = useRouter();
-  const [locale, setLocaleState] = useState<AppLocale>(initialLocale);
-
-  useLayoutEffect(() => {
-    document.documentElement.lang = locale;
-    document.documentElement.dir = locale === 'ar' ? 'rtl' : 'ltr';
-    localizeDocumentCopy(document.body, locale);
-  }, [locale]);
+  const [isPending, beginLocaleTransition] = useTransition();
 
   const setLocale = useCallback(
     (nextLocale: AppLocale) => {
-      if (nextLocale === locale) return;
+      if (nextLocale === initialLocale || isPending) return;
 
       const expires = new Date();
       expires.setFullYear(expires.getFullYear() + 1);
       document.cookie = `SANAD_LOCALE=${nextLocale}; path=/; expires=${expires.toUTCString()}; SameSite=Lax`;
 
-      // This update is urgent: client-rendered and optimistic server copy must
-      // change before the slower Server Component refresh completes.
-      setLocaleState(nextLocale);
-
-      startTransition(() => {
-        // Server Components read the locale cookie, so refresh their payload
-        // without changing the current URL or doing a full browser reload.
+      // Keep the current page intact while React fetches and atomically merges
+      // the Server Component payload for the new locale. This preserves client
+      // state and avoids a full document reload and a second hydration pass.
+      beginLocaleTransition(() => {
         router.refresh();
       });
     },
-    [locale, router],
+    [beginLocaleTransition, initialLocale, isPending, router],
   );
 
-  const value = useMemo(() => ({ setLocale }), [setLocale]);
+  const value = useMemo(
+    () => ({ isPending, setLocale }),
+    [isPending, setLocale],
+  );
 
   return (
     <LocaleContext.Provider value={value}>
       <NextIntlClientProvider
-        locale={locale}
-        messages={messagesByLocale[locale]}
+        locale={initialLocale}
+        messages={messagesByLocale[initialLocale]}
       >
         {children}
       </NextIntlClientProvider>

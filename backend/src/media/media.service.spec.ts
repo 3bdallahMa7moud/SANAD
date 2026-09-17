@@ -3,6 +3,7 @@ import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { MediaService } from './media.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../files/storage.service';
+import { ImageOptimizationService } from './image-optimization.service';
 
 const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
 
@@ -19,6 +20,7 @@ describe('MediaService', () => {
   let service: MediaService;
   let prisma: any;
   let storage: any;
+  let imageOptimizer: any;
   let tx: any;
 
   beforeEach(() => {
@@ -49,9 +51,20 @@ describe('MediaService', () => {
       getSignedUrl: vi.fn(async (key: string) => `signed:${key}`),
       delete: vi.fn().mockResolvedValue(undefined),
     };
+    imageOptimizer = {
+      convertToWebp: vi.fn().mockResolvedValue({
+        buffer: Buffer.from('optimized-webp'),
+        extension: '.webp',
+        height: 600,
+        mimetype: 'image/webp',
+        size: 15,
+        width: 1200,
+      }),
+    };
     service = new MediaService(
       prisma as PrismaService,
       storage as unknown as StorageService,
+      imageOptimizer as ImageOptimizationService,
     );
   });
 
@@ -120,11 +133,18 @@ describe('MediaService', () => {
       );
 
       expect(storage.upload.mock.calls[0][0]).toMatch(
-        /^media\/site\/hero_banner_[a-f0-9]{8}\.png$/,
+        /^media\/site\/hero_banner_[a-f0-9]{8}\.webp$/,
       );
+      expect(storage.upload.mock.calls[0][1]).toEqual(
+        Buffer.from('optimized-webp'),
+      );
+      expect(storage.upload.mock.calls[0][2]).toBe('image/webp');
       expect(tx.site_media.upsert.mock.calls[0][0].where).toEqual({
         media_key: 'hero_banner',
       });
+      expect(tx.site_media.upsert.mock.calls[0][0].create.media_type).toBe(
+        'image/webp',
+      );
     });
 
     // The media key is attacker-influenced and lands inside a storage path, so
@@ -255,6 +275,13 @@ describe('MediaService', () => {
 
       await service.uploadPackageImage(3, pngFile(), {} as never, 1);
 
+      expect(storage.upload.mock.calls[0][0]).toMatch(
+        /^packages\/3\/[a-f0-9-]+\.webp$/,
+      );
+      expect(storage.upload.mock.calls[0][1]).toEqual(
+        Buffer.from('optimized-webp'),
+      );
+      expect(storage.upload.mock.calls[0][2]).toBe('image/webp');
       expect(tx.package_images.create.mock.calls[0][0].data).toEqual(
         expect.objectContaining({
           is_primary: true,

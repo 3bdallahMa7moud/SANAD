@@ -61,6 +61,7 @@ export function AccountNavigation({
             openAuthModal(undefined, 'sign-up');
           }}
           size={mobile ? 'lg' : 'md'}
+          variant={mobile ? 'outline' : 'ghost'}
         >
           {_copy('Sign Up')}
         </Button>

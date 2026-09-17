@@ -93,13 +93,6 @@ const sections = [
     ],
   },
   {
-    id: 'your-rights',
-    title: 'Your Rights',
-    content: [
-      'Under UAE Federal Decree-Law No. 45 of 2021 on Personal Data Protection and applicable international privacy frameworks, you have the right to access, correct, and delete your personal data. You may also withdraw consent for non-essential communications at any time.',
-    ],
-  },
-  {
     id: 'contact',
     title: 'Contact',
     content: [

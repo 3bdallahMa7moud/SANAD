@@ -22,10 +22,12 @@ export function PublicLayout({ announcement, children }: PublicLayoutProps) {
       >
         {_copy('Skip to main content')}
       </a>
-      <AnnouncementBar>
-        {announcement ? _copy(announcement) : undefined}
-      </AnnouncementBar>
-      <PublicNavbar />
+      <div className="sticky top-0 z-40">
+        <AnnouncementBar>
+          {announcement ? _copy(announcement) : undefined}
+        </AnnouncementBar>
+        <PublicNavbar />
+      </div>
       <main className="min-w-0 flex-1" id="main-content" tabIndex={-1}>
         {_copy(children)}
       </main>

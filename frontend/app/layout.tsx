@@ -6,11 +6,15 @@ import { getLocale } from 'next-intl/server';
 import { cookies } from 'next/headers';
 
 import { AppProviders } from '@/components/providers/app-providers';
-import { LocaleProvider, type AppLocale } from '@/components/providers/locale-provider';
+import {
+  LocaleProvider,
+  type AppLocale,
+} from '@/components/providers/locale-provider';
 import { getSiteUrl } from '@/lib/env/public-env';
 import arabicMessages from '@/messages/ar.json';
 import englishMessages from '@/messages/en.json';
 
+import 'react-phone-number-input/style.css';
 import './globals.css';
 
 const merriweather = Merriweather({

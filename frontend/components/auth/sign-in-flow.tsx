@@ -176,7 +176,7 @@ export function SignInFlow({
   };
 
   return (
-    <div className="mx-auto w-full max-w-md pt-2">
+    <div className="mx-auto w-full max-w-[400px] pt-2">
       <div className="mb-7 text-center">
         <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-accent">
           {_copy('Customer Sign In')}
@@ -194,7 +194,10 @@ export function SignInFlow({
         {step === 'otp' ? (
           <div className="mt-4 flex justify-center">
             <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-border bg-surface-muted px-3 py-2 text-sm font-semibold text-primary">
-              <Mail aria-hidden="true" className="size-4 shrink-0 text-accent" />
+              <Mail
+                aria-hidden="true"
+                className="size-4 shrink-0 text-accent"
+              />
               <span className="min-w-0 break-all" dir="ltr">
                 {maskedEmail || email}
               </span>

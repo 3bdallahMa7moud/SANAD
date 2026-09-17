@@ -354,6 +354,31 @@ export function validate(config: Record<string, unknown>) {
         }
       }
     }
+    const smtpValues = [
+      validatedConfig.SMTP_HOST,
+      validatedConfig.SMTP_USER,
+      validatedConfig.SMTP_PASSWORD,
+    ];
+    const hasAnySmtpConfiguration = smtpValues.some((value) =>
+      Boolean(value?.trim()),
+    );
+    const hasCompleteSmtpConfiguration = smtpValues.every((value) =>
+      Boolean(value?.trim()),
+    );
+    if (hasAnySmtpConfiguration && !hasCompleteSmtpConfiguration) {
+      throw new Error(
+        'SMTP configuration is incomplete: provide SMTP_HOST, SMTP_USER, and SMTP_PASSWORD',
+      );
+    }
+    if (
+      !hasCompleteSmtpConfiguration &&
+      (!validatedConfig.RESEND_API_KEY?.trim() ||
+        validatedConfig.RESEND_API_KEY.trim() === 're_placeholder')
+    ) {
+      throw new Error(
+        'Production requires SMTP_HOST or RESEND_API_KEY (SMTP also requires SMTP_USER and SMTP_PASSWORD)',
+      );
+    }
     if (validatedConfig.PAYMENT_PROVIDER === 'mock') {
       throw new Error(
         'Production cannot use PAYMENT_PROVIDER=mock. Use manual for admin-confirmed external payments, or configure a real payment provider.',

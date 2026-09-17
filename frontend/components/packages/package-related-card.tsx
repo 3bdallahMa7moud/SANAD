@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import { PackagePrice } from '@/components/packages/package-price';
+import type { SecondaryExchangeRates } from '@/lib/packages/exchange-rates';
 import { PackageOfferFlag } from '@/components/packages/package-offer-visual';
 import { PackageSocialProof } from '@/components/packages/package-social-proof';
 import {
@@ -17,9 +18,13 @@ import type { CareerPackage } from '@/types/domain';
 
 interface PackageRelatedCardProps {
   packageItem: CareerPackage;
+  rates?: SecondaryExchangeRates | null;
 }
 
-export function PackageRelatedCard({ packageItem }: PackageRelatedCardProps) {
+export function PackageRelatedCard({
+  packageItem,
+  rates = null,
+}: PackageRelatedCardProps) {
   const _copy = useCopy();
 
   const image = getPackagePrimaryImage(packageItem);
@@ -68,7 +73,11 @@ export function PackageRelatedCard({ packageItem }: PackageRelatedCardProps) {
         <p className="mt-2 line-clamp-2 min-h-12 text-sm leading-6 text-muted-foreground">
           {_copy(getPackageShortDescription(packageItem))}
         </p>
-        <PackagePrice className="mt-5" packageItem={packageItem} />
+        <PackagePrice
+          className="mt-5"
+          packageItem={packageItem}
+          rates={rates}
+        />
         <PackageSocialProof
           className="mt-4 border-t border-border/70 pt-4"
           packageItem={packageItem}

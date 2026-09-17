@@ -26,20 +26,39 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { packagesApi } from '@/lib/api';
-import { FALLBACK_PACKAGES } from '@/lib/packages/fallback-packages';
+import { getSecondaryExchangeRates } from '@/lib/packages/exchange-rates';
 import { getPackageHref } from '@/lib/packages/presentation';
 import type { CareerPackage } from '@/types/domain';
 
-const featuredPackageNames = [
-  'Professional Package',
-  'Full Package',
-  'LinkedIn Profile Optimization',
+const featuredPackageDefinitions = [
+  {
+    names: ['Professional Package'],
+    categoryKey: 'professional.category',
+    icon: FileCheck2,
+  },
+  {
+    names: ['Premium Full Package', 'Full Package'],
+    categoryKey: 'full.category',
+    icon: LayoutTemplate,
+  },
+  {
+    names: ['LinkedIn Profile Optimization'],
+    categoryKey: 'linkedin.category',
+    icon: UserRoundCheck,
+  },
 ] as const;
 
 function selectFeaturedPackages(catalog: CareerPackage[]): CareerPackage[] {
-  return featuredPackageNames
-    .map((name) => catalog.find((item) => item.name === name))
-    .filter((item): item is CareerPackage => item !== undefined);
+  return featuredPackageDefinitions
+    .map(({ names }) =>
+      catalog.find((item) => names.some((name) => name === item.name)),
+    )
+    .filter((item): item is CareerPackage => item !== undefined)
+    .sort((first, second) =>
+      second.price !== first.price
+        ? second.price - first.price
+        : first.sortOrder - second.sortOrder,
+    );
 }
 
 export async function FeaturedPackages() {
@@ -47,26 +66,29 @@ export async function FeaturedPackages() {
 
   const t = await getTranslations('home.featuredPackages');
 
-  const catalog = await packagesApi.list({ limit: 100 }).catch(() => null);
-  const selected = selectFeaturedPackages(catalog?.items ?? []);
-  const packages =
-    selected.length === featuredPackageNames.length
-      ? selected
-      : selectFeaturedPackages(FALLBACK_PACKAGES);
-  const featuredPackages = packages.map((packageItem, index) => ({
-    packageItem,
-    category: [
-      t('professional.category'),
-      t('full.category'),
-      t('linkedin.category'),
-    ][index],
-    icon: [FileCheck2, LayoutTemplate, UserRoundCheck][index],
-  }));
+  const [catalog, rates] = await Promise.all([
+    packagesApi.list({ limit: 100 }),
+    getSecondaryExchangeRates(),
+  ]);
+  const featuredPackages = selectFeaturedPackages(catalog.items).map(
+    (packageItem) => {
+      const definition = featuredPackageDefinitions.find(
+        ({ names }) => names.some((name) => name === packageItem.name),
+      );
+
+      return {
+        packageItem,
+        category: t(definition!.categoryKey),
+        icon: definition!.icon,
+      };
+    },
+  );
 
   return (
     <section
       aria-labelledby="featured-packages-heading"
       className="scroll-mt-24 border-b border-border bg-background"
+      dir={_copy.locale === 'ar' ? 'rtl' : 'ltr'}
       id="services"
     >
       <div className="layout-container layout-section">
@@ -135,7 +157,11 @@ export async function FeaturedPackages() {
                       packageItem.descriptionAr,
                     )}
                   </CardDescription>
-                  <PackagePrice className="mt-5" packageItem={packageItem} />
+                  <PackagePrice
+                    className="mt-5"
+                    packageItem={packageItem}
+                    rates={rates}
+                  />
                 </CardHeader>
 
                 <CardFooter className="mt-auto pt-4 border-t border-border/60">

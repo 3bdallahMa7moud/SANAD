@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 
 import { PackageCard } from '@/components/packages/package-card';
+import type { SecondaryExchangeRates } from '@/lib/packages/exchange-rates';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { CareerPackage } from '@/types/domain';
@@ -33,6 +34,7 @@ type SortOption =
 
 interface ServicesCatalogProps {
   packages: CareerPackage[];
+  rates?: SecondaryExchangeRates | null;
 }
 
 const categoryIcons = {
@@ -72,7 +74,10 @@ function matchesSearch(packageItem: CareerPackage, query: string): boolean {
   return searchable.includes(query.toLowerCase());
 }
 
-export function ServicesCatalog({ packages }: ServicesCatalogProps) {
+export function ServicesCatalog({
+  packages,
+  rates = null,
+}: ServicesCatalogProps) {
   const _copy = useCopy();
 
   const params = useSearchParams();
@@ -271,6 +276,7 @@ export function ServicesCatalog({ packages }: ServicesCatalogProps) {
                   }
                   index={index}
                   packageItem={packageItem}
+                  rates={rates}
                   shortTitle={getPackageShortTitle(packageItem)}
                 />
               </li>

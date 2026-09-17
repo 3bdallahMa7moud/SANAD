@@ -10,6 +10,8 @@ import {
 import Link from 'next/link';
 
 import { PackagePrice } from '@/components/packages/package-price';
+import { SecondaryPrices } from '@/components/packages/secondary-prices';
+import type { SecondaryExchangeRates } from '@/lib/packages/exchange-rates';
 import {
   PackageOfferBanner,
   PackageOfferFlag,
@@ -26,12 +28,14 @@ interface PackageOrderCardProps {
   checkoutHref: string;
   packageItem: CareerPackage;
   pricing: CheckoutPricing | null;
+  rates?: SecondaryExchangeRates | null;
 }
 
 export function PackageOrderCard({
   checkoutHref,
   packageItem,
   pricing,
+  rates = null,
 }: PackageOrderCardProps) {
   const _copy = useCopy();
 
@@ -79,6 +83,11 @@ export function PackageOrderCard({
             <p className="mt-2 font-display text-4xl leading-none text-primary">
               {_copy(_copy.money(pricing.finalAmount, pricing.currency))}
             </p>
+            <SecondaryPrices
+              amount={pricing.finalAmount}
+              currency={pricing.currency}
+              rates={rates}
+            />
 
             <dl className="mt-6 grid gap-3 border-y border-border py-5 text-sm">
               <div className="flex items-center justify-between gap-4">
@@ -118,7 +127,11 @@ export function PackageOrderCard({
           </>
         ) : (
           <>
-            <PackagePrice packageItem={packageItem} size="hero" />
+            <PackagePrice
+              packageItem={packageItem}
+              size="hero"
+              rates={rates}
+            />
             <p className="mt-3 text-xs leading-5 text-muted-foreground">
               {_copy(
                 'The final tax and total are confirmed when your order is started.',

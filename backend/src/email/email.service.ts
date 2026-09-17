@@ -21,7 +21,7 @@ export class EmailService {
   private readonly resend: Resend | null = null;
   private readonly smtpTransporter: nodemailer.Transporter | null = null;
   private readonly emailFrom: string;
-  private readonly providerType: 'resend' | 'smtp' | 'mock';
+  private readonly mockDelivery: boolean;
 
   constructor(
     private readonly configService: ConfigService,
@@ -42,7 +42,15 @@ export class EmailService {
       ? fromAddress
       : `SANAD <${fromAddress}>`;
 
-    if (smtpHost) {
+    const smtpPass = this.configService.get<string>('SMTP_PASSWORD');
+    const hasSmtpConfiguration = Boolean(
+      smtpHost?.trim() && smtpUser?.trim() && smtpPass?.trim(),
+    );
+    const hasResendConfiguration = Boolean(
+      resendApiKey?.trim() && resendApiKey.trim() !== 're_placeholder',
+    );
+
+    if (hasSmtpConfiguration) {
       // 1. SMTP Provider (Gmail, SES, Sendgrid, custom SMTP)
       const smtpPort = parseInt(
         this.configService.get<string>('SMTP_PORT') || '587',
@@ -51,28 +59,40 @@ export class EmailService {
       const isSecure =
         this.configService.get<string>('SMTP_SECURE') === 'true' ||
         smtpPort === 465;
-      const smtpPass = this.configService.get<string>('SMTP_PASSWORD');
 
       this.smtpTransporter = nodemailer.createTransport({
-        host: smtpHost,
+        host: smtpHost!.trim(),
         port: smtpPort,
         secure: isSecure,
-        auth:
-          smtpUser && smtpPass ? { user: smtpUser, pass: smtpPass } : undefined,
+        auth: { user: smtpUser!.trim(), pass: smtpPass!.trim() },
       });
 
-      this.providerType = 'smtp';
       this.logger.log(
         `SMTP email provider initialized successfully (host: ${smtpHost}, port: ${smtpPort})`,
       );
-    } else if (resendApiKey && resendApiKey !== 're_placeholder') {
-      // 2. Resend Provider
-      this.resend = new Resend(resendApiKey);
-      this.providerType = 'resend';
-      this.logger.log('Resend email provider initialized successfully');
-    } else {
-      // 3. Mock fallback in Development
-      this.providerType = 'mock';
+    }
+
+    if (hasResendConfiguration) {
+      // Keep Resend available as a fallback when SMTP rejects or times out.
+      this.resend = new Resend(resendApiKey!.trim());
+      this.logger.log(
+        hasSmtpConfiguration
+          ? 'Resend fallback email provider initialized successfully'
+          : 'Resend email provider initialized successfully',
+      );
+    }
+
+    this.mockDelivery = !hasSmtpConfiguration && !hasResendConfiguration;
+    if (this.mockDelivery) {
+      const nodeEnv =
+        this.configService.get<string>('nodeEnv') ||
+        this.configService.get<string>('NODE_ENV');
+      if (nodeEnv === 'production') {
+        throw new Error(
+          'Production requires a complete SMTP configuration or RESEND_API_KEY',
+        );
+      }
+
       this.logger.warn(
         'Neither SMTP nor RESEND_API_KEY is configured. Development email delivery will be simulated without logging message bodies.',
       );
@@ -105,7 +125,9 @@ export class EmailService {
     bodyHtml: string;
     bodyText?: string;
   }): Promise<{ success: boolean; id?: string; error?: string }> {
-    if (this.providerType === 'smtp' && this.smtpTransporter) {
+    let smtpError: string | undefined;
+
+    if (this.smtpTransporter) {
       try {
         const info = await this.smtpTransporter.sendMail({
           from: this.emailFrom,
@@ -117,10 +139,12 @@ export class EmailService {
 
         return { success: true, id: info.messageId };
       } catch (err: any) {
+        smtpError = err.message;
         this.logger.error(`SMTP send failed: ${err.message}`, err.stack);
-        return { success: false, error: err.message };
       }
-    } else if (this.providerType === 'resend' && this.resend) {
+    }
+
+    if (this.resend) {
       try {
         const data = await this.resend.emails.send({
           from: this.emailFrom,
@@ -133,8 +157,7 @@ export class EmailService {
         if (data.error || !data.data?.id) {
           return {
             success: false,
-            error:
-              data.error?.message || 'Email provider returned no message ID',
+            error: data.error?.message || 'Resend returned no message ID',
           };
         }
         return { success: true, id: data.data.id };
@@ -142,13 +165,21 @@ export class EmailService {
         this.logger.error(`Resend send failed: ${err.message}`, err.stack);
         return { success: false, error: err.message };
       }
-    } else {
+    }
+
+    if (smtpError) {
+      return { success: false, error: smtpError };
+    }
+
+    if (this.mockDelivery) {
       // Mock delivery for dev/testing
       this.logger.log(
         `[MOCK EMAIL SENT] To: ${options.to} | Subject: ${options.subject}`,
       );
       return { success: true, id: `mock_email_${Date.now()}` };
     }
+
+    return { success: false, error: 'No email provider is available' };
   }
 
   // Standard email builders
@@ -243,16 +274,18 @@ export class EmailService {
     `;
     const bodyText = `SANAD | رمز التحقق\n\nرمز التحقق الخاص بك: ${otp}\n\nهذا الرمز صالح لمدة 10 دقائق. إذا لم تطلب هذا الرمز، يمكنك تجاهل هذه الرسالة.`;
 
-    await this.queueEmail({
+    // OTP is time-sensitive. Deliver it before acknowledging the request so a
+    // provider outage cannot look like a successful send to the customer.
+    const result = await this.sendDirect({
       to: email,
       subject,
       bodyHtml,
       bodyText,
-      templateName: 'otp_verification',
-      templateData: { otp },
-      priority: 1,
     });
-
+    if (!result.success) {
+      throw new Error(result.error || 'OTP email delivery failed');
+    }
+    return result;
   }
 
   private escapeHtml(value: string): string {

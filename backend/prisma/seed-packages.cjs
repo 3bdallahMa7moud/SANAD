@@ -319,12 +319,14 @@ async function main() {
     },
     {
       setting_key: 'banner_text_ar',
-      setting_value: 'خصم 50 درهم لأول 50 عميل',
+      setting_value:
+        'خصم 50% على باقات مختارة لفترة محدودة — اكتشف العروض الآن',
       description: 'Promotional banner text (Arabic)',
     },
     {
       setting_key: 'banner_text_en',
-      setting_value: 'AED 50 off for the first 50 customers',
+      setting_value:
+        '50% off selected packages for a limited time — explore the offers now',
       description: 'Promotional banner text (English)',
     },
   ];

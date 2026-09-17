@@ -14,7 +14,9 @@ ENV DATABASE_URL=postgresql://localhost:5432/sanad_db?schema=public
 RUN apk add --no-cache openssl python3 make g++
 
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm ci && \
+    SHARP_IGNORE_GLOBAL_LIBVIPS=1 npm run build --prefix node_modules/sharp && \
+    ln -s ../../@img/sharp-libvips-linuxmusl-x64 node_modules/sharp/src/sharp-libvips-linuxmusl-x64
 
 # =====================================================
 # Stage 2: compile TypeScript to dist/
@@ -41,14 +43,19 @@ WORKDIR /app
 
 ENV DATABASE_URL=postgresql://localhost:5432/sanad_db?schema=public
 
-RUN apk add --no-cache openssl python3 make g++
+RUN apk add --no-cache openssl
 
 COPY package.json package-lock.json ./
 COPY prisma ./prisma
 
-# Scripts stay enabled so argon2 resolves its native binding, then the Prisma
-# client is generated against the production dependency tree.
-RUN npm ci --omit=dev && \
+# Scripts stay enabled so argon2 resolves its native binding. Sharp's addon is
+# copied from the deps stage because this server's older CPU cannot use Sharp's
+# generic x64-v2 prebuilt addon.
+RUN npm ci --omit=dev
+
+COPY --from=deps /app/node_modules/sharp/src/build/Release/sharp-linuxmusl-x64-*.node /app/node_modules/sharp/src/build/Release/
+
+RUN ln -s ../../@img/sharp-libvips-linuxmusl-x64 node_modules/sharp/src/sharp-libvips-linuxmusl-x64 && \
     npx prisma generate && \
     npm cache clean --force
 

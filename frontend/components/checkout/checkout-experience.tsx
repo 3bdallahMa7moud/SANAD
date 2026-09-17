@@ -16,6 +16,8 @@ import { useEffect, useState, type FormEvent } from 'react';
 
 import { useAuthModal } from '@/components/auth/auth-modal';
 import { Alert } from '@/components/ui/alert';
+import { SecondaryPrices } from '@/components/packages/secondary-prices';
+import type { SecondaryExchangeRates } from '@/lib/packages/exchange-rates';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -39,6 +41,7 @@ interface CheckoutExperienceProps {
   checkoutMode: 'manual' | 'gateway';
   packageItem: CareerPackage;
   pricing: CheckoutPricing;
+  rates?: SecondaryExchangeRates | null;
 }
 
 interface CheckoutFormState {
@@ -223,6 +226,7 @@ export function CheckoutExperience({
   checkoutMode,
   packageItem,
   pricing,
+  rates = null,
 }: CheckoutExperienceProps) {
   const _copy = useCopy();
 
@@ -949,6 +953,12 @@ export function CheckoutExperience({
               </dd>
             </div>
           </dl>
+
+          <SecondaryPrices
+            amount={displayPricing.finalAmount}
+            currency={displayPricing.currency}
+            rates={rates}
+          />
 
           <div className="mt-6 border-t border-border pt-5">
             <label

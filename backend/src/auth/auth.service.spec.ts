@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  HttpException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { createHash } from 'crypto';
@@ -14,6 +15,7 @@ const hash = (value: string) =>
 describe('AuthService token security', () => {
   let prisma: any;
   let jwt: any;
+  let config: any;
   let service: AuthService;
 
   beforeEach(() => {
@@ -60,7 +62,7 @@ describe('AuthService token security', () => {
         ),
       ),
     };
-    const config = {
+    config = {
       get: vi.fn((key: string) => {
         const values: Record<string, string> = {
           JWT_ACCESS_SECRET: 'access-secret-value-that-is-long-enough',
@@ -363,6 +365,44 @@ describe('AuthService token security', () => {
         recipient_email: 'user@example.com',
         body_html: expect.stringContaining('&lt;User&gt;'),
       }),
+    });
+  });
+
+  it('reports OTP delivery failure and invalidates the unusable challenge', async () => {
+    prisma.users.findUnique.mockResolvedValue(null);
+    prisma.email_otp_challenges = {
+      findFirst: vi.fn().mockResolvedValue(null),
+      updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+      create: vi.fn().mockResolvedValue({ id: 91 }),
+    };
+    const emailService = {
+      sendOtpEmail: vi.fn().mockRejectedValue(new Error('SMTP rejected login')),
+    };
+    const serviceWithEmail = new AuthService(
+      prisma,
+      jwt,
+      config,
+      emailService as never,
+    );
+
+    let thrown: unknown;
+    try {
+      await serviceWithEmail.requestPasswordlessOtp({
+        email: 'customer@example.com',
+        flow: 'sign_up',
+      });
+    } catch (error) {
+      thrown = error;
+    }
+
+    expect(thrown).toBeInstanceOf(HttpException);
+    expect((thrown as HttpException).getStatus()).toBe(503);
+    expect((thrown as HttpException).getResponse()).toMatchObject({
+      code: 'EMAIL_DELIVERY_FAILED',
+    });
+    expect(prisma.email_otp_challenges.updateMany).toHaveBeenLastCalledWith({
+      where: { id: 91, consumed_at: null },
+      data: { consumed_at: expect.any(Date) },
     });
   });
 });

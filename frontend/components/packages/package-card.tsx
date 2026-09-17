@@ -10,6 +10,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import { PackagePrice } from '@/components/packages/package-price';
+import type { SecondaryExchangeRates } from '@/lib/packages/exchange-rates';
 import { PackageOfferFlag } from '@/components/packages/package-offer-visual';
 import { PackageSocialProof } from '@/components/packages/package-social-proof';
 import { Badge } from '@/components/ui/badge';
@@ -35,6 +36,7 @@ interface PackageCardProps {
   index: number;
   packageItem: CareerPackage;
   shortTitle?: string;
+  rates?: SecondaryExchangeRates | null;
 }
 
 export function PackageCard({
@@ -42,6 +44,7 @@ export function PackageCard({
   index,
   packageItem,
   shortTitle: providedShortTitle,
+  rates = null,
 }: PackageCardProps) {
   const _copy = useCopy();
 
@@ -141,7 +144,7 @@ export function PackageCard({
           </span>
         </div>
         <div className="mt-auto">
-          <PackagePrice packageItem={packageItem} />
+          <PackagePrice packageItem={packageItem} rates={rates} />
         </div>
         {companionOffer ? (
           <div className="mt-4 rounded-md border border-accent/35 bg-accent/10 p-3 text-sm">

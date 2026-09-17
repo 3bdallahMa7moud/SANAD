@@ -5,18 +5,22 @@ import {
   getPackageCurrentPrice,
 } from '@/lib/packages/presentation';
 import { cn } from '@/lib/utils/cn';
+import { SecondaryPrices } from '@/components/packages/secondary-prices';
+import type { SecondaryExchangeRates } from '@/lib/packages/exchange-rates';
 import type { CareerPackage } from '@/types/domain';
 
 interface PackagePriceProps {
   className?: string;
   packageItem: CareerPackage;
   size?: 'card' | 'hero';
+  rates?: SecondaryExchangeRates | null;
 }
 
 export function PackagePrice({
   className,
   packageItem,
   size = 'card',
+  rates = null,
 }: PackagePriceProps) {
   const _copy = useCopy();
 
@@ -58,6 +62,7 @@ export function PackagePrice({
             ) : null}
             {_copy(_copy.money(currentPrice))}
           </p>
+          <SecondaryPrices amount={currentPrice} rates={rates} />
         </div>
 
         {offer ? (

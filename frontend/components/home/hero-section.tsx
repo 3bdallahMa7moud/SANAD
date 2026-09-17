@@ -15,7 +15,7 @@ import {
   MotionStaggerItem,
   MotionStaggerList,
 } from '@/components/motion/motion-reveal';
-import heroCareerProfile from '@/public/images/home/hero-career-profile.webp';
+import sanadFirst50Hero from '@/public/images/home/sanad-first50-hero.webp';
 
 export async function HeroSection() {
   const _copy = await getCopy();
@@ -120,34 +120,26 @@ export async function HeroSection() {
           className="relative mx-auto w-full max-w-[44rem] lg:mx-0 lg:justify-self-end"
           delay={0.16}
         >
-          <HeroCareerVisual imageAlt={t('imageAlt')} />
+          <HeroOfferVisual imageAlt={t('imageAlt')} />
         </MotionMediaReveal>
       </div>
     </section>
   );
 }
 
-function HeroCareerVisual({ imageAlt }: { imageAlt: string }) {
+function HeroOfferVisual({ imageAlt }: { imageAlt: string }) {
   const _copy = useCopy();
 
   return (
-    <div className="relative aspect-[4/5] overflow-hidden rounded-lg border border-border bg-surface shadow-lg sm:aspect-[5/6] lg:aspect-[16/11] lg:h-auto">
+    <div className="relative aspect-[16/9] overflow-hidden rounded-lg border border-border bg-surface shadow-lg">
       <Image
         alt={_copy(imageAlt)}
-        className="object-cover object-center lg:object-contain"
+        className="object-contain"
         fill
         placeholder="blur"
         preload
         sizes="(max-width: 1023px) calc(100vw - 2rem), 42vw"
-        src={heroCareerProfile}
-      />
-      <div
-        aria-hidden="true"
-        className="sanad-hero-frame-line absolute inset-x-0 top-0 h-1.5 origin-left bg-primary"
-      />
-      <div
-        aria-hidden="true"
-        className="sanad-hero-frame-accent absolute top-0 right-0 h-1.5 w-[28%] origin-right bg-accent"
+        src={sanadFirst50Hero}
       />
     </div>
   );
