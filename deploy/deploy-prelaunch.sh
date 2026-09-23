@@ -103,10 +103,12 @@ tar -czf "$SOURCE_BACKUP" -C "$PROJECT_ROOT" \
   .
 
 if [ "$INSTALL_DEPENDENCIES" = "1" ]; then
-  echo "Installing backend dependencies..."
-  (cd "$BACKEND_DIR" && npm ci)
-  echo "Installing frontend dependencies..."
-  (cd "$FRONTEND_DIR" && npm ci)
+  # Builds need CLI and tooling packages that are normally devDependencies.
+  # NODE_ENV remains production for the resulting processes and artifacts.
+  echo "Installing backend build dependencies..."
+  (cd "$BACKEND_DIR" && npm ci --include=dev)
+  echo "Installing frontend build dependencies..."
+  (cd "$FRONTEND_DIR" && npm ci --include=dev)
 fi
 
 echo "Building backend..."

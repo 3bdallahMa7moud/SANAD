@@ -68,7 +68,8 @@ cd "$FRONTEND_DIR"
 # Dependencies are unchanged for this UI-only release. Set
 # INSTALL_DEPENDENCIES=1 when package.json or package-lock.json changed.
 if [ "${INSTALL_DEPENDENCIES:-0}" = "1" ]; then
-  npm ci
+  # Keep build tooling available even though the runtime uses NODE_ENV=production.
+  npm ci --include=dev
 fi
 
 install -d -m 0700 "$BACKUP_DIR"
