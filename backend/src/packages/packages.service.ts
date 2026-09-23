@@ -5,14 +5,7 @@ import { CreatePackageDto, UpdatePackageDto } from './dto';
 import { PaginationDto, createPaginatedResponse } from '../common/utils';
 import { StorageService } from '../files/storage.service';
 
-const PUBLIC_PACKAGE_FILTER: Prisma.packagesWhereInput = {
-  is_active: true,
-  NOT: [
-    { name_en: { equals: 'Job Application Service', mode: 'insensitive' } },
-    { name_ar: { equals: 'خدمة التقديم على الوظائف', mode: 'insensitive' } },
-    { name_ar: { equals: 'طلبات التوظيف', mode: 'insensitive' } },
-  ],
-};
+const PUBLIC_PACKAGE_FILTER: Prisma.packagesWhereInput = { is_active: true };
 
 @Injectable()
 export class PackagesService {

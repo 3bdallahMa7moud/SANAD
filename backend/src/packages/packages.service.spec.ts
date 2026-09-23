@@ -39,18 +39,6 @@ describe('PackagesService', () => {
 
       expect(prisma.packages.findMany.mock.calls[0][0].where).toEqual({
         is_active: true,
-        NOT: [
-          {
-            name_en: { equals: 'Job Application Service', mode: 'insensitive' },
-          },
-          {
-            name_ar: {
-              equals: 'خدمة التقديم على الوظائف',
-              mode: 'insensitive',
-            },
-          },
-          { name_ar: { equals: 'طلبات التوظيف', mode: 'insensitive' } },
-        ],
       });
       expect(result.data.items).toEqual([
         {
@@ -79,14 +67,11 @@ describe('PackagesService', () => {
       ]);
     });
 
-    it('excludes the application service by exact name so the application file remains visible', async () => {
+    it('includes every active package, including job application services', async () => {
       await service.findAllPublic(query());
 
       const { where } = prisma.packages.findMany.mock.calls[0][0];
-      expect(where.NOT[0].name_en).toEqual({
-        equals: 'Job Application Service',
-        mode: 'insensitive',
-      });
+      expect(where).toEqual({ is_active: true });
       expect(prisma.packages.count.mock.calls[0][0].where).toEqual(where);
     });
 
@@ -157,18 +142,6 @@ describe('PackagesService', () => {
       expect(prisma.packages.findFirst.mock.calls[0][0].where).toEqual({
         id: 9,
         is_active: true,
-        NOT: [
-          {
-            name_en: { equals: 'Job Application Service', mode: 'insensitive' },
-          },
-          {
-            name_ar: {
-              equals: 'خدمة التقديم على الوظائف',
-              mode: 'insensitive',
-            },
-          },
-          { name_ar: { equals: 'طلبات التوظيف', mode: 'insensitive' } },
-        ],
       });
     });
   });
