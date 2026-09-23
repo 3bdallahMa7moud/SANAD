@@ -111,6 +111,10 @@ if [ "$INSTALL_DEPENDENCIES" = "1" ]; then
   (cd "$FRONTEND_DIR" && npm ci --include=dev)
 fi
 
+# The API service runs as $API_USER. npm ci is run as root by this deployment
+# script, so hand the backend runtime dependencies back to the service user.
+chown -R "$API_USER:$API_GROUP" "$BACKEND_DIR/node_modules"
+
 echo "Building backend..."
 (cd "$BACKEND_DIR" && npm run build && NODE_ENV=production npm run preflight)
 chown -R "$API_USER:$API_GROUP" "$BACKEND_DIR/dist"
