@@ -36,7 +36,6 @@ function service(
     features,
     description: 'Support for your next job and professional profile.',
     deliveryDays: 5,
-    maxRevisions: id,
     sortOrder: id,
     images: [],
     offers: [],
@@ -112,7 +111,7 @@ describe('Package selection experience', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Showing 4 of 4');
   });
 
-  it('compares published scope and different revision allowances without inventing inclusions', () => {
+  it('compares published scope without inventing inclusions', () => {
     render(<PackageComparison packages={packages} />);
     const table = screen.getByRole('table');
     const row = within(table).getByRole('row', {
@@ -120,9 +119,6 @@ describe('Package selection experience', () => {
     });
     expect(within(row).getByText('Not listed')).toBeInTheDocument();
     expect(within(row).getByText('Included')).toBeInTheDocument();
-    expect(
-      within(table).getByRole('row', { name: /Revision rounds/ }),
-    ).toHaveTextContent('1');
     expect(
       screen.queryByRole('link', { name: 'Professional CV' }),
     ).not.toBeInTheDocument();
@@ -165,7 +161,6 @@ describe('Package selection experience', () => {
     ).toBeVisible();
     expect(screen.queryByText('Professional CV')).not.toBeInTheDocument();
     expect(screen.getByText('5 days estimated')).toBeVisible();
-    expect(screen.getByText('1 revision')).toBeVisible();
     expect(screen.getByText('4.8')).toBeVisible();
     expect(screen.getByText('45 confirmed buyers')).toBeVisible();
     expect(screen.getByText(/AED\s*250/)).toBeVisible();
@@ -182,6 +177,7 @@ describe('Package selection experience', () => {
           {
             id: 1,
             path: '/images/packages/professional-cv.webp',
+            url: '/images/packages/professional-cv.webp',
             altText: 'CV illustration',
             isPrimary: true,
             displayOrder: 0,

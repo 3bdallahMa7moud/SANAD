@@ -47,7 +47,6 @@ const packageItem: CareerPackage = {
   price: 400,
   features: [],
   deliveryDays: 3,
-  maxRevisions: 2,
   sortOrder: 1,
   images: [],
   offers: [],

@@ -19,8 +19,8 @@ export async function generateMetadata(): Promise<Metadata> {
       'الأسئلة الشائعة | سند للخدمات المهنية',
     ),
     description: _copy(
-      'Find answers about SANAD career services, delivery, revisions, privacy, and choosing the right package.',
-      'إجابات شاملة حول خدمات سند ومدة التسليم وسياسة التعديلات والخصوصية واختيار الباقة المناسبة.',
+      'Find answers about SANAD career services, delivery, privacy, and choosing the right package.',
+      'إجابات شاملة حول خدمات سند ومدة التسليم والخصوصية واختيار الباقة المناسبة.',
     ),
     alternates: { canonical: '/faq' },
   });
@@ -59,7 +59,7 @@ export default function FaqPage() {
             </h1>
             <p className="mt-6 max-w-[42rem] text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8">
               {_copy(
-                'Find clear information about SANAD services, the order process, delivery, revisions, and what to expect from your documents.',
+                'Find clear information about SANAD services, the order process, delivery, and what to expect from your documents.',
               )}
             </p>
           </div>

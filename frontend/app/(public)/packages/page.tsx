@@ -104,7 +104,7 @@ export default async function PackagesPage() {
             {[
               [
                 'Choose your scope',
-                'Review the deliverables, total and revision allowance.',
+                'Review the deliverables, total, and delivery timeline.',
               ],
               [
                 'Share your background',

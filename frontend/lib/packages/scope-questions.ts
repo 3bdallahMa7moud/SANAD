@@ -7,7 +7,6 @@ const questions: Record<string, string[]> = {
   ],
   'professional package': [
     'Is the cover letter tailored to one vacancy or provided as a reusable template?',
-    'How does the included revision round apply across the CV and cover letter?',
   ],
   'full package': [
     'How does the scope differ from ordering CV + Cover Letter and LinkedIn separately?',

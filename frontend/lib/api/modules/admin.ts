@@ -28,7 +28,6 @@ export interface AdminPackage {
   is_active: boolean | null;
   sort_order: number | null;
   delivery_days: number;
-  max_revisions: number | null;
   updated_at: string | null;
   package_images: AdminPackageImage[];
   _count?: { orders: number };

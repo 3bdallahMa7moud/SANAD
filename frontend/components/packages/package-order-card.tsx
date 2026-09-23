@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import {
   getBestPackageOffer,
   getPackageCurrentPrice,
+  formatDeliveryEstimate,
 } from '@/lib/packages/presentation';
 import type { CareerPackage, CheckoutPricing } from '@/types/domain';
 import { formatMoney } from '@/lib/orders/presentation';
@@ -123,11 +124,7 @@ export function PackageOrderCard({
           </>
         ) : (
           <>
-            <PackagePrice
-              packageItem={packageItem}
-              size="hero"
-              rates={rates}
-            />
+            <PackagePrice packageItem={packageItem} size="hero" rates={rates} />
             <p className="mt-3 text-xs leading-5 text-muted-foreground">
               {_copy(
                 'The final tax and total are confirmed when your order is started.',
@@ -177,7 +174,7 @@ export function PackageOrderCard({
               {_copy('Delivery')}
             </dt>
             <dd className="mt-2 text-sm font-semibold text-primary">
-              {_copy(packageItem.deliveryDays)} {_copy('days estimated')}
+              {formatDeliveryEstimate(packageItem.deliveryDays, _copy.locale)}
             </dd>
           </div>
         </dl>

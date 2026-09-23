@@ -1,10 +1,5 @@
 import { useCopy } from '@/lib/i18n/use-copy';
-import {
-  ArrowRight,
-  Clock3,
-  FileText,
-  Sparkles,
-} from 'lucide-react';
+import { ArrowRight, Clock3, FileText, Sparkles } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -27,6 +22,7 @@ import {
   getPackagePrimaryImage,
   getPackageShortDescription,
   getPackageShortTitle,
+  formatDeliveryEstimate,
 } from '@/lib/packages/presentation';
 import type { CareerPackage } from '@/types/domain';
 
@@ -53,7 +49,7 @@ export function PackageCard({
   const shortDescription = getPackageShortDescription(packageItem);
   const shortDescriptionAr =
     packageItem.descriptionAr?.replace(/\s+/g, ' ').trim() ||
-    'راجع المخرجات المشمولة وموعد التسليم والتعديلات.';
+    'راجع المخرجات المشمولة وموعد التسليم.';
   const companionOffer = [...(packageItem.companionOffers ?? [])].sort(
     (first, second) => second.discountPercentage - first.discountPercentage,
   )[0];
@@ -65,7 +61,7 @@ export function PackageCard({
         aria-label={_copy(`View ${packageItem.name}`)}
         className="relative block aspect-[16/10] overflow-hidden border-b border-border/70 bg-surface-muted"
       >
-        {primaryImage ? (
+        {primaryImage?.url ? (
           <Image
             alt={_copy(
               primaryImage.altText ??
@@ -73,8 +69,9 @@ export function PackageCard({
             )}
             className="object-cover transition-transform duration-500 ease-[var(--ease-standard)] motion-safe:group-hover:scale-[1.04] motion-reduce:transition-none"
             fill
+            quality={85}
             sizes="(max-width: 767px) calc(100vw - 2rem), (max-width: 1023px) 50vw, 33vw"
-            src={primaryImage.url ?? primaryImage.path}
+            src={primaryImage.url}
           />
         ) : (
           <div
@@ -134,7 +131,7 @@ export function PackageCard({
         <div className="mb-5 flex flex-wrap gap-3 text-sm text-muted-foreground">
           <span className="inline-flex items-center gap-1.5">
             <Clock3 className="size-4" aria-hidden="true" />
-            {_copy(packageItem.deliveryDays)} {_copy('days estimated')}
+            {formatDeliveryEstimate(packageItem.deliveryDays, _copy.locale)}
           </span>
         </div>
         <div className="mt-auto">

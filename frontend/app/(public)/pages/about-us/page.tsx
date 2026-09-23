@@ -132,7 +132,7 @@ export default async function AboutUsPage() {
                 </p>
                 <p>
                   {_copy(
-                    'The process is straightforward: choose a service, share your career context through the official WhatsApp channel, and receive the agreed deliverables within the timeline listed for your package. Revision rounds follow the allowance published for the selected service.',
+                    'The process is straightforward: choose a service, share your career context through the official WhatsApp channel, and receive the agreed deliverables within the timeline listed for your package.',
                   )}
                 </p>
               </>
@@ -164,15 +164,6 @@ export default async function AboutUsPage() {
                 </dt>
                 <dd className="mt-1 text-muted-foreground">
                   {_copy('According to the timeline listed in each package')}
-                </dd>
-              </div>
-              <Separator />
-              <div>
-                <dt className="font-semibold text-primary">
-                  {_copy('Revisions')}
-                </dt>
-                <dd className="mt-1 text-muted-foreground">
-                  {_copy('According to the allowance listed in each package')}
                 </dd>
               </div>
             </dl>

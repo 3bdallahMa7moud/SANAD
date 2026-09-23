@@ -69,11 +69,6 @@ const faqItems: readonly FaqItem[] = [
       'After your order is confirmed, the SANAD team coordinates document exchange with you through the official WhatsApp number. Final files are delivered through the same agreed channel and are not currently stored in the order dashboard.',
   },
   {
-    question: 'How do revisions work?',
-    answer:
-      'Each service includes a set number of revision rounds. Revisions cover refinements within the agreed scope of the service — they are not open-ended rewrites. You review the completed work first, then request adjustments within the included allowance.',
-  },
-  {
     question: 'Are the services focused on the UAE and Gulf job market?',
     answer:
       'Yes. SANAD\u2019s services are shaped with the UAE and broader Gulf market in mind, including the expectations of regional employers, industry norms, and the way professional documents are evaluated in this context.',

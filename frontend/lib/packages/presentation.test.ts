@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { CareerPackage } from '@/types/domain';
-import { getPackageCurrentPrice } from './presentation';
+import { formatDeliveryEstimate, getPackageCurrentPrice } from './presentation';
 
 function packageWithLimitedOffer(price: number): CareerPackage {
   return {
@@ -10,7 +10,6 @@ function packageWithLimitedOffer(price: number): CareerPackage {
     price,
     features: [],
     deliveryDays: 1,
-    maxRevisions: 0,
     sortOrder: 1,
     images: [],
     offers: [
@@ -36,5 +35,14 @@ describe('limited package pricing', () => {
     expect(getPackageCurrentPrice(packageWithLimitedOffer(originalPrice))).toBe(
       expectedPrice,
     );
+  });
+});
+
+describe('delivery estimate copy', () => {
+  it('uses singular and plural day labels in English and Arabic', () => {
+    expect(formatDeliveryEstimate(1, 'en')).toBe('1 day estimated');
+    expect(formatDeliveryEstimate(3, 'en')).toBe('3 days estimated');
+    expect(formatDeliveryEstimate(1, 'ar')).toBe('يوم تقريبًا');
+    expect(formatDeliveryEstimate(3, 'ar')).toBe('3 أيام تقريبًا');
   });
 });

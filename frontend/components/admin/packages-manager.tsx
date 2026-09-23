@@ -27,6 +27,8 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { adminApi, adminKeys, ApiError, type AdminPackage } from '@/lib/api';
+import { resolveMediaUrl } from '@/lib/media/resolve-media-url';
+import { formatDeliveryEstimate } from '@/lib/packages/presentation';
 
 import {
   AdminPageHeader,
@@ -45,7 +47,6 @@ const schema = z.object({
   features_en: z.string(),
   features_ar: z.string(),
   deliveryDays: z.coerce.number().int().min(1),
-  revisions: z.coerce.number().int().min(0),
   sortOrder: z.coerce.number().int(),
   active: z.boolean(),
 });
@@ -60,7 +61,6 @@ const defaults: Values = {
   features_en: '',
   features_ar: '',
   deliveryDays: 7,
-  revisions: 1,
   sortOrder: 0,
   active: true,
 };
@@ -111,7 +111,6 @@ export function PackagesManager() {
         features_en: (editing.features_en ?? []).join('\n'),
         features_ar: (editing.features_ar ?? []).join('\n'),
         deliveryDays: editing.delivery_days,
-        revisions: editing.max_revisions ?? 0,
         sortOrder: editing.sort_order ?? 0,
         active: editing.is_active !== false,
       });
@@ -135,7 +134,6 @@ export function PackagesManager() {
           .map((v) => v.trim())
           .filter(Boolean),
         delivery_days: values.deliveryDays,
-        max_revisions: values.revisions,
         sort_order: values.sortOrder,
         is_active: values.active,
       };
@@ -278,7 +276,6 @@ export function PackagesManager() {
                 <th className="px-4 py-3">{_copy('Price')}</th>
                 <th className="px-4 py-3">{_copy('Status')}</th>
                 <th className="px-4 py-3">{_copy('Delivery')}</th>
-                <th className="px-4 py-3">{_copy('Revisions')}</th>
                 <th className="px-4 py-3">{_copy('Sort')}</th>
                 <th className="px-4 py-3">{_copy('Updated')}</th>
                 <th className="px-4 py-3">{_copy('Actions')}</th>
@@ -289,10 +286,13 @@ export function PackagesManager() {
                 const image =
                   pkg.package_images.find((item) => item.is_primary) ??
                   pkg.package_images[0];
+                const imageSrc = resolveMediaUrl(
+                  image?.image_url ?? image?.url,
+                );
                 return (
                   <tr key={pkg.id}>
                     <td className="px-4 py-3">
-                      {image ? (
+                      {imageSrc && image ? (
                         <Image
                           alt={_copy(
                             image.alt_text ?? pkg.name_en,
@@ -300,7 +300,7 @@ export function PackagesManager() {
                           )}
                           className="size-12 rounded-md object-cover"
                           height={48}
-                          src={image.image_url ?? image.url ?? image.image_path}
+                          src={imageSrc}
                           unoptimized
                           width={48}
                         />
@@ -325,10 +325,11 @@ export function PackagesManager() {
                       {_copy(pkg.is_active ? 'Active' : 'Inactive')}
                     </td>
                     <td className="px-4 py-3">
-                      {_copy(pkg.delivery_days)} {_copy('days')}
-                    </td>
-                    <td className="px-4 py-3">
-                      {_copy(pkg.max_revisions ?? 0)}
+                      {formatDeliveryEstimate(
+                        pkg.delivery_days,
+                        _copy.locale,
+                        false,
+                      )}
                     </td>
                     <td className="px-4 py-3">{_copy(pkg.sort_order ?? 0)}</td>
                     <td className="px-4 py-3 text-muted-foreground">
@@ -435,10 +436,6 @@ export function PackagesManager() {
               <Input type="number" {...register('deliveryDays')} />
             </label>
             <label className="grid gap-1 text-sm font-semibold">
-              {_copy('Max Revisions')}
-              <Input type="number" {...register('revisions')} />
-            </label>
-            <label className="grid gap-1 text-sm font-semibold">
               {_copy('Sort Order')}
               <Input type="number" {...register('sortOrder')} />
             </label>
@@ -486,89 +483,100 @@ export function PackagesManager() {
                 />
               ) : null}
               <div className="mt-4 grid gap-3">
-                {editing.package_images.map((image) => (
-                  <div
-                    className="grid gap-3 border border-border p-3 sm:grid-cols-[4rem_minmax(0,1fr)_auto] sm:items-center"
-                    key={image.id}
-                  >
-                    <Image
-                      alt={_copy(
-                        image.alt_text ?? editing.name_en,
-                        editing.name_ar,
+                {editing.package_images.map((image) => {
+                  const imageSrc = resolveMediaUrl(
+                    image.image_url ?? image.url,
+                  );
+                  return (
+                    <div
+                      className="grid gap-3 border border-border p-3 sm:grid-cols-[4rem_minmax(0,1fr)_auto] sm:items-center"
+                      key={image.id}
+                    >
+                      {imageSrc ? (
+                        <Image
+                          alt={_copy(
+                            image.alt_text ?? editing.name_en,
+                            editing.name_ar,
+                          )}
+                          className="size-16 object-cover"
+                          height={64}
+                          src={imageSrc}
+                          unoptimized
+                          width={64}
+                        />
+                      ) : (
+                        <span className="grid size-16 place-items-center bg-surface-muted text-xs text-muted-foreground">
+                          {_copy('Image unavailable')}
+                        </span>
                       )}
-                      className="size-16 object-cover"
-                      height={64}
-                      src={image.image_url ?? image.url ?? image.image_path}
-                      unoptimized
-                      width={64}
-                    />
-                    <Input
-                      aria-label={_copy('Image alt text')}
-                      defaultValue={image.alt_text ?? ''}
-                      onBlur={(event) => {
-                        if (event.target.value !== (image.alt_text ?? ''))
-                          imageMutation.mutate({
-                            imageId: image.id,
-                            input: { alt_text: event.target.value },
-                          });
-                      }}
-                    />
-                    <div className="flex gap-1">
-                      <Button
-                        aria-label={_copy('Move image up')}
-                        onClick={() =>
-                          imageMutation.mutate({
-                            imageId: image.id,
-                            input: {
-                              display_order: Math.max(
-                                0,
-                                (image.display_order ?? 0) - 1,
-                              ),
-                            },
-                          })
-                        }
-                        size="icon"
-                        variant="ghost"
-                      >
-                        <ArrowUp className="size-4" />
-                      </Button>
-                      <Button
-                        aria-label={_copy('Move image down')}
-                        onClick={() =>
-                          imageMutation.mutate({
-                            imageId: image.id,
-                            input: {
-                              display_order: (image.display_order ?? 0) + 1,
-                            },
-                          })
-                        }
-                        size="icon"
-                        variant="ghost"
-                      >
-                        <ArrowDown className="size-4" />
-                      </Button>
-                      <Button
-                        onClick={() =>
-                          imageMutation.mutate({
-                            imageId: image.id,
-                            input: { is_primary: true },
-                          })
-                        }
-                        size="sm"
-                        variant="outline"
-                      >
-                        {_copy(image.is_primary ? 'Primary' : 'Set primary')}
-                      </Button>
-                      <Button
-                        onClick={() => setImageToDelete(image.id)}
-                        size="sm"
-                        variant="destructive"
-                      >
-                        {_copy('Delete')}
-                      </Button>
+                      <Input
+                        aria-label={_copy('Image alt text')}
+                        defaultValue={image.alt_text ?? ''}
+                        onBlur={(event) => {
+                          if (event.target.value !== (image.alt_text ?? ''))
+                            imageMutation.mutate({
+                              imageId: image.id,
+                              input: { alt_text: event.target.value },
+                            });
+                        }}
+                      />
+                      <div className="flex gap-1">
+                        <Button
+                          aria-label={_copy('Move image up')}
+                          onClick={() =>
+                            imageMutation.mutate({
+                              imageId: image.id,
+                              input: {
+                                display_order: Math.max(
+                                  0,
+                                  (image.display_order ?? 0) - 1,
+                                ),
+                              },
+                            })
+                          }
+                          size="icon"
+                          variant="ghost"
+                        >
+                          <ArrowUp className="size-4" />
+                        </Button>
+                        <Button
+                          aria-label={_copy('Move image down')}
+                          onClick={() =>
+                            imageMutation.mutate({
+                              imageId: image.id,
+                              input: {
+                                display_order: (image.display_order ?? 0) + 1,
+                              },
+                            })
+                          }
+                          size="icon"
+                          variant="ghost"
+                        >
+                          <ArrowDown className="size-4" />
+                        </Button>
+                        <Button
+                          onClick={() =>
+                            imageMutation.mutate({
+                              imageId: image.id,
+                              input: { is_primary: true },
+                            })
+                          }
+                          size="sm"
+                          variant="outline"
+                        >
+                          {_copy(image.is_primary ? 'Primary' : 'Set primary')}
+                        </Button>
+                        <Button
+                          onClick={() => setImageToDelete(image.id)}
+                          size="sm"
+                          variant="destructive"
+                        >
+                          {_copy('Delete')}
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
               <div className="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
                 <Input

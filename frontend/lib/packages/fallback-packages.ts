@@ -19,7 +19,6 @@ export const FALLBACK_PACKAGES: CareerPackage[] = [
       'تحسين ملف لينكدإن — 150 درهم',
     ],
     deliveryDays: 10,
-    maxRevisions: 3,
     sortOrder: 1,
     images: [
       {
@@ -62,7 +61,6 @@ export const FALLBACK_PACKAGES: CareerPackage[] = [
       'تحسين ملف لينكدإن — 150 درهم',
     ],
     deliveryDays: 7,
-    maxRevisions: 2,
     sortOrder: 2,
     images: [
       {
@@ -103,7 +101,6 @@ export const FALLBACK_PACKAGES: CareerPackage[] = [
       'خطاب التقديم (العربية أو الإنجليزية) — 100 درهم',
     ],
     deliveryDays: 5,
-    maxRevisions: 1,
     sortOrder: 3,
     images: [
       {
@@ -140,7 +137,6 @@ export const FALLBACK_PACKAGES: CareerPackage[] = [
       'Clear experience and achievement positioning',
     ],
     deliveryDays: 5,
-    maxRevisions: 2,
     sortOrder: 4,
     images: [
       {
@@ -172,7 +168,6 @@ export const FALLBACK_PACKAGES: CareerPackage[] = [
       'Practical profile improvement guidance',
     ],
     deliveryDays: 4,
-    maxRevisions: 1,
     sortOrder: 5,
     images: [
       {

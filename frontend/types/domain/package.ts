@@ -35,7 +35,6 @@ export interface CareerPackage {
   price: number;
   features: string[];
   deliveryDays: number;
-  maxRevisions: number;
   sortOrder: number;
   images: PackageImage[];
   offers: PackageOffer[];

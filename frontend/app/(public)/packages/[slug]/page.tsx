@@ -60,6 +60,7 @@ import {
   getPackageIdFromSlug,
   getPackagePrimaryImage,
   getPackageSlug,
+  formatDeliveryEstimate,
 } from '@/lib/packages/presentation';
 import type { CareerPackage, CheckoutPricing } from '@/types/domain';
 
@@ -181,9 +182,7 @@ export async function generateMetadata({
   const packageHref = getPackageHref(packageItem);
   const canonicalUrl = toAbsoluteUrl(packageHref) ?? packageHref;
   const primaryImage = getPackagePrimaryImage(packageItem);
-  const imageUrl = primaryImage
-    ? toAbsoluteUrl(primaryImage.url ?? primaryImage.path)
-    : null;
+  const imageUrl = primaryImage?.url ? toAbsoluteUrl(primaryImage.url) : null;
 
   return await getLocalizedMetadata({
     title: `${localizedName} | ${_copy('SANAD Career Services', 'سند للخدمات المهنية')}`,
@@ -223,7 +222,10 @@ export default async function PackageDetailPage({
   }
 
   const [{ feedback, pricing, relatedPackages, contactNumber }, rates] =
-    await Promise.all([getOptionalPageData(packageItem), getSecondaryExchangeRates()]);
+    await Promise.all([
+      getOptionalPageData(packageItem),
+      getSecondaryExchangeRates(),
+    ]);
   const feedbackItems = feedback?.items ?? [];
   const feedbackRating = feedback?.summary.averageRating ?? 0;
   const content = getPackageDetailContent(packageItem);
@@ -247,8 +249,8 @@ export default async function PackageDetailPage({
     description:
       packageItem.description ??
       `Professional career support from SANAD: ${packageItem.name}.`,
-    image: primaryImage
-      ? (toAbsoluteUrl(primaryImage.url ?? primaryImage.path) ?? undefined)
+    image: primaryImage?.url
+      ? (toAbsoluteUrl(primaryImage.url) ?? undefined)
       : undefined,
     provider: {
       '@type': 'Organization',
@@ -411,8 +413,10 @@ export default async function PackageDetailPage({
                       {_copy('Delivery', 'التسليم')}
                     </dt>
                     <dd className="mt-1.5 font-semibold text-primary-foreground">
-                      {_copy(packageItem.deliveryDays)}{' '}
-                      {_copy('days estimated', 'أيام تقريبًا')}
+                      {formatDeliveryEstimate(
+                        packageItem.deliveryDays,
+                        _copy.locale,
+                      )}
                     </dd>
                   </div>
                 </dl>
@@ -715,7 +719,7 @@ export default async function PackageDetailPage({
                 </ul>
                 <p className="mt-4 text-sm leading-6 text-muted-foreground">
                   {_copy(
-                    'Confirm whether the delivery estimate uses working or calendar days, when the timeline starts, and the deadline for requesting revisions.',
+                    'Confirm whether the delivery estimate uses working or calendar days and when the timeline starts.',
                   )}
                 </p>
                 {contactHref ? (
@@ -908,7 +912,7 @@ export default async function PackageDetailPage({
               </h2>
               <p className="mt-4 max-w-md text-sm leading-6 text-muted-foreground">
                 {_copy(
-                  'Clear answers about starting the service, revisions, and the outcome you can expect.',
+                  'Clear answers about starting the service and the outcome you can expect.',
                 )}
               </p>
             </div>

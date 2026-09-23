@@ -1,5 +1,6 @@
 'use client';
 import { useCopy } from '@/lib/i18n/use-copy';
+import { formatDeliveryEstimate } from '@/lib/packages/presentation';
 
 import {
   CheckCircle2,
@@ -855,7 +856,11 @@ export function CheckoutExperience({
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
             {_copy('Delivered in')}
-            {_copy(displayPricing.deliveryDays)} {_copy('days')}
+            {formatDeliveryEstimate(
+              displayPricing.deliveryDays,
+              _copy.locale,
+              false,
+            )}
           </p>
         </div>
         <div className="p-6">

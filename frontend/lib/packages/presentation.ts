@@ -49,6 +49,22 @@ export function formatPackagePrice(value: number): string {
   return PRICE_FORMATTER.format(value);
 }
 
+export function formatDeliveryEstimate(
+  days: number,
+  locale: string,
+  estimated = true,
+): string {
+  const formattedDays = new Intl.NumberFormat(locale).format(days);
+  if (locale === 'ar') {
+    const label =
+      days === 1 ? 'يوم' : days === 2 ? 'يومان' : `${formattedDays} أيام`;
+    return estimated ? `${label} تقريبًا` : label;
+  }
+
+  const label = `${formattedDays} ${days === 1 ? 'day' : 'days'}`;
+  return estimated ? `${label} estimated` : label;
+}
+
 export function getBestPackageOffer(
   packageItem: CareerPackage,
 ): PackageOffer | null {
@@ -83,6 +99,6 @@ export function getPackageShortTitle(packageItem: CareerPackage): string {
 export function getPackageShortDescription(packageItem: CareerPackage): string {
   return (
     packageItem.description?.replace(/\s+/g, ' ').trim() ||
-    'Review the included deliverables, delivery estimate and revisions.'
+    'Review the included deliverables and delivery estimate.'
   );
 }

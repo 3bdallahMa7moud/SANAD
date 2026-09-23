@@ -13,6 +13,7 @@ import {
   getPackagePrimaryImage,
   getPackageShortDescription,
   getPackageShortTitle,
+  formatDeliveryEstimate,
 } from '@/lib/packages/presentation';
 import type { CareerPackage } from '@/types/domain';
 
@@ -36,13 +37,14 @@ export function PackageRelatedCard({
       href={getPackageHref(packageItem)}
     >
       <div className="relative aspect-[16/9] overflow-hidden border-b border-border bg-surface-muted">
-        {image ? (
+        {image?.url ? (
           <Image
             alt={_copy(image.altText ?? `${packageItem.name} service preview`)}
             className="object-cover transition-transform duration-300 motion-safe:group-hover:scale-[1.015] motion-reduce:transition-none"
             fill
+            quality={85}
             sizes="(max-width: 767px) calc(100vw - 2rem), 33vw"
-            src={image.url ?? image.path}
+            src={image.url}
           />
         ) : (
           <div className="grid h-full place-items-center text-primary">
@@ -60,7 +62,11 @@ export function PackageRelatedCard({
         <div className="flex items-center justify-between gap-4">
           <span className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase">
             <Clock3 aria-hidden="true" className="size-3.5 text-accent" />
-            {_copy(packageItem.deliveryDays)} {_copy('days')}
+            {formatDeliveryEstimate(
+              packageItem.deliveryDays,
+              _copy.locale,
+              false,
+            )}
           </span>
           <ArrowRight
             aria-hidden="true"

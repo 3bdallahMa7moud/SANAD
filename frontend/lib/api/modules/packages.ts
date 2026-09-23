@@ -7,7 +7,7 @@ import type {
   PackageImage,
   PackageOffer,
 } from '@/types/domain';
-import { getApiBaseUrl } from '@/lib/env/public-env';
+import { resolveMediaUrl } from '@/lib/media/resolve-media-url';
 
 import { ApiError } from '../errors';
 import { api, type ApiRequestOptions } from '../request';
@@ -57,7 +57,6 @@ const packagePayloadSchema = z.object({
   price: decimalSchema,
   features_en: z.array(z.string().min(1)).nullish(),
   delivery_days: z.number().int().positive(),
-  max_revisions: z.number().int().nonnegative().nullish(),
   sort_order: z.number().int().nullish(),
   buyer_count: z.number().int().nonnegative().nullish(),
   rating_average: decimalSchema.pipe(z.number().max(5)).nullish(),
@@ -88,23 +87,11 @@ function toPackageImage(payload: PackageImagePayload): PackageImage {
   return {
     id: payload.id,
     path: payload.image_path,
-    url: imageUrl === null ? null : resolveImageUrl(imageUrl),
+    url: resolveMediaUrl(imageUrl),
     altText: payload.alt_text ?? null,
     isPrimary: payload.is_primary === true,
     displayOrder: payload.display_order ?? 0,
   };
-}
-
-function resolveImageUrl(value: string): string {
-  if (/^https?:\/\//i.test(value) || value.startsWith('/images/')) {
-    return value;
-  }
-
-  if (value.startsWith('/')) {
-    return new URL(value, getApiBaseUrl()).toString();
-  }
-
-  return value;
 }
 
 function toPackageOffer(payload: PackageOfferPayload): PackageOffer {
@@ -140,7 +127,6 @@ function toCareerPackage(payload: PackagePayload): CareerPackage {
     price: payload.price,
     features: payload.features_en ?? [],
     deliveryDays: payload.delivery_days,
-    maxRevisions: payload.max_revisions ?? 0,
     sortOrder: payload.sort_order ?? 0,
     images: (payload.package_images ?? []).map(toPackageImage),
     offers: (payload.offers ?? []).map(toPackageOffer),

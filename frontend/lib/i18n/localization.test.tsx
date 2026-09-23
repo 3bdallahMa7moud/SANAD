@@ -56,7 +56,6 @@ describe('i18n copy and next-intl context integration', () => {
     expect(translateCopy('Enlarge Custom Service illustration', 'ar')).toBe(
       'تكبير صورة Custom Service',
     );
-    expect(translateCopy('3 revisions', 'ar')).toBe('3 تعديلات');
   });
 
   it('uses explicit arabicValue override when provided', () => {

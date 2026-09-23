@@ -76,14 +76,6 @@ const sections = [
     ],
   },
   {
-    id: 'revisions',
-    title: 'Revisions',
-    content: [
-      'Each service includes the number of revision rounds stated in the selected package. Revisions cover refinements within the agreed scope and must be requested through the official WhatsApp conversation for the order.',
-      'Requests that represent a substantial career pivot—targeting an entirely different industry or seniority level—may be treated as a new order or incur an adaptation fee, which will be communicated and agreed upon before any additional work begins.',
-    ],
-  },
-  {
     id: 'intellectual-property',
     title: 'Intellectual Property',
     content: [

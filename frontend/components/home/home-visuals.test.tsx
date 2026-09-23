@@ -48,7 +48,6 @@ function packageItem(name: string): CareerPackage {
     price: 250,
     features: [],
     deliveryDays: 5,
-    maxRevisions: 1,
     sortOrder: 1,
     images: [],
     offers: [],
@@ -104,7 +103,9 @@ describe('home visual sections', () => {
   it('applies the direction-aware hero media offset', () => {
     renderWithEnglish(<HeroSection />);
 
-    expect(document.querySelector('.sanad-hero-media-offset')).toBeInTheDocument();
+    expect(
+      document.querySelector('.sanad-hero-media-offset'),
+    ).toBeInTheDocument();
   });
 
   it.each([

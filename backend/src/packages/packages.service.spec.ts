@@ -210,7 +210,6 @@ describe('PackagesService', () => {
           is_active: true,
           sort_order: 0,
           delivery_days: 7,
-          max_revisions: 1,
         }),
       );
     });
@@ -234,6 +233,20 @@ describe('PackagesService', () => {
 
       expect(prisma.packages.update.mock.calls[0][0].data).toEqual({
         price: 100,
+      });
+    });
+  });
+
+  describe('updateStatus', () => {
+    it('persists a deactivated package so public queries no longer include it', async () => {
+      prisma.packages.findUnique.mockResolvedValue({ id: 9 });
+      prisma.packages.update.mockResolvedValue({ id: 9, is_active: false });
+
+      await service.updateStatus(9, false);
+
+      expect(prisma.packages.update).toHaveBeenCalledWith({
+        where: { id: 9 },
+        data: { is_active: false },
       });
     });
   });

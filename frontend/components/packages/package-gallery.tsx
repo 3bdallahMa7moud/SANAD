@@ -32,13 +32,15 @@ export function PackageGallery({
 
   const orderedImages = useMemo(
     () =>
-      [...images].sort((first, second) => {
-        if (first.isPrimary !== second.isPrimary) {
-          return first.isPrimary ? -1 : 1;
-        }
+      images
+        .filter((image) => Boolean(image.url))
+        .sort((first, second) => {
+          if (first.isPrimary !== second.isPrimary) {
+            return first.isPrimary ? -1 : 1;
+          }
 
-        return first.displayOrder - second.displayOrder;
-      }),
+          return first.displayOrder - second.displayOrder;
+        }),
     [images],
   );
   const [selectedId, setSelectedId] = useState<number | null>(
@@ -111,8 +113,9 @@ export function PackageGallery({
               )}
               fill
               priority
+              quality={85}
               sizes="(max-width: 1023px) calc(100vw - 2rem), 46vw"
-              src={selectedImage.url ?? selectedImage.path}
+              src={selectedImage.url!}
             />
             <span
               aria-hidden="true"
@@ -146,12 +149,13 @@ export function PackageGallery({
           </DialogDescription>
           <div className="relative h-[65svh] min-h-48 bg-surface-muted">
             <Image
-              src={selectedImage.url ?? selectedImage.path}
+              src={selectedImage.url!}
               alt={_copy(
                 selectedImage.altText ?? `${packageName} illustration`,
                 selectedImage.altText ?? `صورة توضيحية لخدمة ${packageName}`,
               )}
               fill
+              quality={85}
               sizes="(max-width: 1023px) 90vw, 960px"
               className="object-contain"
             />
@@ -189,8 +193,9 @@ export function PackageGallery({
                   alt={_copy('')}
                   className="object-cover"
                   fill
+                  quality={85}
                   sizes="9rem"
-                  src={image.url ?? image.path}
+                  src={image.url!}
                 />
               </button>
             );

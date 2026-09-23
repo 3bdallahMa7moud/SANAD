@@ -274,7 +274,6 @@ export class PackagesService {
         is_active: dto.is_active ?? true,
         sort_order: dto.sort_order ?? 0,
         delivery_days: dto.delivery_days ?? 7,
-        max_revisions: dto.max_revisions ?? 1,
       },
       include: { package_images: true },
     });
@@ -301,9 +300,6 @@ export class PackagesService {
         ...(dto.sort_order !== undefined && { sort_order: dto.sort_order }),
         ...(dto.delivery_days !== undefined && {
           delivery_days: dto.delivery_days,
-        }),
-        ...(dto.max_revisions !== undefined && {
-          max_revisions: dto.max_revisions,
         }),
       },
       include: { package_images: true },

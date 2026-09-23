@@ -5,7 +5,9 @@ import { MulterFile } from '../common/interfaces';
 
 const MAX_INPUT_PIXELS = 40_000_000;
 const MAX_OUTPUT_DIMENSION = 2400;
-const WEBP_QUALITY = 82;
+// Package and site images are marketing assets. Keep enough detail for large
+// service previews while still delivering a substantially smaller WebP file.
+const WEBP_QUALITY = 86;
 
 export interface OptimizedWebpImage {
   buffer: Buffer;
@@ -34,7 +36,7 @@ export class ImageOptimizationService {
         })
         .webp({
           quality: WEBP_QUALITY,
-          effort: 5,
+          effort: 6,
           smartSubsample: true,
         })
         .toBuffer({ resolveWithObject: true });

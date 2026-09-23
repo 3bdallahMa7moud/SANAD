@@ -5,6 +5,7 @@ import { getServiceCategory } from '@/lib/packages/categories';
 import {
   getPackageHref,
   getPackageCurrentPrice,
+  formatDeliveryEstimate,
 } from '@/lib/packages/presentation';
 import type { CareerPackage } from '@/types/domain';
 import { Button } from '@/components/ui/button';
@@ -36,9 +37,7 @@ export function PackageComparison({
           {_copy('Compare complete packages')}
         </h2>
         <p className="mt-3 max-w-2xl text-muted-foreground">
-          {_copy(
-            'Choose by what is included and the delivery estimate.',
-          )}
+          {_copy('Choose by what is included and the delivery estimate.')}
         </p>
         <p id="comparison-help" className="mt-5 text-sm text-muted-foreground">
           {_copy(
@@ -54,9 +53,7 @@ export function PackageComparison({
         >
           <table className="w-full min-w-[48rem] table-fixed text-sm">
             <caption className="sr-only">
-              {_copy(
-                'Published deliverables and delivery estimates',
-              )}
+              {_copy('Published deliverables and delivery estimates')}
             </caption>
             <colgroup>
               <col className="w-2/5" />
@@ -95,7 +92,10 @@ export function PackageComparison({
             <tbody>
               {features.map((feature) => (
                 <tr key={feature} className="border-b border-border">
-                  <th scope="row" className="p-4 text-start align-middle font-medium">
+                  <th
+                    scope="row"
+                    className="p-4 text-start align-middle font-medium"
+                  >
                     {_copy(feature)}
                   </th>
                   {bundles.map((item) => (
@@ -122,17 +122,27 @@ export function PackageComparison({
                 </tr>
               ))}
               <tr className="border-b border-border">
-                <th scope="row" className="p-4 text-start align-middle font-medium">
+                <th
+                  scope="row"
+                  className="p-4 text-start align-middle font-medium"
+                >
                   {_copy('Estimated delivery')}
                 </th>
                 {bundles.map((item) => (
                   <td key={item.id} className="p-4 text-center align-middle">
-                    {_copy(item.deliveryDays)} {_copy('days')}
+                    {formatDeliveryEstimate(
+                      item.deliveryDays,
+                      _copy.locale,
+                      false,
+                    )}
                   </td>
                 ))}
               </tr>
               <tr>
-                <th scope="row" className="p-4 text-start align-middle font-medium">
+                <th
+                  scope="row"
+                  className="p-4 text-start align-middle font-medium"
+                >
                   {_copy('Explore the scope')}
                 </th>
                 {bundles.map((item) => (

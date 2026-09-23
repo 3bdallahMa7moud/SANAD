@@ -30,12 +30,6 @@ export class CreatePackageDto {
   @Min(1)
   @Type(() => Number)
   delivery_days?: number;
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  @Type(() => Number)
-  max_revisions?: number;
 }
 
 export class UpdatePackageDto {
@@ -63,12 +57,6 @@ export class UpdatePackageDto {
   @Min(1)
   @Type(() => Number)
   delivery_days?: number;
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  @Type(() => Number)
-  max_revisions?: number;
 }
 
 export class UpdatePackageStatusDto {

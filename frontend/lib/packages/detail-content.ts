@@ -46,7 +46,7 @@ const PACKAGE_CONTENT: Record<string, PackageSpecificContent> = {
       {
         title: 'Review and final delivery',
         description:
-          'You review the completed work and use the included revision rounds to refine the agreed scope.',
+          'You review the completed work and confirm that the agreed scope has been delivered.',
       },
     ],
   },
@@ -73,7 +73,7 @@ const PACKAGE_CONTENT: Record<string, PackageSpecificContent> = {
       {
         title: 'Review and delivery',
         description:
-          'You review the work and request refinements within the included revision allowance.',
+          'You review the work and confirm that the agreed scope has been delivered.',
       },
     ],
   },
@@ -100,7 +100,7 @@ const PACKAGE_CONTENT: Record<string, PackageSpecificContent> = {
       {
         title: 'Final review',
         description:
-          'You review the paired documents and use the included revision to refine the agreed content.',
+          'You review the paired documents and confirm that the agreed content has been delivered.',
       },
     ],
   },
@@ -125,9 +125,9 @@ const PACKAGE_CONTENT: Record<string, PackageSpecificContent> = {
           'Your experience is rewritten and organized for clarity, relevance, and easier scanning.',
       },
       {
-        title: 'Revision and delivery',
+        title: 'Review and delivery',
         description:
-          'You review the completed CV and request refinements within the included revision rounds.',
+          'You review the completed CV and confirm that the agreed scope has been delivered.',
       },
     ],
   },
@@ -170,21 +170,12 @@ PACKAGE_CONTENT['career excellence package'] = PACKAGE_CONTENT['full package'];
 PACKAGE_CONTENT['professional distinction package'] =
   PACKAGE_CONTENT['professional package'];
 
-function getCommonFaqs(packageItem: CareerPackage): PackageFaqItem[] {
-  const revisionText =
-    packageItem.maxRevisions === 1
-      ? 'one revision round'
-      : `${packageItem.maxRevisions} revision rounds`;
-
+function getCommonFaqs(): PackageFaqItem[] {
   return [
     {
       question: 'What do you need from me to begin?',
       answer:
         'Start with the preparation list on this page. SANAD will confirm any additional information required for your specific background and target role before work begins.',
-    },
-    {
-      question: 'How do the included revisions work?',
-      answer: `This service includes ${revisionText}. Revisions refine the agreed service scope and are coordinated after you review the first completed version.`,
     },
     {
       question: 'Does this service guarantee interviews or employment?',
@@ -202,7 +193,7 @@ export function getPackageDetailContent(
   if (specific) {
     return {
       ...specific,
-      faqs: [...(specific.faqs ?? []), ...getCommonFaqs(packageItem)],
+      faqs: [...(specific.faqs ?? []), ...getCommonFaqs()],
     };
   }
 
@@ -229,9 +220,9 @@ export function getPackageDetailContent(
       {
         title: 'Review and completion',
         description:
-          'You review the work and request refinements within the included revision allowance.',
+          'You review the work and confirm that the agreed scope has been delivered.',
       },
     ],
-    faqs: getCommonFaqs(packageItem),
+    faqs: getCommonFaqs(),
   };
 }
