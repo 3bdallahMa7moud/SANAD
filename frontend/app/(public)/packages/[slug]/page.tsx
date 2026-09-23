@@ -10,7 +10,6 @@ import {
   Clock3,
   ListChecks,
   MessageCircle,
-  RefreshCcw,
   ShieldCheck,
   Target,
 } from 'lucide-react';
@@ -176,8 +175,8 @@ export async function generateMetadata({
   const description =
     _copy(packageItem.description, packageItem.descriptionAr) ??
     _copy(
-      `Review the scope, pricing, delivery estimate, and included revisions for ${packageItem.name}.`,
-      `تعرف على نطاق العمل والأسعار والمدة التقديرية والتعديلات المشمولة في ${localizedName}.`,
+      `Review the scope, pricing, and delivery estimate for ${packageItem.name}.`,
+      `تعرف على نطاق العمل والأسعار والمدة التقديرية في ${localizedName}.`,
     );
   const packageHref = getPackageHref(packageItem);
   const canonicalUrl = toAbsoluteUrl(packageHref) ?? packageHref;
@@ -231,12 +230,9 @@ export default async function PackageDetailPage({
   const scopeQuestions = getScopeQuestions(packageItem);
   const contactHref = whatsappHref(
     contactNumber,
-    `Hello, I would like to confirm the scope, delivery timing and revisions for ${packageItem.name} before ordering.`,
+    `Hello, I would like to confirm the scope and delivery timing for ${packageItem.name} before ordering.`,
   );
   const bestOffer = getBestPackageOffer(packageItem);
-  const revisionLabel = `${packageItem.maxRevisions} ${
-    packageItem.maxRevisions === 1 ? 'revision' : 'revisions'
-  }`;
   const displayPrice = getOrderDisplayPrice(packageItem, pricing, _copy.locale);
   const hasRating =
     packageItem.ratingAverage !== null && packageItem.ratingCount > 0;
@@ -262,9 +258,9 @@ export default async function PackageDetailPage({
       '@type': 'Offer',
       url: canonicalUrl,
       priceCurrency: pricing?.currency ?? 'AED',
-      price: (
-        pricing?.finalAmount ?? getPackageCurrentPrice(packageItem)
-      ).toFixed(2),
+      price: Math.round(
+        pricing?.finalAmount ?? getPackageCurrentPrice(packageItem),
+      ),
       availability: 'https://schema.org/InStock',
     },
   };
@@ -417,18 +413,6 @@ export default async function PackageDetailPage({
                     <dd className="mt-1.5 font-semibold text-primary-foreground">
                       {_copy(packageItem.deliveryDays)}{' '}
                       {_copy('days estimated', 'أيام تقريبًا')}
-                    </dd>
-                  </div>
-                  <div className="border-s border-primary-foreground/15 p-4 sm:p-4.5">
-                    <dt className="flex items-center gap-2 text-xs font-semibold tracking-[0.08em] text-primary-foreground/65 uppercase">
-                      <RefreshCcw
-                        aria-hidden="true"
-                        className="size-4 text-accent"
-                      />
-                      {_copy('Revisions', 'التعديلات')}
-                    </dt>
-                    <dd className="mt-1.5 font-semibold text-primary-foreground">
-                      {_copy(revisionLabel)}
                     </dd>
                   </div>
                 </dl>

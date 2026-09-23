@@ -4,7 +4,7 @@ const PRICE_FORMATTER = new Intl.NumberFormat('en-AE', {
   style: 'currency',
   currency: 'AED',
   minimumFractionDigits: 0,
-  maximumFractionDigits: 2,
+  maximumFractionDigits: 0,
 });
 
 function slugify(value: string): string {
@@ -65,7 +65,13 @@ export function getPackageCurrentPrice(packageItem: CareerPackage): number {
   const offer = getBestPackageOffer(packageItem);
   if (offer === null) return packageItem.price;
 
-  return packageItem.price * (1 - offer.discountPercentage / 100);
+  return (
+    offer.salePrice ?? packageItem.price * (1 - offer.discountPercentage / 100)
+  );
+}
+
+export function getPackageOriginalPrice(packageItem: CareerPackage): number {
+  return getBestPackageOffer(packageItem)?.originalPrice ?? packageItem.price;
 }
 
 // Use the published name and description, so admin edits stay consistent

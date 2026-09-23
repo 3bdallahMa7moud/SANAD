@@ -4,12 +4,15 @@ import {
   createContext,
   useCallback,
   useContext,
+  useLayoutEffect,
   useMemo,
+  useRef,
   useTransition,
   type ReactNode,
 } from 'react';
 import { NextIntlClientProvider, type AbstractIntlMessages } from 'next-intl';
-import { useRouter } from 'next/navigation';
+
+import { persistLocale } from '@/app/actions/locale';
 
 export type AppLocale = 'ar' | 'en';
 
@@ -32,25 +35,43 @@ export function LocaleProvider({
   initialLocale,
   messagesByLocale,
 }: LocaleProviderProps) {
-  const router = useRouter();
   const [isPending, beginLocaleTransition] = useTransition();
+  const localeRequestInFlight = useRef(false);
+
+  useLayoutEffect(() => {
+    document.documentElement.lang = initialLocale;
+    document.documentElement.dir = initialLocale === 'ar' ? 'rtl' : 'ltr';
+  }, [initialLocale]);
 
   const setLocale = useCallback(
     (nextLocale: AppLocale) => {
-      if (nextLocale === initialLocale || isPending) return;
+      if (
+        nextLocale === initialLocale ||
+        isPending ||
+        localeRequestInFlight.current
+      ) {
+        return;
+      }
 
-      const expires = new Date();
-      expires.setFullYear(expires.getFullYear() + 1);
-      document.cookie = `SANAD_LOCALE=${nextLocale}; path=/; expires=${expires.toUTCString()}; SameSite=Lax`;
+      localeRequestInFlight.current = true;
 
-      // Keep the current page intact while React fetches and atomically merges
-      // the Server Component payload for the new locale. This preserves client
-      // state and avoids a full document reload and a second hydration pass.
-      beginLocaleTransition(() => {
-        router.refresh();
+      // Do not update only the client locale while the old Server Component
+      // payload is still on screen. The action changes the cookie and Next.js
+      // returns the new route/layout tree together, so every section switches
+      // in one coherent commit.
+      beginLocaleTransition(async () => {
+        try {
+          await persistLocale(nextLocale);
+        } catch (error) {
+          // A stale Server Action reference after a deployment or a temporary
+          // network failure should leave the current page usable and retryable.
+          console.error('Unable to change the interface language.', error);
+        } finally {
+          localeRequestInFlight.current = false;
+        }
       });
     },
-    [beginLocaleTransition, initialLocale, isPending, router],
+    [beginLocaleTransition, initialLocale, isPending],
   );
 
   const value = useMemo(

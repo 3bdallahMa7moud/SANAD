@@ -19,7 +19,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return publicRoutes.map((path) => ({
     url: new URL(path, siteUrl).toString(),
     lastModified,
-    changeFrequency: path === '/' ? 'weekly' : 'monthly',
+    changeFrequency: path === '/' ? ('weekly' as const) : ('monthly' as const),
     priority: path === '/' ? 1 : path === '/packages' ? 0.9 : 0.6,
   }));
 }

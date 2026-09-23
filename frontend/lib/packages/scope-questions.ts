@@ -14,18 +14,12 @@ const questions: Record<string, string[]> = {
     'Do you receive LinkedIn text to add yourself, or is implementation included?',
   ],
   'premium full package': [
-    'What exactly is included in the Job Application File?',
-    'How does that file differ from the standalone Job Application Service?',
-    'Is submission assistance included, and if so, for how many opportunities?',
+    'Which documents and profile improvements are included?',
+    'Which languages and file formats are included?',
   ],
   'linkedin profile optimization': [
     'Which profile sections and languages are included?',
     'Will you receive ready-to-use text and guidance, or is implementation included?',
-  ],
-  'job application service': [
-    'Does SANAD submit applications, or provide preparation and a checklist only?',
-    'How many opportunities, which platforms and what service period are covered?',
-    'What application tracking or follow-up deliverable will you receive?',
   ],
 };
 

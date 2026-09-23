@@ -1,7 +1,7 @@
 'use client';
 
 import { useLocale } from 'next-intl';
-import { Globe } from 'lucide-react';
+import { Globe, LoaderCircle } from 'lucide-react';
 
 import { useLocaleSwitcher } from '@/components/providers/locale-provider';
 import { cn } from '@/lib/utils/cn';
@@ -11,7 +11,7 @@ interface LanguageSwitcherProps {
   variant?: 'icon' | 'text' | 'full';
 }
 
-/** Persists the locale and refreshes server-rendered copy in place. */
+/** Requests an atomic server-side locale change for the active route. */
 export function LanguageSwitcher({
   className,
   variant = 'full',
@@ -37,15 +37,22 @@ export function LanguageSwitcher({
           : variant === 'text'
             ? 'inline-flex min-h-9 items-center gap-1.5 rounded-md px-2'
             : 'inline-flex min-h-9 items-center gap-1.5 rounded-md px-2.5',
-        'text-sm font-semibold text-foreground transition-colors duration-200 hover:bg-surface-muted hover:text-primary',
+        'text-sm font-semibold text-foreground transition-colors duration-200 hover:bg-surface-muted hover:text-primary disabled:cursor-wait disabled:opacity-70',
         className,
       )}
       disabled={isPending}
       onClick={() => setLocale(nextLocale)}
       type="button"
     >
-      {variant !== 'text' && (
-        <Globe aria-hidden="true" className="size-4 shrink-0" />
+      {isPending ? (
+        <LoaderCircle
+          aria-hidden="true"
+          className="size-4 shrink-0 animate-spin"
+        />
+      ) : (
+        variant !== 'text' && (
+          <Globe aria-hidden="true" className="size-4 shrink-0" />
+        )
       )}
       {variant !== 'icon' && <span>{label}</span>}
     </button>

@@ -3,7 +3,6 @@ import {
   ArrowRight,
   CheckCircle2,
   Clock3,
-  RefreshCcw,
   ShieldCheck,
   Tag,
 } from 'lucide-react';
@@ -43,9 +42,6 @@ export function PackageOrderCard({
   const companionOffers = [...(packageItem.companionOffers ?? [])].sort(
     (first, second) => second.discountPercentage - first.discountPercentage,
   );
-  const revisions = `${packageItem.maxRevisions} ${
-    packageItem.maxRevisions === 1 ? 'revision' : 'revisions'
-  }`;
 
   return (
     <aside
@@ -174,7 +170,7 @@ export function PackageOrderCard({
           </div>
         ) : null}
 
-        <dl className="mt-5 grid grid-cols-2 gap-4">
+        <dl className="mt-5 grid gap-4">
           <div>
             <dt className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase">
               <Clock3 aria-hidden="true" className="size-4 text-accent" />
@@ -182,15 +178,6 @@ export function PackageOrderCard({
             </dt>
             <dd className="mt-2 text-sm font-semibold text-primary">
               {_copy(packageItem.deliveryDays)} {_copy('days estimated')}
-            </dd>
-          </div>
-          <div>
-            <dt className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase">
-              <RefreshCcw aria-hidden="true" className="size-4 text-accent" />
-              {_copy('Included')}
-            </dt>
-            <dd className="mt-2 text-sm font-semibold text-primary">
-              {_copy(revisions)}
             </dd>
           </div>
         </dl>

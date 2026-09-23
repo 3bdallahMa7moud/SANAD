@@ -3,7 +3,6 @@ import {
   ArrowRight,
   Clock3,
   FileText,
-  RefreshCcw,
   Sparkles,
 } from 'lucide-react';
 import Image from 'next/image';
@@ -136,11 +135,6 @@ export function PackageCard({
           <span className="inline-flex items-center gap-1.5">
             <Clock3 className="size-4" aria-hidden="true" />
             {_copy(packageItem.deliveryDays)} {_copy('days estimated')}
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <RefreshCcw className="size-4" aria-hidden="true" />
-            {_copy(packageItem.maxRevisions)}{' '}
-            {_copy(packageItem.maxRevisions === 1 ? 'revision' : 'revisions')}
           </span>
         </div>
         <div className="mt-auto">

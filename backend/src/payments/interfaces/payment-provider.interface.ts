@@ -7,6 +7,7 @@ export interface CreatePaymentParams {
   customerEmail: string;
   customerPhone?: string;
   returnUrl?: string;
+  attemptNumber?: number;
 }
 
 export interface PaymentIntentResult {
@@ -20,10 +21,11 @@ export interface PaymentIntentResult {
 export interface WebhookEventPayload {
   transactionId: string;
   orderId: number;
-  status: 'paid' | 'failed' | 'cancelled';
+  status: 'paid' | 'pending' | 'failed' | 'cancelled';
   amount: number;
   currency: string;
   rawPayload: Record<string, any>;
+  eventId?: string;
 }
 
 export interface PaymentProvider {

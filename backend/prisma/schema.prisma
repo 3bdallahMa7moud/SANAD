@@ -81,6 +81,8 @@ model offers {
   description_ar      String?
   description_en      String?
   discount_percentage Decimal   @db.Decimal(5, 2)
+  original_price      Decimal?  @db.Decimal(10, 2)
+  sale_price          Decimal?  @db.Decimal(10, 2)
   start_date          DateTime  @db.Timestamp(6)
   end_date            DateTime  @db.Timestamp(6)
   is_active           Boolean?  @default(true)

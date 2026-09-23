@@ -15,16 +15,19 @@ export async function HowItWorks() {
 
   const steps = [
     {
+      id: 'requirements',
       number: t('step1Number'),
       title: t('step1Title'),
       description: t('step1Desc'),
     },
     {
+      id: 'review',
       number: t('step2Number'),
       title: t('step2Title'),
       description: t('step2Desc'),
     },
     {
+      id: 'delivery',
       number: t('step3Number'),
       title: t('step3Title'),
       description: t('step3Desc'),
@@ -58,10 +61,10 @@ export async function HowItWorks() {
         </div>
 
         <MotionTimeline className="mt-12 grid border-y border-border ps-6 lg:mt-14 lg:grid-cols-3 lg:ps-0">
-          {steps.map(({ description, number, title }) => (
+          {steps.map(({ description, id, number, title }) => (
             <MotionStaggerItem
               className="border-b border-border py-8 transition-colors duration-200 hover:bg-surface-muted/55 last:border-b-0 sm:py-10 lg:border-e lg:border-b-0 lg:px-8 lg:first:ps-0 lg:last:border-e-0 lg:last:pe-0"
-              key={number}
+              key={id}
             >
               <div className="flex items-center gap-5">
                 <span

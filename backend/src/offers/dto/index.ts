@@ -43,6 +43,18 @@ export class CreateOfferDto {
   @Max(100)
   @Type(() => Number)
   discount_percentage!: number;
+  @ApiPropertyOptional({ description: 'Price displayed before the offer' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0.01)
+  @Type(() => Number)
+  original_price?: number;
+  @ApiPropertyOptional({ description: 'Price charged after the offer' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Type(() => Number)
+  sale_price?: number;
   @ApiProperty() @IsDateString() start_date!: string;
   @ApiProperty() @IsDateString() end_date!: string;
   @ApiPropertyOptional() @IsOptional() @IsBoolean() is_active?: boolean;
@@ -78,6 +90,18 @@ export class UpdateOfferDto {
   @Max(100)
   @Type(() => Number)
   discount_percentage?: number;
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  @Min(0.01)
+  @Type(() => Number)
+  original_price?: number;
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Type(() => Number)
+  sale_price?: number;
   @ApiPropertyOptional() @IsOptional() @IsDateString() start_date?: string;
   @ApiPropertyOptional() @IsOptional() @IsDateString() end_date?: string;
   @ApiPropertyOptional() @IsOptional() @IsBoolean() is_active?: boolean;

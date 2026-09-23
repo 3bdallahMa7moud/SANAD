@@ -25,7 +25,7 @@ type PackageSpecificContent = Omit<PackageDetailContent, 'faqs'> & {
 const PACKAGE_CONTENT: Record<string, PackageSpecificContent> = {
   'premium full package': {
     bestFor:
-      'Professionals who want their CV, cover letter, LinkedIn profile, and application materials to present one coordinated career story.',
+      'Professionals who want their CV, Cover Letter, and LinkedIn profile to present one coordinated career story.',
     preparation: [
       'Your current CV or a complete employment history',
       'The roles, industries, and locations you are targeting',
@@ -49,12 +49,10 @@ const PACKAGE_CONTENT: Record<string, PackageSpecificContent> = {
           'You review the completed work and use the included revision rounds to refine the agreed scope.',
       },
     ],
-    importantNote:
-      'The exact handling of job-application submissions is confirmed with SANAD before work begins. Never send account passwords through an enquiry message.',
   },
   'full package': {
     bestFor:
-      'Professionals who need a coordinated CV, cover letter, and LinkedIn profile without the additional job-application file.',
+      'Professionals who need a coordinated CV, cover letter, and LinkedIn profile.',
     preparation: [
       'Your current CV or complete career history',
       'Your target roles and preferred industries',
@@ -90,7 +88,7 @@ const PACKAGE_CONTENT: Record<string, PackageSpecificContent> = {
     ],
     process: [
       {
-        title: 'Application review',
+        title: 'Career direction review',
         description:
           'We review your background and the type of opportunity you plan to pursue.',
       },
@@ -161,35 +159,6 @@ const PACKAGE_CONTENT: Record<string, PackageSpecificContent> = {
     ],
     importantNote:
       'The service covers the profile sections listed in the package scope. Any direct access or implementation arrangement must be confirmed separately with SANAD.',
-  },
-  'job application service': {
-    bestFor:
-      'Professionals who need an organized workflow for target opportunities, application documents, and submission preparation.',
-    preparation: [
-      'Your current CV and available application documents',
-      'Target roles, preferred industries, and locations',
-      'Examples of suitable vacancies or selection criteria',
-      'Your application priorities and any relevant deadlines',
-    ],
-    process: [
-      {
-        title: 'Target criteria review',
-        description:
-          'We confirm the type of opportunities and the application priorities relevant to your search.',
-      },
-      {
-        title: 'Application preparation',
-        description:
-          'The opportunity list, supporting documents, and submission workflow are organized within the agreed scope.',
-      },
-      {
-        title: 'Checklist handover',
-        description:
-          'You receive a clear application checklist and review the prepared workflow before completion.',
-      },
-    ],
-    importantNote:
-      'The number of opportunities, service period, platforms, and any submission assistance are confirmed before work begins. Never share account passwords by WhatsApp or an unsecured form.',
   },
 };
 

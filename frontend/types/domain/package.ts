@@ -13,6 +13,8 @@ export interface PackageOffer {
   nameAr?: string | null;
   description: string | null;
   discountPercentage: number;
+  originalPrice?: number | null;
+  salePrice?: number | null;
 }
 
 export interface CompanionOffer extends PackageOffer {

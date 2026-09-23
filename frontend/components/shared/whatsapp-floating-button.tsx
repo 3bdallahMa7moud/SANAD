@@ -54,12 +54,15 @@ export function WhatsAppFloatingButton({
     >
       <a
         aria-label={_copy('Chat on WhatsApp')}
-        className="flex size-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-all duration-200 hover:scale-105 hover:bg-[#20bd5a] hover:shadow-xl active:scale-95 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#25D366] focus-visible:ring-offset-2"
+        className="group flex min-h-14 min-w-14 items-center justify-center gap-2 overflow-hidden rounded-full bg-[#25D366] px-4 text-white shadow-lg transition-[transform,background-color,box-shadow] duration-200 hover:scale-105 hover:bg-[#20bd5a] hover:shadow-xl active:scale-95 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#25D366] focus-visible:ring-offset-2"
         href={whatsappUrl}
         rel="noreferrer noopener"
         target="_blank"
       >
-        <WhatsAppIcon className="size-7" />
+        <WhatsAppIcon className="size-7 shrink-0" />
+        <span className="max-w-0 overflow-hidden whitespace-nowrap text-sm font-semibold opacity-0 transition-[max-width,opacity] duration-200 group-hover:max-w-40 group-hover:opacity-100 group-focus-visible:max-w-40 group-focus-visible:opacity-100">
+          {_copy('Contact us now', 'تواصل معنا الآن')}
+        </span>
       </a>
     </div>
   );

@@ -18,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return await getLocalizedMetadata({
     title: _copy('Career Services | SANAD', 'الخدمات المهنية | سند'),
     description: _copy(
-      'Compare CV writing, LinkedIn optimization, application support and complete career packages by scope, price, delivery and revisions.',
+      'Compare CV writing, Cover Letters, LinkedIn optimization, and complete career packages by scope, price, and delivery.',
       'قارن بين خدمات كتابة السيرة الذاتية وتحسين الملف الشخصي والدعم الوظيفي حسب النطاق والمدة والأسعار.',
     ),
     alternates: { canonical: '/packages' },
@@ -76,10 +76,10 @@ export default async function PackagesPage() {
                 asChild
                 className="bg-accent text-accent-foreground hover:bg-accent/90"
               >
-                <Link href="#services-catalog">
+                <a href="#service-results">
                   {_copy('Explore services')}
                   <ArrowDown aria-hidden="true" className="size-4" />
-                </Link>
+                </a>
               </Button>
               {hasComparison ? (
                 <Link

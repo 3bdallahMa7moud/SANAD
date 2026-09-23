@@ -38,7 +38,7 @@ export function formatMoney(
     style: 'currency',
     currency,
     minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
+    maximumFractionDigits: 0,
   }).format(Number(value));
 }
 

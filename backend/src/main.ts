@@ -163,7 +163,7 @@ async function bootstrap() {
   }
 
   const port = configService.get<number>('PORT') || 3000;
-  await app.listen(port);
+  await app.listen(port, '127.0.0.1');
   logger.log(`SANAD API running on http://localhost:${port}/api/v1`);
   if (swaggerEnabled) {
     logger.log(`Swagger Docs available at http://localhost:${port}/api/docs`);

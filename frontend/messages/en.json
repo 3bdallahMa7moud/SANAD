@@ -47,7 +47,7 @@
     "featuredPackages": {
       "eyebrow": "Featured services",
       "heading": "Your CV. Your LinkedIn. Your Next Job.",
-      "body": "We write your CV, optimise your LinkedIn to match it, then apply to jobs on your behalf — so you can focus on preparing for interviews.",
+      "body": "We write your CV, optimize your LinkedIn profile, and align your professional documents around your career direction.",
       "exploreService": "Explore Service",
       "bestFor": "Best for",
       "supports": "What this service supports",
@@ -74,15 +74,6 @@
       },
       "full": {
         "category": "Full Package"
-      },
-      "linkedinJobs": {
-        "category": "LinkedIn Jobs",
-        "title": "LinkedIn Job Applications",
-        "description": "We apply to relevant job opportunities on LinkedIn on your behalf — saving you time and keeping your search active.",
-        "bestFor": "Professionals who want consistent job applications without the daily effort.",
-        "benefit1": "Targeted job search based on your role and preferences",
-        "benefit2": "Applications sent on your behalf through LinkedIn",
-        "benefit3": "Regular updates on applications submitted"
       }
     },
     "careerStory": {

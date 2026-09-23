@@ -37,7 +37,7 @@ export function PackageComparison({
         </h2>
         <p className="mt-3 max-w-2xl text-muted-foreground">
           {_copy(
-            'Choose by what is included, the delivery estimate and revision allowance.',
+            'Choose by what is included and the delivery estimate.',
           )}
         </p>
         <p id="comparison-help" className="mt-5 text-sm text-muted-foreground">
@@ -55,7 +55,7 @@ export function PackageComparison({
           <table className="w-full min-w-[48rem] table-fixed text-sm">
             <caption className="sr-only">
               {_copy(
-                'Published deliverables, delivery estimates and revisions',
+                'Published deliverables and delivery estimates',
               )}
             </caption>
             <colgroup>
@@ -128,16 +128,6 @@ export function PackageComparison({
                 {bundles.map((item) => (
                   <td key={item.id} className="p-4 text-center align-middle">
                     {_copy(item.deliveryDays)} {_copy('days')}
-                  </td>
-                ))}
-              </tr>
-              <tr className="border-b border-border">
-                <th scope="row" className="p-4 text-start align-middle font-medium">
-                  {_copy('Revision rounds')}
-                </th>
-                {bundles.map((item) => (
-                  <td key={item.id} className="p-4 text-center align-middle">
-                    {_copy(item.maxRevisions)}
                   </td>
                 ))}
               </tr>

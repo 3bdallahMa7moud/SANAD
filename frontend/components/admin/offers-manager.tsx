@@ -36,6 +36,8 @@ const schema = z
     name_en: z.string().trim().min(2),
     name_ar: z.string().trim().min(2),
     discount: z.coerce.number().min(0).max(100),
+    originalPrice: z.coerce.number().min(0),
+    salePrice: z.coerce.number().min(0),
     startDate: z.string().min(1),
     endDate: z.string().min(1),
     active: z.boolean(),
@@ -67,7 +69,16 @@ const schema = z
   .refine((data) => new Date(data.endDate) > new Date(data.startDate), {
     path: ['endDate'],
     message: 'End date must be after start date.',
-  });
+  })
+  .refine(
+    (data) =>
+      data.type !== 'standard' ||
+      (data.originalPrice > 0 && data.salePrice <= data.originalPrice),
+    {
+      path: ['salePrice'],
+      message: 'Sale price must not exceed the original price.',
+    },
+  );
 type Values = z.infer<typeof schema>;
 type FormInput = z.input<typeof schema>;
 const empty: Values = {
@@ -77,6 +88,8 @@ const empty: Values = {
   name_en: '',
   name_ar: '',
   discount: 10,
+  originalPrice: 0,
+  salePrice: 0,
   startDate: '',
   endDate: '',
   active: true,
@@ -109,6 +122,7 @@ export function OffersManager() {
     reset,
     control,
     setValue,
+    getValues,
     formState: { errors },
   } = useForm<FormInput, unknown, Values>({
     resolver: zodResolver(schema),
@@ -116,21 +130,63 @@ export function OffersManager() {
   });
   const active = useWatch({ control, name: 'active' });
   const offerType = useWatch({ control, name: 'type' });
+
+  const updateDiscountFromPrices = () => {
+    const { originalPrice, salePrice } = getValues();
+    if (originalPrice <= 0 || salePrice > originalPrice) return;
+    setValue(
+      'discount',
+      Number((((originalPrice - salePrice) / originalPrice) * 100).toFixed(2)),
+      { shouldValidate: true },
+    );
+  };
+
+  const selectPackage = (packageId: number) => {
+    const pkg = packages.data?.items.find((item) => item.id === packageId);
+    if (!pkg) return;
+    const originalPrice = Number(pkg.price);
+    setValue('originalPrice', originalPrice);
+    setValue(
+      'salePrice',
+      Number((originalPrice * (1 - getValues('discount') / 100)).toFixed(2)),
+    );
+  };
+
   useEffect(() => {
     if (editing === null)
-      reset({ ...empty, packageId: packages.data?.items[0]?.id ?? 0 });
-    else if (editing)
+      reset({
+        ...empty,
+        packageId: packages.data?.items[0]?.id ?? 0,
+        originalPrice: Number(packages.data?.items[0]?.price ?? 0),
+        salePrice: Number(
+          (Number(packages.data?.items[0]?.price ?? 0) * 0.9).toFixed(2),
+        ),
+      });
+    else if (editing) {
+      const packagePrice = Number(
+        editing.package?.price ??
+          packages.data?.items.find((pkg) => pkg.id === editing.package_id)
+            ?.price ??
+          0,
+      );
+      const discount = Number(editing.discount_percentage);
       reset({
         packageId: editing.package_id ?? 0,
         triggerPackageId: editing.trigger_package_id ?? 0,
         type: editing.offer_type ?? 'standard',
         name_en: editing.name_en,
         name_ar: editing.name_ar ?? '',
-        discount: Number(editing.discount_percentage),
+        discount,
+        originalPrice: Number(editing.original_price ?? packagePrice),
+        salePrice: Number(
+          editing.sale_price ??
+            (packagePrice * (1 - discount / 100)).toFixed(2),
+        ),
         startDate: localDate(editing.start_date),
         endDate: localDate(editing.end_date),
         active: editing.is_active !== false,
       });
+    }
   }, [editing, packages.data, reset]);
   const invalidate = () =>
     client.invalidateQueries({ queryKey: ['admin', 'offers'] });
@@ -149,6 +205,12 @@ export function OffersManager() {
         description_en: '',
         description_ar: '',
         discount_percentage: values.discount,
+        ...(values.type === 'standard'
+          ? {
+              original_price: values.originalPrice,
+              sale_price: values.salePrice,
+            }
+          : {}),
         start_date: new Date(values.startDate).toISOString(),
         end_date: new Date(values.endDate).toISOString(),
         is_active: values.active,
@@ -193,6 +255,7 @@ export function OffersManager() {
                 <th className="px-4 py-3">{_copy('Purchased service')}</th>
                 <th className="px-4 py-3">{_copy('Discounted service')}</th>
                 <th className="px-4 py-3">{_copy('Discount')}</th>
+                <th className="px-4 py-3">{_copy('Prices')}</th>
                 <th className="px-4 py-3">{_copy('Dates')}</th>
                 <th className="px-4 py-3">{_copy('Status')}</th>
                 <th className="px-4 py-3">{_copy('Actions')}</th>
@@ -226,6 +289,11 @@ export function OffersManager() {
                   <td className="px-4 py-4">
                     {_copy(Number(offer.discount_percentage))}
                     {_copy('%')}
+                  </td>
+                  <td className="px-4 py-4" dir="ltr">
+                    {offer.original_price != null && offer.sale_price != null
+                      ? `${offer.original_price} → ${offer.sale_price}`
+                      : '—'}
                   </td>
                   <td className="px-4 py-4 text-muted-foreground">
                     {_copy(_copy.date(offer.start_date))} {_copy('–')}
@@ -354,6 +422,10 @@ export function OffersManager() {
                   className="min-h-11 rounded-md border border-[var(--control-border)] bg-surface px-3"
                   aria-invalid={errors.packageId ? true : undefined}
                   {...register('packageId')}
+                  onChange={(event) => {
+                    setValue('packageId', Number(event.target.value));
+                    selectPackage(Number(event.target.value));
+                  }}
                 >
                   <option value="0">{_copy('Select package')}</option>
                   {packages.data?.items.map((pkg) => (
@@ -369,6 +441,39 @@ export function OffersManager() {
                 ) : null}
               </label>
             ) : null}
+            {offerType === 'standard' ? (
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="grid gap-1 text-sm font-semibold">
+                  {_copy('Original price', 'السعر قبل الخصم')}
+                  <Input
+                    min="0"
+                    step="0.01"
+                    type="number"
+                    {...register('originalPrice', {
+                      onChange: updateDiscountFromPrices,
+                    })}
+                    invalid={Boolean(errors.originalPrice)}
+                  />
+                </label>
+                <label className="grid gap-1 text-sm font-semibold">
+                  {_copy('Offer price', 'السعر بعد الخصم')}
+                  <Input
+                    min="0"
+                    step="0.01"
+                    type="number"
+                    {...register('salePrice', {
+                      onChange: updateDiscountFromPrices,
+                    })}
+                    invalid={Boolean(errors.salePrice)}
+                  />
+                  {errors.salePrice ? (
+                    <span className="text-xs font-normal text-error">
+                      {_copy(errors.salePrice.message)}
+                    </span>
+                  ) : null}
+                </label>
+              </div>
+            ) : null}
             <label className="grid gap-1 text-sm font-semibold">
               {_copy('Discount %')}
               <Input
@@ -378,6 +483,14 @@ export function OffersManager() {
                 type="number"
                 {...register('discount')}
               />
+              {offerType === 'standard' ? (
+                <span className="text-xs font-normal text-muted-foreground">
+                  {_copy(
+                    'Changing either price calculates this value. You can still edit it without changing the prices.',
+                    'تغيير أي من السعرين يحسب هذه النسبة تلقائيًا، ويمكنك تعديلها يدويًا دون تغيير الأسعار.',
+                  )}
+                </span>
+              ) : null}
             </label>
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="grid gap-1 text-sm font-semibold">

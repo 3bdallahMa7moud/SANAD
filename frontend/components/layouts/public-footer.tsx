@@ -21,6 +21,7 @@ export async function PublicFooter() {
 
   const footerGroups = [
     {
+      id: 'explore',
       label: t('footer.explore'),
       links: [
         { href: '/', label: t('nav.home') },
@@ -29,6 +30,7 @@ export async function PublicFooter() {
       ],
     },
     {
+      id: 'company',
       label: t('footer.company'),
       links: [
         { href: '/pages/about-us', label: t('nav.aboutUs') },
@@ -36,6 +38,7 @@ export async function PublicFooter() {
       ],
     },
     {
+      id: 'support',
       label: t('footer.support'),
       links: [
         { href: '/faq', label: t('nav.faq') },
@@ -81,7 +84,7 @@ export async function PublicFooter() {
               direction="up"
               distance={18}
               initialOpacity={0.6}
-              key={group.label}
+              key={group.id}
             >
               <nav
                 aria-label={_copy(

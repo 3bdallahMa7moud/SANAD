@@ -1,6 +1,73 @@
 import { expect, test } from '@playwright/test';
 import arabic from '../messages/interface-ar.json';
+import arabicMessages from '../messages/ar.json';
+import englishMessages from '../messages/en.json';
 test.use({ contextOptions: { reducedMotion: 'reduce' } });
+
+test('language switching keeps one locale visible while the server action is pending', async ({
+  page,
+  context,
+}) => {
+  await context.addCookies([
+    { name: 'SANAD_LOCALE', value: 'en', url: 'http://127.0.0.1:3100' },
+  ]);
+  await page.goto('/');
+
+  const englishHeading = `${englishMessages.home.hero.headline1} ${englishMessages.home.hero.headline2}`;
+  const arabicHeading = `${arabicMessages.home.hero.headline1} ${arabicMessages.home.hero.headline2}`;
+  const heading = page.getByRole('heading', { level: 1 });
+  await expect(heading).toHaveAttribute('aria-label', englishHeading);
+
+  let markActionStarted = () => {};
+  let releaseAction = () => {};
+  const actionStarted = new Promise<void>((resolve) => {
+    markActionStarted = resolve;
+  });
+  const actionRelease = new Promise<void>((resolve) => {
+    releaseAction = resolve;
+  });
+
+  await page.route('**/*', async (route) => {
+    const request = route.request();
+    if (
+      request.method() === 'POST' &&
+      request.headers()['next-action'] !== undefined
+    ) {
+      markActionStarted();
+      await actionRelease;
+    }
+    await route.continue();
+  });
+
+  try {
+    await page
+      .getByRole('button', { name: 'التبديل إلى العربية' })
+      .filter({ visible: true })
+      .click();
+    await actionStarted;
+
+    await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+    await expect(page.locator('html')).toHaveAttribute('dir', 'ltr');
+    await expect(heading).toHaveAttribute('aria-label', englishHeading);
+    await expect(
+      page.getByText(englishMessages.home.hero.body, { exact: true }),
+    ).toBeVisible();
+    await expect(
+      page
+        .getByRole('button', { name: 'التبديل إلى العربية' })
+        .filter({ visible: true }),
+    ).toBeDisabled();
+  } finally {
+    releaseAction();
+  }
+
+  await expect(page.locator('html')).toHaveAttribute('lang', 'ar');
+  await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
+  await expect(heading).toHaveAttribute('aria-label', arabicHeading);
+  await expect(
+    page.getByText(arabicMessages.home.hero.body, { exact: true }),
+  ).toBeVisible();
+});
 
 test('Arabic and dark mode persist across routes and reloads', async ({
   page,

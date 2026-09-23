@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 
 import { Button } from '@/components/ui/button';
-import { PUBLIC_SERVICES_HREF } from '@/constants/public-navigation';
 import {
   MotionAccentLine,
   MotionHeading,
@@ -15,7 +14,7 @@ import {
   MotionStaggerItem,
   MotionStaggerList,
 } from '@/components/motion/motion-reveal';
-import sanadFirst50Hero from '@/public/images/home/sanad-first50-hero.webp';
+const sanadFirst50Hero = '/images/home/sanad-first50-hero.webp';
 
 export async function HeroSection() {
   const _copy = await getCopy();
@@ -23,9 +22,9 @@ export async function HeroSection() {
   const t = await getTranslations('home.hero');
 
   const trustIndicators = [
-    { icon: FileCheck2, label: t('trustAts') },
-    { icon: MapPin, label: t('trustUae') },
-    { icon: PenLine, label: t('trustCrafted') },
+    { id: 'ats', icon: FileCheck2, label: t('trustAts') },
+    { id: 'uae', icon: MapPin, label: t('trustUae') },
+    { id: 'crafted', icon: PenLine, label: t('trustCrafted') },
   ];
 
   return (
@@ -69,13 +68,13 @@ export async function HeroSection() {
           <MotionReveal delay={0.4} distance={14}>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
               <Button asChild className="group w-full sm:w-auto" size="lg">
-                <Link href={PUBLIC_SERVICES_HREF}>
+                <a href="#services">
                   {_copy(t('ctaPrimary'))}
                   <ArrowRight
                     aria-hidden="true"
                     className="size-4 transition-transform duration-200 ease-[var(--ease-standard)] motion-safe:group-hover:translate-x-0.5 motion-safe:group-focus-visible:translate-x-0.5 motion-reduce:transition-none"
                   />
-                </Link>
+                </a>
               </Button>
               <Button
                 asChild
@@ -98,10 +97,10 @@ export async function HeroSection() {
             delay={0.48}
             stagger={0.07}
           >
-            {trustIndicators.map(({ icon: Icon, label }) => (
+            {trustIndicators.map(({ id, icon: Icon, label }) => (
               <MotionStaggerItem
                 className="flex min-h-9 items-center gap-2.5 text-sm font-medium text-foreground"
-                key={label}
+                key={id}
               >
                 <span className="grid size-8 shrink-0 place-items-center rounded-sm border border-border bg-surface text-secondary shadow-xs">
                   <Icon
@@ -136,7 +135,6 @@ function HeroOfferVisual({ imageAlt }: { imageAlt: string }) {
         alt={_copy(imageAlt)}
         className="object-contain"
         fill
-        placeholder="blur"
         preload
         sizes="(max-width: 1023px) calc(100vw - 2rem), 42vw"
         src={sanadFirst50Hero}

@@ -1,6 +1,11 @@
 @import 'tailwindcss';
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 6rem;
+}
+
 .sanad-phone-input {
   --PhoneInput-color--focus: var(--primary);
   --PhoneInputCountryFlag-height: 1.15rem;
@@ -744,12 +749,6 @@ html[data-theme='dark']
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@media (max-width: 63.999rem) {
-  body:has(.package-detail-page) [data-whatsapp-floating] {
-    display: none;
   }
 }
 

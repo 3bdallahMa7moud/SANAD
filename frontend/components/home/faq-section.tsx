@@ -24,7 +24,7 @@ const faqItems: readonly FaqItem[] = [
   {
     question: 'What career services does SANAD offer?',
     answer:
-      'SANAD supports professional CV and resume writing, LinkedIn profile optimization, cover letters, job application preparation, and bundled career-document packages designed for a coordinated professional presentation.',
+      'SANAD supports professional CV writing, LinkedIn profile optimization, Cover Letters, and bundled career-document packages designed for a coordinated professional presentation.',
     link: {
       href: PUBLIC_SERVICES_HREF,
       label: 'View career services',
@@ -96,7 +96,7 @@ const faqItems: readonly FaqItem[] = [
   {
     question: 'What can I do with the documents after I receive them?',
     answer:
-      'The completed documents are yours to use for job applications, professional networking, and career development. They are tailored to your background and target direction at the time of the service.',
+      'The completed documents are yours to use for professional networking and career development. They are tailored to your background and target direction at the time of the service.',
   },
   {
     question: 'Does SANAD guarantee interviews or employment?',

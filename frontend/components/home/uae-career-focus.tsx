@@ -11,7 +11,7 @@ import {
   MotionStaggerItem,
   MotionStaggerList,
 } from '@/components/motion/motion-reveal';
-import uaeCareerFocusImage from '@/public/images/home/uae-career-focus.webp';
+const uaeCareerFocusImage = '/images/home/uae-career-focus.webp';
 
 export async function UaeCareerFocus() {
   const _copy = await getCopy();
@@ -49,10 +49,10 @@ export async function UaeCareerFocus() {
               delay={0.12}
               stagger={0.07}
             >
-              {focusPoints.map((point) => (
+              {focusPoints.map((point, index) => (
                 <MotionStaggerItem
                   className="flex items-center gap-3 border-t border-border pt-3 text-sm font-semibold text-primary"
-                  key={point}
+                  key={`focus-point-${index}`}
                 >
                   <Check
                     aria-hidden="true"
@@ -72,7 +72,6 @@ export async function UaeCareerFocus() {
               alt={_copy(t('imageAlt'))}
               className="scale-[1.06] object-cover"
               fill
-              placeholder="blur"
               sizes="(max-width: 1023px) calc(100vw - 2rem), 55vw"
               src={uaeCareerFocusImage}
             />

@@ -32,6 +32,8 @@ const packageOfferPayloadSchema = z.object({
   name_ar: z.string().nullish(),
   description_en: z.string().nullish(),
   discount_percentage: decimalSchema.pipe(z.number().max(100)),
+  original_price: decimalSchema.nullish(),
+  sale_price: decimalSchema.nullish(),
 });
 const companionOfferPayloadSchema = packageOfferPayloadSchema.extend({
   offer_type: z.enum(['cross_service_any', 'cross_service_specific']),
@@ -112,6 +114,8 @@ function toPackageOffer(payload: PackageOfferPayload): PackageOffer {
     nameAr: payload.name_ar,
     description: payload.description_en ?? null,
     discountPercentage: payload.discount_percentage,
+    originalPrice: payload.original_price ?? null,
+    salePrice: payload.sale_price ?? null,
   };
 }
 function toCompanionOffer(payload: CompanionOfferPayload): CompanionOffer {

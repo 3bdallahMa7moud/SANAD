@@ -128,9 +128,15 @@ export class CheckoutService {
       const discountBase = secondaryPackage
         ? secondaryOriginalPrice
         : originalPrice;
-      offerDiscountAmount =
-        Math.round(((discountBase * offerDiscountPercentage) / 100) * 100) /
-        100;
+      const customSalePrice = Number(offer.sale_price ?? NaN);
+      const hasCustomSalePrice =
+        !secondaryPackage &&
+        Number.isFinite(customSalePrice) &&
+        customSalePrice >= 0;
+      offerDiscountAmount = hasCustomSalePrice
+        ? Math.max(0, Math.round((discountBase - customSalePrice) * 100) / 100)
+        : Math.round(((discountBase * offerDiscountPercentage) / 100) * 100) /
+          100;
       secondaryDiscountAmount = secondaryPackage ? offerDiscountAmount : 0;
       priceAfterOffer = Math.max(0, originalPrice - offerDiscountAmount);
     }

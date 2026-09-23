@@ -24,12 +24,6 @@ export function SecondaryPrices({
       )}
     >
       <span dir="ltr" className="inline-block whitespace-nowrap">
-        {_copy.money(amount * rates.USD, 'USD')}
-      </span>
-      <span aria-hidden="true" className="mx-1.5">
-        ·
-      </span>
-      <span dir="ltr" className="inline-block whitespace-nowrap">
         {_copy.money(amount * rates.EGP, 'EGP')}
       </span>
     </p>

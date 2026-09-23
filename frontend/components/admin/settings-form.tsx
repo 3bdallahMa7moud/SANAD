@@ -41,6 +41,7 @@ const schema = z
       'twitter_url',
       'linkedin_url',
       'instagram_url',
+      'tiktok_url',
     ]) {
       const value = values[key]?.trim();
       if (value && !z.url({ protocol: /^https?$/ }).safeParse(value).success) {
@@ -70,6 +71,7 @@ const labels: Record<string, string> = {
   twitter_url: 'X / Twitter URL',
   linkedin_url: 'LinkedIn URL',
   instagram_url: 'Instagram URL',
+  tiktok_url: 'TikTok URL',
   hero_title_ar: 'Home Page Title (Arabic)',
   hero_title_en: 'Home Page Title (English)',
   hero_subtitle_ar: 'Home Page Subtitle (Arabic)',

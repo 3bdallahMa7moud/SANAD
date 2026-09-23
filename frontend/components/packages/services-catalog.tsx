@@ -42,7 +42,6 @@ const categoryIcons = {
   bundles: BriefcaseBusiness,
   documents: FileText,
   profile: UserRoundCheck,
-  applications: BriefcaseBusiness,
   other: SlidersHorizontal,
 };
 const categoryOptions = serviceCategories.map((item) => ({
@@ -82,9 +81,14 @@ export function ServicesCatalog({
 
   const params = useSearchParams();
   const query = params.get('q') ?? '';
-  const category =
+  const requestedCategory =
     categoryOptions.find((item) => item.value === params.get('category'))
       ?.value ?? 'all';
+  const category =
+    requestedCategory === 'all' ||
+    packages.some((item) => getServiceCategory(item) === requestedCategory)
+      ? requestedCategory
+      : 'all';
   const sort =
     sortOptions.find((item) => item.value === params.get('sort'))?.value ??
     'recommended';
@@ -217,8 +221,10 @@ export function ServicesCatalog({
           {categoryOptions
             .filter(
               (option) =>
-                option.value !== 'other' ||
-                packages.some((item) => getServiceCategory(item) === 'other'),
+                option.value === 'all' ||
+                packages.some(
+                  (item) => getServiceCategory(item) === option.value,
+                ),
             )
             .map(({ value, label, icon: Icon }) => {
               const selected = category === value;
@@ -241,7 +247,10 @@ export function ServicesCatalog({
             })}
         </div>
 
-        <div className="mt-7 flex flex-wrap items-center justify-between gap-3 text-sm">
+        <div
+          className="mt-7 flex flex-wrap items-center justify-between gap-3 text-sm"
+          id="service-results"
+        >
           <p
             className="font-semibold text-primary"
             role="status"

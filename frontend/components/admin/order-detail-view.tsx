@@ -101,7 +101,7 @@ export function OrderDetailView({ id }: { id: number }) {
   );
   const paymentAmount =
     paymentAmountOverride ??
-    (order ? Number(order.final_amount).toFixed(2) : '');
+    (order ? String(Math.round(Number(order.final_amount))) : '');
   const hasCollectedPayment = Boolean(
     order?.payments.some(
       (payment) =>

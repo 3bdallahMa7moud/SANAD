@@ -6,21 +6,17 @@ export const FALLBACK_PACKAGES: CareerPackage[] = [
     name: 'Premium Full Package',
     nameAr: 'الباقة المتكاملة المميزة',
     description:
-      'A premium bilingual career package covering your CV, cover letter, LinkedIn profile, job application file, and job application service.',
+      'A premium bilingual career package covering your CV, cover letter, and LinkedIn profile.',
     price: 800,
     features: [
       'CV (English + Arabic) — 300 AED',
       'Cover Letter (English + Arabic) — 200 AED',
       'LinkedIn Profile Optimization — 150 AED',
-      'Job Application File — 50 AED',
-      'Job Application — 100 AED',
     ],
     featuresAr: [
       'السيرة الذاتية (العربية + الإنجليزية) — 300 درهم',
       'خطاب التقديم (العربية + الإنجليزية) — 200 درهم',
       'تحسين ملف لينكدإن — 150 درهم',
-      'ملف التقديم على الوظائف — 50 درهم',
-      'خدمة التقديم على الوظائف — 100 درهم',
     ],
     deliveryDays: 10,
     maxRevisions: 3,
@@ -200,34 +196,5 @@ export const FALLBACK_PACKAGES: CareerPackage[] = [
     buyerCount: 130,
     ratingAverage: 4.8,
     ratingCount: 31,
-  },
-  {
-    id: 6,
-    name: 'Job Application Service',
-    description:
-      'Professional job-application support for organizing opportunities, tailoring documents, and preparing a clear submission workflow.',
-    price: 249,
-    features: [
-      'Target opportunity organization',
-      'Job application document support',
-      'Clear submission workflow and checklist',
-    ],
-    deliveryDays: 7,
-    maxRevisions: 2,
-    sortOrder: 6,
-    images: [
-      {
-        id: 6,
-        path: '/images/packages/job-application-service.webp',
-        url: '/images/packages/job-application-service.webp',
-        altText: 'Job Application Service',
-        isPrimary: true,
-        displayOrder: 1,
-      },
-    ],
-    offers: [],
-    buyerCount: 64,
-    ratingAverage: 4.7,
-    ratingCount: 15,
   },
 ];

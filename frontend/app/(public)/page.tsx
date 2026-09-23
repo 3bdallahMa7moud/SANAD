@@ -1,10 +1,12 @@
 import { getLocalizedMetadata } from '@/lib/i18n/metadata';
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 
 import { CareerStory } from '@/components/home/career-story';
 import { FeaturedPackages } from '@/components/home/featured-packages';
 import { FinalCta } from '@/components/home/final-cta';
 import { HeroSection } from '@/components/home/hero-section';
+import { HomeSectionSkeleton } from '@/components/home/home-section-skeleton';
 import { HowItWorks } from '@/components/home/how-it-works';
 import { PremiumCta } from '@/components/home/premium-cta';
 import { Testimonials } from '@/components/home/testimonials';
@@ -34,13 +36,17 @@ export default function Home() {
   return (
     <>
       <HeroSection />
-      <FeaturedPackages />
+      <Suspense fallback={<HomeSectionSkeleton section="packages" />}>
+        <FeaturedPackages />
+      </Suspense>
       <CareerStory />
       <WhySanad />
       <UaeCareerFocus />
       <HowItWorks />
       <PremiumCta />
-      <Testimonials />
+      <Suspense fallback={<HomeSectionSkeleton section="testimonials" />}>
+        <Testimonials />
+      </Suspense>
       <FinalCta />
     </>
   );

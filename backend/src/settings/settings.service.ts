@@ -15,6 +15,7 @@ const PUBLIC_SETTING_KEYS = [
   'twitter_url',
   'linkedin_url',
   'instagram_url',
+  'tiktok_url',
   'hero_title_ar',
   'hero_title_en',
   'hero_subtitle_ar',
@@ -39,6 +40,7 @@ const SOCIAL_URL_SETTING_KEYS = new Set([
   'twitter_url',
   'linkedin_url',
   'instagram_url',
+  'tiktok_url',
 ]);
 
 @Injectable()

@@ -27,13 +27,6 @@ function serviceInstructions(serviceName: string): Instruction[] {
       { en: 'If you do not have a profile yet, send your CV or career details to create it.', ar: 'إن لم يكن لديك حساب، أرسل السيرة الذاتية أو بياناتك المهنية لإنشائه.' },
     ];
   }
-  if (name.includes('job application') || name.includes('employment') || name.includes('recruit')) {
-    return [
-      { en: 'Send your current CV and your target job titles.', ar: 'أرسل سيرتك الذاتية الحالية والمسميات الوظيفية المستهدفة.' },
-      { en: 'Tell us your preferred country or city and work type.', ar: 'اكتب الدولة أو المدينة ونوع العمل الذي تفضله.' },
-      { en: 'Share relevant job links or any additional requirements.', ar: 'أرسل روابط الوظائف المناسبة أو أي متطلبات إضافية.' },
-    ];
-  }
   if (name.includes('cv') || name.includes('resume')) {
     return [
       { en: 'For a new CV: send your name, contact details, education, experience, skills, and certificates.', ar: 'لسيرة ذاتية جديدة: أرسل الاسم وبيانات التواصل والتعليم والخبرات والمهارات والشهادات.' },

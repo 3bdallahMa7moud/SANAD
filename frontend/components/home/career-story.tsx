@@ -11,7 +11,7 @@ import {
   MotionStaggerItem,
   MotionStaggerList,
 } from '@/components/motion/motion-reveal';
-import careerStoryImage from '@/public/images/home/career-story.webp';
+const careerStoryImage = '/images/home/career-story.webp';
 
 export async function CareerStory() {
   const _copy = await getCopy();
@@ -35,7 +35,6 @@ export async function CareerStory() {
               alt={_copy(t('imageAlt'))}
               className="scale-[1.06] object-cover"
               fill
-              placeholder="blur"
               sizes="(max-width: 1023px) calc(100vw - 2rem), 50vw"
               src={careerStoryImage}
             />
@@ -67,10 +66,10 @@ export async function CareerStory() {
               delay={0.14}
               stagger={0.08}
             >
-              {storyPoints.map((point) => (
+              {storyPoints.map((point, index) => (
                 <MotionStaggerItem
                   className="flex items-start gap-3 text-sm leading-6 text-foreground sm:text-base"
-                  key={point}
+                  key={`story-point-${index}`}
                 >
                   <span className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-surface text-secondary shadow-xs">
                     <Check aria-hidden="true" className="size-3.5" />

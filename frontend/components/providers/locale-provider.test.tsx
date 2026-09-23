@@ -1,31 +1,54 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 import { useLocale } from 'next-intl';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { LocaleProvider, useLocaleSwitcher } from './locale-provider';
 
 const mocks = vi.hoisted(() => ({
-  refresh: vi.fn(),
+  persistLocale: vi.fn(),
 }));
 
-vi.mock('next/navigation', () => ({
-  useRouter: () => ({ refresh: mocks.refresh }),
+vi.mock('@/app/actions/locale', () => ({
+  persistLocale: mocks.persistLocale,
 }));
 
-function LocaleControl() {
+const headingCopy = {
+  ar: 'ابنِ ملفاً مهنياً',
+  en: 'Build a Career Profile',
+} as const;
+
+function LocaleControl({ target }: { target: 'ar' | 'en' }) {
   const locale = useLocale();
-  const { setLocale } = useLocaleSwitcher();
+  const { isPending, setLocale } = useLocaleSwitcher();
 
-  return <button onClick={() => setLocale('ar')}>{locale}</button>;
+  return (
+    <button disabled={isPending} onClick={() => setLocale(target)}>
+      {locale}
+    </button>
+  );
 }
 
-function TestProvider({ locale }: { locale: 'ar' | 'en' }) {
+function TestProvider({
+  locale,
+  target,
+}: {
+  locale: 'ar' | 'en';
+  target: 'ar' | 'en';
+}) {
   return (
     <LocaleProvider
       initialLocale={locale}
       messagesByLocale={{ ar: {}, en: {} }}
     >
-      <LocaleControl />
+      <LocaleControl target={target} />
+      <h1>{headingCopy[locale]}</h1>
     </LocaleProvider>
   );
 }
@@ -33,30 +56,76 @@ function TestProvider({ locale }: { locale: 'ar' | 'en' }) {
 describe('LocaleProvider', () => {
   afterEach(() => {
     cleanup();
+    document.documentElement.lang = '';
+    document.documentElement.dir = '';
   });
 
   beforeEach(() => {
-    mocks.refresh.mockReset();
-    document.cookie = 'SANAD_LOCALE=; Max-Age=0; path=/';
+    mocks.persistLocale.mockReset();
   });
 
-  it('persists the requested locale and refreshes the route in place', () => {
-    const view = render(<TestProvider locale="en" />);
+  it('keeps the old page coherent until the server sends the new locale tree', async () => {
+    let finishLocaleUpdate: (() => void) | undefined;
+    mocks.persistLocale.mockImplementation(
+      () =>
+        new Promise<void>((resolve) => {
+          finishLocaleUpdate = resolve;
+        }),
+    );
+    const view = render(<TestProvider locale="en" target="ar" />);
 
     fireEvent.click(screen.getByRole('button', { name: 'en' }));
 
-    expect(document.cookie).toContain('SANAD_LOCALE=ar');
-    expect(mocks.refresh).toHaveBeenCalledOnce();
+    await waitFor(() => expect(mocks.persistLocale).toHaveBeenCalledWith('ar'));
 
-    view.rerender(<TestProvider locale="ar" />);
+    // Server and client copy must remain from the same locale while the
+    // Server Action/RSC response is in flight.
+    expect(screen.getByRole('button', { name: 'en' })).toBeVisible();
+    expect(screen.getByRole('heading')).toHaveTextContent(headingCopy.en);
+    expect(document.documentElement).toHaveAttribute('lang', 'en');
+    expect(document.documentElement).toHaveAttribute('dir', 'ltr');
+
+    // Simulate the route/layout tree returned after the cookie mutation.
+    view.rerender(<TestProvider locale="ar" target="en" />);
     expect(screen.getByRole('button', { name: 'ar' })).toBeVisible();
+    expect(screen.getByRole('heading')).toHaveTextContent(headingCopy.ar);
+    expect(document.documentElement).toHaveAttribute('lang', 'ar');
+    expect(document.documentElement).toHaveAttribute('dir', 'rtl');
+
+    await act(async () => finishLocaleUpdate?.());
   });
 
-  it('does not refresh when the selected locale is already active', () => {
-    render(<TestProvider locale="ar" />);
+  it('does not persist when the selected locale is already active', () => {
+    render(<TestProvider locale="ar" target="ar" />);
 
     fireEvent.click(screen.getByRole('button', { name: 'ar' }));
 
-    expect(mocks.refresh).not.toHaveBeenCalled();
+    expect(mocks.persistLocale).not.toHaveBeenCalled();
+  });
+
+  it('keeps the current locale usable when the server action fails', async () => {
+    const error = new Error('network unavailable');
+    const consoleError = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+    mocks.persistLocale.mockRejectedValue(error);
+    render(<TestProvider locale="en" target="ar" />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'en' }));
+
+    await waitFor(() =>
+      expect(consoleError).toHaveBeenCalledWith(
+        'Unable to change the interface language.',
+        error,
+      ),
+    );
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'en' })).toBeEnabled(),
+    );
+    expect(screen.getByRole('heading')).toHaveTextContent(headingCopy.en);
+    expect(document.documentElement).toHaveAttribute('lang', 'en');
+    expect(document.documentElement).toHaveAttribute('dir', 'ltr');
+
+    consoleError.mockRestore();
   });
 });

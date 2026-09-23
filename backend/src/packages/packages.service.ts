@@ -1,8 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import type { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePackageDto, UpdatePackageDto } from './dto';
 import { PaginationDto, createPaginatedResponse } from '../common/utils';
 import { StorageService } from '../files/storage.service';
+
+const PUBLIC_PACKAGE_FILTER: Prisma.packagesWhereInput = {
+  is_active: true,
+  NOT: [
+    { name_en: { equals: 'Job Application Service', mode: 'insensitive' } },
+    { name_ar: { equals: 'خدمة التقديم على الوظائف', mode: 'insensitive' } },
+    { name_ar: { equals: 'طلبات التوظيف', mode: 'insensitive' } },
+  ],
+};
 
 @Injectable()
 export class PackagesService {
@@ -33,6 +43,7 @@ export class PackagesService {
 
   private async toPublicPackage<
     T extends {
+      id: number;
       package_images?: any[];
       _count?: { orders: number };
       package_reviews?: Array<{ rating: number }>;
@@ -65,7 +76,7 @@ export class PackagesService {
 
   // PUBLIC: Get active packages with offers
   async findAllPublic(query: PaginationDto) {
-    const where: Record<string, unknown> = { is_active: true };
+    const where: Record<string, unknown> = { ...PUBLIC_PACKAGE_FILTER };
 
     if (query.search) {
       where.OR = [
@@ -134,7 +145,7 @@ export class PackagesService {
 
   async findOnePublic(id: number) {
     const pkg = await this.prisma.packages.findFirst({
-      where: { id, is_active: true },
+      where: { id, ...PUBLIC_PACKAGE_FILTER },
       include: {
         package_images: { orderBy: { display_order: 'asc' } },
         offers: {

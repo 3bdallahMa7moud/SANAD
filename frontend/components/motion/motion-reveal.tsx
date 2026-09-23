@@ -127,9 +127,11 @@ export function MotionHeading({
 
   const reduceMotion = useReducedMotion();
   const displayLines = lines?.length ? lines : [text];
+  const localizedLines = displayLines.map((line) => _copy(line));
+  const accessibleText = lines?.length ? localizedLines.join(' ') : _copy(text);
   const animationProps = {
     'data-motion-reveal': true,
-    'aria-label': text,
+    'aria-label': accessibleText,
     className,
     id,
     initial: reduceMotion ? false : 'hidden',
@@ -146,13 +148,17 @@ export function MotionHeading({
     whileInView: 'visible',
   } as const;
 
-  const content = displayLines.map((line) => (
-    <span aria-hidden="true" className="block overflow-hidden" key={line}>
+  const content = localizedLines.map((line, index) => (
+    <span
+      aria-hidden="true"
+      className="block overflow-hidden"
+      key={`heading-line-${index}`}
+    >
       <motion.span
         className="block"
         variants={reduceMotion ? undefined : headingLineVariants}
       >
-        {_copy(line)}
+        {line}
       </motion.span>
     </span>
   ));

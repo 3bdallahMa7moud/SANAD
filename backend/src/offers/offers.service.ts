@@ -134,6 +134,20 @@ export class OffersService {
       dto.package_id,
       dto.trigger_package_id,
     );
+    if ((dto.original_price === undefined) !== (dto.sale_price === undefined)) {
+      throw new BadRequestException(
+        'Original and sale prices must be provided together',
+      );
+    }
+    if (
+      dto.original_price !== undefined &&
+      dto.sale_price !== undefined &&
+      dto.sale_price > dto.original_price
+    ) {
+      throw new BadRequestException(
+        'Sale price cannot exceed the original price',
+      );
+    }
     await this.ensurePackagesExist([
       configuration.packageId,
       configuration.triggerPackageId,
@@ -149,6 +163,8 @@ export class OffersService {
         description_ar: dto.description_ar,
         description_en: dto.description_en,
         discount_percentage: dto.discount_percentage,
+        original_price: dto.original_price,
+        sale_price: dto.sale_price,
         start_date: new Date(dto.start_date),
         end_date: new Date(dto.end_date),
         is_active: dto.is_active ?? true,
@@ -165,6 +181,22 @@ export class OffersService {
     const endDate = dto.end_date ? new Date(dto.end_date) : current.end_date;
     if (endDate <= startDate) {
       throw new BadRequestException('End date must be after start date');
+    }
+    const originalPrice = dto.original_price ?? current.original_price;
+    const salePrice = dto.sale_price ?? current.sale_price;
+    if ((originalPrice === null) !== (salePrice === null)) {
+      throw new BadRequestException(
+        'Original and sale prices must be provided together',
+      );
+    }
+    if (
+      originalPrice !== null &&
+      salePrice !== null &&
+      Number(salePrice) > Number(originalPrice)
+    ) {
+      throw new BadRequestException(
+        'Sale price cannot exceed the original price',
+      );
     }
     const configurationChanged =
       dto.offer_type !== undefined ||
@@ -206,6 +238,10 @@ export class OffersService {
         ...(dto.discount_percentage !== undefined && {
           discount_percentage: dto.discount_percentage,
         }),
+        ...(dto.original_price !== undefined && {
+          original_price: dto.original_price,
+        }),
+        ...(dto.sale_price !== undefined && { sale_price: dto.sale_price }),
         ...(dto.start_date !== undefined && {
           start_date: new Date(dto.start_date),
         }),

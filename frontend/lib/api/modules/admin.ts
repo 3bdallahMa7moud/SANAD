@@ -44,10 +44,17 @@ export interface AdminOffer {
   description_en: string | null;
   description_ar?: string | null;
   discount_percentage: DecimalValue;
+  original_price?: DecimalValue | null;
+  sale_price?: DecimalValue | null;
   start_date: string;
   end_date: string;
   is_active: boolean | null;
-  package: { id: number; name_en: string; name_ar?: string | null } | null;
+  package: {
+    id: number;
+    name_en: string;
+    name_ar?: string | null;
+    price?: DecimalValue;
+  } | null;
   trigger_package?: {
     id: number;
     name_en: string;
