@@ -132,7 +132,8 @@ export function OffersManager() {
   const offerType = useWatch({ control, name: 'type' });
 
   const updateDiscountFromPrices = () => {
-    const { originalPrice, salePrice } = getValues();
+    const originalPrice = Number(getValues('originalPrice'));
+    const salePrice = Number(getValues('salePrice'));
     if (originalPrice <= 0 || salePrice > originalPrice) return;
     setValue(
       'discount',
@@ -146,9 +147,10 @@ export function OffersManager() {
     if (!pkg) return;
     const originalPrice = Number(pkg.price);
     setValue('originalPrice', originalPrice);
+    const discount = Number(getValues('discount'));
     setValue(
       'salePrice',
-      Number((originalPrice * (1 - getValues('discount') / 100)).toFixed(2)),
+      Number((originalPrice * (1 - discount / 100)).toFixed(2)),
     );
   };
 
