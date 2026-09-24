@@ -1,1 +1,10 @@
-{"extends": "./tsconfig.json", "compilerOptions": {"incremental": false, "plugins": []}, "include": ["components/home/testimonials-carousel.tsx", "components/feedback/verified-review-card.tsx", "components/home/testimonials.tsx"], "exclude": ["node_modules"]}
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "incremental": false, "plugins": [] },
+  "include": [
+    "components/home/testimonials-carousel.tsx",
+    "components/feedback/verified-review-card.tsx",
+    "components/home/testimonials.tsx"
+  ],
+  "exclude": ["node_modules"]
+}
