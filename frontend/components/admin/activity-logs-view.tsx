@@ -27,7 +27,16 @@ import {
   Pager,
 } from './admin-ui';
 
-const EMPTY_FILTERS: Omit<ActivityLogQuery, 'page' | 'limit'> = {};
+type ActivityLogFilters = {
+  action?: string;
+  admin_id?: number;
+  end_date?: string;
+  search?: string;
+  start_date?: string;
+  table_name?: string;
+};
+
+const EMPTY_FILTERS: ActivityLogFilters = {};
 
 export function ActivityLogsView() {
   const _copy = useCopy();
@@ -35,8 +44,7 @@ export function ActivityLogsView() {
   const client = useQueryClient();
 
   const [page, setPage] = useState(1);
-  const [filters, setFilters] =
-    useState<Omit<ActivityLogQuery, 'page' | 'limit'>>(EMPTY_FILTERS);
+  const [filters, setFilters] = useState<ActivityLogFilters>(EMPTY_FILTERS);
   const [retentionDate, setRetentionDate] = useState('');
   const [deleting, setDeleting] = useState<ActivityLog | null>(null);
   const [purgeOpen, setPurgeOpen] = useState(false);
