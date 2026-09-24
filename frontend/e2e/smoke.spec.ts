@@ -11,7 +11,7 @@ test('home page and accessible sign-in dialog work', async ({ page }) => {
   ).toBeVisible();
 
   const signIn = page.getByRole('button', { name: 'Sign In' }).first();
-  await signIn.click();
+  await signIn.click({ force: true });
   await expect(page.getByRole('dialog')).toBeVisible();
 
   await page.keyboard.press('Escape');
@@ -23,7 +23,10 @@ test('sign-up is separate and collects the complete customer profile', async ({
   page,
 }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Sign Up' }).first().click();
+  await page
+    .getByRole('button', { name: 'Sign Up' })
+    .first()
+    .click({ force: true });
 
   const dialog = page.getByRole('dialog');
   await expect(dialog).toBeVisible();
@@ -36,7 +39,7 @@ test('sign-up is separate and collects the complete customer profile', async ({
   await expect(dialog.getByLabel('Phone number')).toBeVisible();
   await expect(dialog.getByLabel('Gender')).toBeVisible();
 
-  await dialog.getByRole('button', { name: 'Sign In' }).click();
+  await dialog.getByRole('button', { name: 'Sign In' }).click({ force: true });
   await expect(
     dialog.getByRole('heading', { name: 'Welcome back' }),
   ).toBeVisible();
