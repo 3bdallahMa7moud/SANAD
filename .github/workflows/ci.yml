@@ -166,6 +166,8 @@ jobs:
           TRUST_PROXY: "1"
           SWAGGER_ENABLED: "false"
           SMTP_HOST: smtp.example.test
+          SMTP_USER: ci-user
+          SMTP_PASSWORD: ci-password
           REQUIRE_EMAIL_VERIFICATION: "true"
           PAYMENT_PROVIDER: manual
         run: npm run preflight:production

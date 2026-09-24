@@ -94,7 +94,7 @@ describe('GoogleAuthButton', () => {
       expect.objectContaining({
         locale: 'en',
         shape: 'rectangular',
-        text: 'signin_with',
+        text: 'signup_with',
       }),
     );
   });
