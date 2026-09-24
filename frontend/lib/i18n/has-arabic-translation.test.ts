@@ -11,4 +11,12 @@ describe('hasArabicTranslation', () => {
     expect(hasArabicTranslation(undefined)).toBe(false);
     expect(hasArabicTranslation('Privacy Policy')).toBe(false);
   });
+
+  it('rejects English body copy under an Arabic CMS heading', () => {
+    expect(
+      hasArabicTranslation(
+        '<h2>قبول الشروط</h2><p>By placing an order, you agree to these terms and conditions.</p>',
+      ),
+    ).toBe(false);
+  });
 });
