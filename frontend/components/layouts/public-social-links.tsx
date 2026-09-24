@@ -270,9 +270,7 @@ export function PublicSocialLinks({ className = '' }: PublicSocialLinksProps) {
             target={isEmail ? undefined : '_blank'}
             title={_copy(item.label)}
           >
-            {IconComponent && (
-              <IconComponent className="size-4 shrink-0" />
-            )}
+            {IconComponent && <IconComponent className="size-4 shrink-0" />}
           </a>
         );
       })}

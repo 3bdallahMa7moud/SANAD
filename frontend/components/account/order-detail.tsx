@@ -22,21 +22,45 @@ function serviceInstructions(serviceName: string): Instruction[] {
   const name = serviceName.toLowerCase();
   if (name.includes('linkedin')) {
     return [
-      { en: 'Send your current LinkedIn profile link, if you have one.', ar: 'أرسل رابط حسابك الحالي على لينكدإن إن وُجد.' },
-      { en: 'Tell us the target job title, industry, and country.', ar: 'اكتب المسمى الوظيفي والمجال والدولة المستهدفة.' },
-      { en: 'If you do not have a profile yet, send your CV or career details to create it.', ar: 'إن لم يكن لديك حساب، أرسل السيرة الذاتية أو بياناتك المهنية لإنشائه.' },
+      {
+        en: 'Send your current LinkedIn profile link, if you have one.',
+        ar: 'أرسل رابط حسابك الحالي على لينكدإن إن وُجد.',
+      },
+      {
+        en: 'Tell us the target job title, industry, and country.',
+        ar: 'اكتب المسمى الوظيفي والمجال والدولة المستهدفة.',
+      },
+      {
+        en: 'If you do not have a profile yet, send your CV or career details to create it.',
+        ar: 'إن لم يكن لديك حساب، أرسل السيرة الذاتية أو بياناتك المهنية لإنشائه.',
+      },
     ];
   }
   if (name.includes('cv') || name.includes('resume')) {
     return [
-      { en: 'For a new CV: send your name, contact details, education, experience, skills, and certificates.', ar: 'لسيرة ذاتية جديدة: أرسل الاسم وبيانات التواصل والتعليم والخبرات والمهارات والشهادات.' },
-      { en: 'For an existing CV: send the current file and clearly list the required changes.', ar: 'لتعديل سيرة ذاتية موجودة: أرسل الملف الحالي واكتب التعديلات المطلوبة بوضوح.' },
-      { en: 'Also tell us the target job title and country, if applicable.', ar: 'اكتب أيضًا المسمى الوظيفي والدولة المستهدفة إن وُجدا.' },
+      {
+        en: 'For a new CV: send your name, contact details, education, experience, skills, and certificates.',
+        ar: 'لسيرة ذاتية جديدة: أرسل الاسم وبيانات التواصل والتعليم والخبرات والمهارات والشهادات.',
+      },
+      {
+        en: 'For an existing CV: send the current file and clearly list the required changes.',
+        ar: 'لتعديل سيرة ذاتية موجودة: أرسل الملف الحالي واكتب التعديلات المطلوبة بوضوح.',
+      },
+      {
+        en: 'Also tell us the target job title and country, if applicable.',
+        ar: 'اكتب أيضًا المسمى الوظيفي والدولة المستهدفة إن وُجدا.',
+      },
     ];
   }
   return [
-    { en: 'Send the documents and details related to your requested service.', ar: 'أرسل المستندات والبيانات المرتبطة بالخدمة المطلوبة.' },
-    { en: 'Tell us your target job title, industry, and country when relevant.', ar: 'اكتب المسمى الوظيفي والمجال والدولة المستهدفة عند الحاجة.' },
+    {
+      en: 'Send the documents and details related to your requested service.',
+      ar: 'أرسل المستندات والبيانات المرتبطة بالخدمة المطلوبة.',
+    },
+    {
+      en: 'Tell us your target job title, industry, and country when relevant.',
+      ar: 'اكتب المسمى الوظيفي والمجال والدولة المستهدفة عند الحاجة.',
+    },
   ];
 }
 
@@ -389,7 +413,9 @@ export function OrderDetail(props: Props) {
             <ul className="mt-3 grid gap-2 text-sm leading-6 text-muted-foreground">
               {instructions.map((instruction) => (
                 <li className="flex gap-2" key={instruction.en}>
-                  <span aria-hidden="true" className="text-success">•</span>
+                  <span aria-hidden="true" className="text-success">
+                    •
+                  </span>
                   {_copy(instruction.en, instruction.ar)}
                 </li>
               ))}

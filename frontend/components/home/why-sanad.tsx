@@ -25,10 +25,7 @@ export async function WhySanad() {
               <span aria-hidden="true" className="h-px w-8 bg-accent" />
               {_copy(t('eyebrow'))}
             </p>
-            <h2
-              className="type-h2 mt-5 max-w-[16ch]"
-              id="why-sanad-heading"
-            >
+            <h2 className="type-h2 mt-5 max-w-[16ch]" id="why-sanad-heading">
               {_copy(t('heading'))}
             </h2>
             <p className="mt-6 max-w-[34rem] text-base leading-7 text-foreground/75 sm:text-lg sm:leading-8">
@@ -36,9 +33,7 @@ export async function WhySanad() {
             </p>
           </div>
 
-          <ol
-            className="border-y border-border"
-          >
+          <ol className="border-y border-border">
             {reasons.map(({ description, title }, index) => (
               <li
                 className="grid gap-4 border-b border-border py-6 transition-colors duration-200 hover:bg-background/60 last:border-b-0 sm:grid-cols-[4rem_minmax(0,1fr)] sm:gap-6 sm:py-7"

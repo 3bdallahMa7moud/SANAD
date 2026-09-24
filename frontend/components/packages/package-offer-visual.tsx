@@ -20,8 +20,7 @@ export function PackageOfferFlag({
       )}
     >
       <Tag aria-hidden="true" className="size-4 shrink-0" />
-      {_copy('Save', 'خصم')}{' '}
-      <bdi dir="ltr">{_copy(discountPercentage)}%</bdi>
+      {_copy('Save', 'خصم')} <bdi dir="ltr">{_copy(discountPercentage)}%</bdi>
     </span>
   );
 }

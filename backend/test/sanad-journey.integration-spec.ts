@@ -14,6 +14,7 @@ describe('SANAD real customer-to-public journey', () => {
   let customerId: number | undefined;
   let otherCustomerId: number | undefined;
   let adminId: number | undefined;
+  let packageId: number | undefined;
   let orderId: number | undefined;
 
   const runId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -84,6 +85,19 @@ describe('SANAD real customer-to-public journey', () => {
     customerId = customer.id;
     otherCustomerId = otherCustomer.id;
     adminId = admin.id;
+    const testPackage = await prisma.packages.create({
+      data: {
+        name_ar: 'باقة اختبار رحلة العميل',
+        name_en: `Customer journey test package ${runId}`,
+        description_ar: 'باقة مخصصة لاختبار رحلة العميل المتكاملة.',
+        description_en: 'A package created for the customer journey integration test.',
+        price: 199,
+        is_active: true,
+        sort_order: 0,
+        delivery_days: 3,
+      },
+    });
+    packageId = testPackage.id;
   });
 
   afterAll(async () => {
@@ -101,6 +115,9 @@ describe('SANAD real customer-to-public journey', () => {
           ],
         },
       });
+      if (packageId) {
+        await prisma.packages.delete({ where: { id: packageId } });
+      }
       const ids = [customerId, otherCustomerId, adminId].filter(
         (id): id is number => id !== undefined,
       );
@@ -112,11 +129,9 @@ describe('SANAD real customer-to-public journey', () => {
   });
 
   it('completes checkout, ownership, administration, review moderation, and public display', async () => {
-    const packageRecord = await prisma.packages.findFirst({
-      where: { is_active: true },
-      orderBy: { id: 'asc' },
+    const packageRecord = await prisma.packages.findUniqueOrThrow({
+      where: { id: packageId! },
     });
-    expect(packageRecord).not.toBeNull();
 
     const login = async (email: string) => {
       const response = await request(app.getHttpServer())

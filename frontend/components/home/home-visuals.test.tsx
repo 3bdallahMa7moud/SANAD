@@ -200,7 +200,6 @@ describe('home visual sections', () => {
       'aria-hidden',
       'true',
     );
-
   });
 
   it('duplicates a larger feedback list for a seamless loop', () => {
