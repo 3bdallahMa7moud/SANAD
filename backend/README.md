@@ -15,7 +15,8 @@ REST API مبنية باستخدام NestJS وTypeScript وPostgreSQL وPrisma. 
 - PostgreSQL 14 أو أحدث
 - npm
 
-Redis موجود في Docker Compose للتوسع المستقبلي، لكن rate limiting الحالي يستخدم PostgreSQL ذريًا ليعمل بأمان مع أكثر من نسخة للخادم.
+يستخدم rate limiting الحالي PostgreSQL ذريًا ليعمل بأمان مع أكثر من نسخة
+للخادم، ولا يحتاج Redis.
 
 ## الإعداد
 
@@ -48,9 +49,9 @@ npm run start:dev
 - Swagger: `http://localhost:3001/api/docs` عند `SWAGGER_ENABLED=true` خارج الإنتاج
 - health: `GET /api/v1/health`
 
-في الإنتاج يجب إعداد مزوّد بريد (`RESEND_API_KEY` أو SMTP)، وتحديد CORS صراحةً. يمكن استخدام R2/S3 للملفات أو التخزين المحلي مع Volume دائم مركّب على `/app/uploads`؛ لا تضع إعدادات R2 جزئية. التطبيق يرفض الأسرار القصيرة أو الافتراضية عند الإقلاع.
+في الإنتاج يجب إعداد مزوّد بريد (`RESEND_API_KEY` أو SMTP)، وتحديد CORS صراحةً. يمكن استخدام R2/S3 للملفات أو التخزين المحلي الدائم في `uploads/`؛ لا تضع إعدادات R2 جزئية. التطبيق يرفض الأسرار القصيرة أو الافتراضية عند الإقلاع.
 
-للنشر على أي خادم Node.js أو Docker راجع [`../DEPLOYMENT.md`](../DEPLOYMENT.md).
+للنشر على خادم Node.js راجع [`../DEPLOYMENT.md`](../DEPLOYMENT.md).
 
 ## إنشاء أول مدير
 

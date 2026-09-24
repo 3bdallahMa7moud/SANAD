@@ -263,13 +263,7 @@ export function PublicSocialLinks({ className = '' }: PublicSocialLinksProps) {
             title={_copy(item.label)}
           >
             {IconComponent && (
-              <IconComponent
-                className={
-                  item.platform === 'tiktok'
-                    ? 'size-5 shrink-0'
-                    : 'size-4 shrink-0'
-                }
-              />
+              <IconComponent className="size-4 shrink-0" />
             )}
           </a>
         );

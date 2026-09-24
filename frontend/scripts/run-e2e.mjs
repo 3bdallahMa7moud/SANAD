@@ -7,7 +7,7 @@ import { setTimeout as delay } from 'node:timers/promises';
 const root = process.cwd();
 const standaloneRoot = resolve(root, '.next/standalone');
 
-// Match the production Docker image layout so E2E exercises the standalone
+// Match the production standalone layout so E2E exercises the standalone
 // server and its static assets, not Next's incompatible `next start` command.
 cpSync(resolve(root, 'public'), resolve(standaloneRoot, 'public'), {
   recursive: true,

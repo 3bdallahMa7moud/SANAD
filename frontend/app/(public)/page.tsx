@@ -1,7 +1,6 @@
 import { getLocalizedMetadata } from '@/lib/i18n/metadata';
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
-
 import { CareerStory } from '@/components/home/career-story';
 import { FeaturedPackages } from '@/components/home/featured-packages';
 import { FinalCta } from '@/components/home/final-cta';
@@ -12,9 +11,7 @@ import { PremiumCta } from '@/components/home/premium-cta';
 import { Testimonials } from '@/components/home/testimonials';
 import { UaeCareerFocus } from '@/components/home/uae-career-focus';
 import { WhySanad } from '@/components/home/why-sanad';
-
 import { getCopy } from '@/lib/i18n/server-copy';
-
 export const dynamic = 'force-dynamic';
 
 export async function generateMetadata(): Promise<Metadata> {

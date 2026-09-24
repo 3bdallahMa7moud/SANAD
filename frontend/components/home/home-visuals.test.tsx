@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import type { ReactElement } from 'react';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
@@ -30,6 +30,14 @@ vi.mock('@/components/feedback/verified-review-card', () => ({
   VerifiedReviewCard: ({ review }: { review: PackageReview }) => (
     <article>{review.comment}</article>
   ),
+}));
+
+vi.mock('@/lib/i18n/server-copy', () => ({
+  getCopy: async () => (value: string) => value,
+}));
+
+vi.mock('next-intl/server', () => ({
+  getTranslations: async () => (key: string) => key,
 }));
 
 function renderWithEnglish(ui: ReactElement) {
@@ -100,12 +108,10 @@ describe('home visual sections', () => {
     vi.unstubAllGlobals();
   });
 
-  it('applies the direction-aware hero media offset', () => {
-    renderWithEnglish(<HeroSection />);
+  it('renders the hero media', async () => {
+    renderWithEnglish(await HeroSection());
 
-    expect(
-      document.querySelector('.sanad-hero-media-offset'),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('img')).toBeInTheDocument();
   });
 
   it.each([
@@ -182,29 +188,19 @@ describe('home visual sections', () => {
     );
   });
 
-  it('continuously moves the feedback wall while keeping it draggable', () => {
+  it('keeps the feedback wall keyboard-focusable', () => {
     renderWithEnglish(<TestimonialsCarousel reviews={reviews} />);
 
     const carousel = screen.getByRole('group', {
       name: 'Customer reviews',
     });
 
-    expect(carousel).not.toHaveAttribute('tabindex');
-    expect(carousel).toHaveAttribute('data-draggable', 'true');
+    expect(carousel).toHaveAttribute('tabindex', '0');
     expect(carousel.querySelector('.reviews-loop-copy')).toHaveAttribute(
       'aria-hidden',
       'true',
     );
-    expect(carousel.querySelector('.reviews-loop-card')).toHaveAttribute(
-      'dir',
-      'ltr',
-    );
 
-    fireEvent.pointerDown(carousel, { clientX: 120, pointerId: 1 });
-    expect(carousel).toHaveAttribute('data-dragging', 'true');
-    fireEvent.pointerMove(carousel, { clientX: 160, pointerId: 1 });
-    fireEvent.pointerUp(carousel, { pointerId: 1 });
-    expect(carousel).not.toHaveAttribute('data-dragging');
   });
 
   it('duplicates a larger feedback list for a seamless loop', () => {

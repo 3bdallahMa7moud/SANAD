@@ -1,5 +1,5 @@
 #!/bin/sh
-# Deploy SANAD to the existing native Node.js services (systemd), not Docker.
+# Deploy SANAD to the existing native Node.js services managed by systemd.
 # Backs up PostgreSQL before migrations and verifies both services afterward.
 set -eu
 umask 027
@@ -73,7 +73,7 @@ NODE
 
 echo "This will build and restart the native Node.js API and web services."
 echo "It will back up the database before running Prisma migrations."
-echo "No Docker commands or Admin/CMS edits will be performed."
+echo "No Admin/CMS edits will be performed."
 printf 'Continue with deployment? [y/N] '
 read answer
 case "$answer" in

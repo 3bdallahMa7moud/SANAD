@@ -5,8 +5,15 @@ backend/coverage/
 backend/*.tsbuildinfo
 frontend/node_modules/
 frontend/dist/
+frontend/.next/
 .native-runtime/
 .migration-backups/
+.work/
+
+# Local build snapshots and recovery copies
+backend/dist.before-*/
+backend/src/build/
+backend/src/*.before-*
 
 # Local configuration and runtime data
 **/.env

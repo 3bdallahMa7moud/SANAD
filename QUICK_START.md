@@ -14,10 +14,6 @@ npx prisma generate
 npm run start:dev
 ```
 
-يمكن تشغيل PostgreSQL وRedis محليًا عبر:
-
-```bash
-docker compose up -d
-```
-
-يجب ضبط `POSTGRES_PASSWORD` و`REDIS_PASSWORD` قبل تشغيل Docker Compose. لا توجد حسابات أو كلمات مرور افتراضية. لإنشاء أول مدير، اضبط `ADMIN_EMAIL` و`ADMIN_PASSWORD` ثم شغّل `npm run db:seed-admin`.
+شغّل PostgreSQL محليًا أو استخدم قاعدة PostgreSQL مُدارة، ثم اجعل
+`DATABASE_URL` يشير إليها في ملف `.env`. لإنشاء أول مدير، اضبط
+`ADMIN_EMAIL` و`ADMIN_PASSWORD` ثم شغّل `npm run db:seed-admin`.

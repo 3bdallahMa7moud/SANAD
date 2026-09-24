@@ -11,6 +11,10 @@ import {
   type AppLocale,
 } from '@/components/providers/locale-provider';
 import { getSiteUrl } from '@/lib/env/public-env';
+import {
+  getOrganizationStructuredData,
+  serializeJsonLd,
+} from '@/lib/seo/structured-data';
 import arabicMessages from '@/messages/ar.json';
 import englishMessages from '@/messages/en.json';
 
@@ -46,12 +50,35 @@ export async function generateMetadata(): Promise<Metadata> {
     ? 'خدمات احترافية لكتابة السيرة الذاتية وتحسين ملف لينكدإن والمستندات المهنية لسوق العمل في الإمارات والخليج.'
     : 'Professional CV, LinkedIn, and career-document services for the UAE and Gulf job market.';
   const appName = isAr ? 'سند' : 'SANAD';
+  const keywords = isAr
+    ? [
+        'سند',
+        'SANAD',
+        'Sanad CV',
+        'Saanad',
+        'خدمات السيرة الذاتية',
+        'كتابة سيرة ذاتية احترافية',
+        'تحسين لينكدإن',
+      ]
+    : [
+        'SANAD',
+        'Sanad CV',
+        'Saanad',
+        'Saanad CV',
+        'professional CV writing UAE',
+        'LinkedIn profile optimization UAE',
+        'career services UAE',
+      ];
 
   return await getLocalizedMetadata({
     metadataBase: new URL(getSiteUrl()),
     applicationName: appName,
     title,
     description,
+    keywords,
+    category: 'Career services',
+    creator: 'SANAD',
+    publisher: 'SANAD',
     manifest: '/manifest.webmanifest',
     openGraph: {
       type: 'website',
@@ -59,11 +86,22 @@ export async function generateMetadata(): Promise<Metadata> {
       title,
       description,
       url: '/',
+      images: [
+        {
+          url: '/images/home/hero-career-profile.webp',
+          width: 1754,
+          height: 896,
+          alt: isAr
+            ? 'خدمات سند للسيرة الذاتية والتطوير المهني في الإمارات'
+            : 'SANAD professional CV and career services in the UAE',
+        },
+      ],
     },
     twitter: {
-      card: 'summary',
+      card: 'summary_large_image',
       title,
       description,
+      images: ['/images/home/hero-career-profile.webp'],
     },
   });
 }
@@ -76,6 +114,10 @@ export default async function RootLayout({
   const locale = (await getLocale()) as AppLocale;
   const isRtl = locale === 'ar';
   const theme = (await cookies()).get('SANAD_THEME')?.value;
+  const structuredData = getOrganizationStructuredData({
+    locale,
+    siteUrl: getSiteUrl(),
+  });
 
   return (
     <html
@@ -93,6 +135,12 @@ export default async function RootLayout({
         />
       </head>
       <body>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: serializeJsonLd(structuredData),
+          }}
+          type="application/ld+json"
+        />
         <LocaleProvider
           initialLocale={locale}
           messagesByLocale={{ ar: arabicMessages, en: englishMessages }}

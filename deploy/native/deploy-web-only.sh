@@ -1,6 +1,6 @@
 #!/bin/sh
 # Deploy the current frontend source to the native Node.js web service only.
-# It never rebuilds or restarts the API, database, Docker, or Nginx.
+# It never rebuilds or restarts the API, database, or Nginx.
 set -eu
 umask 027
 

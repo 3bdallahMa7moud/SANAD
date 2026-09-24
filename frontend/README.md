@@ -2,7 +2,7 @@
 
 Next.js frontend for the SANAD career-services platform.
 
-The application supports any Node.js or Docker host; it is not tied to a specific provider. See [`../DEPLOYMENT.md`](../DEPLOYMENT.md) for the complete self-hosting flow.
+The application supports any Node.js host and is not tied to a specific provider. See [`../DEPLOYMENT.md`](../DEPLOYMENT.md) for the complete self-hosting flow.
 
 ## Local development
 
@@ -17,7 +17,8 @@ The frontend starts at `http://localhost:3000`. The local API normally runs at `
 
 ## Production
 
-The production image uses the Next.js `standalone` output and runs as a non-root user. Build it through the root Compose file or directly from this directory.
+The production deployment uses the Next.js `standalone` output and runs through
+the native systemd service included in `deploy/native/`.
 
 For a direct Node.js deployment, run `npm run build` and then start the generated server with `HOSTNAME=0.0.0.0 PORT=3000 npm start`.
 
@@ -30,7 +31,8 @@ Required public build variables are documented in [`.env.production.example`](./
 
 Every public URL must use HTTPS outside localhost. The API URL must include `/api/v1`.
 
-`NEXT_PUBLIC_*` values are embedded during `npm run build`, so rebuild the image after changing them.
+`NEXT_PUBLIC_*` values are embedded during `npm run build`, so rebuild and
+restart the frontend after changing them.
 
 ## Verification
 

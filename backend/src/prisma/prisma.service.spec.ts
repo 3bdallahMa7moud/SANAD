@@ -26,7 +26,7 @@ describe('PrismaService', () => {
   });
 
   // Starting with an unreachable database and serving 500s is worse than not
-  // starting at all: the container fails its probe and the deploy rolls back.
+  // starting at all: systemd keeps the service from accepting bad traffic.
   it('rethrows a startup connection failure so the process fails fast', async () => {
     connect.mockRejectedValue(new Error('ECONNREFUSED 127.0.0.1:5432'));
 

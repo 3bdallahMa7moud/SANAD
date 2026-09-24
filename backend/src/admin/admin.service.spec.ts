@@ -16,7 +16,11 @@ describe('AdminService', () => {
     tx = {
       users: { update: vi.fn() },
       user_sessions: { updateMany: vi.fn() },
-      admin_activity_log: { create: vi.fn() },
+      admin_activity_log: {
+        create: vi.fn(),
+        delete: vi.fn(),
+        deleteMany: vi.fn(),
+      },
     };
     prisma = {
       users: {
@@ -40,6 +44,7 @@ describe('AdminService', () => {
       admin_activity_log: {
         findMany: vi.fn().mockResolvedValue([]),
         count: vi.fn().mockResolvedValue(0),
+        findUnique: vi.fn(),
       },
       $transaction: vi.fn(async (input: any) =>
         typeof input === 'function' ? input(tx) : Promise.all(input),
@@ -459,8 +464,29 @@ describe('AdminService', () => {
 
       expect(prisma.admin_activity_log.findMany.mock.calls[0][0].where).toEqual(
         {
-          action: 'update_order_status',
-          table_name: 'orders',
+          action: { contains: 'update_order_status', mode: 'insensitive' },
+          table_name: { contains: 'orders', mode: 'insensitive' },
+        },
+      );
+    });
+
+    it('filters by acting administrator and an inclusive date range', async () => {
+      await service.getActivityLogs({
+        page: 1,
+        limit: 20,
+        skip: 0,
+        admin_id: 11,
+        start_date: '2026-01-01',
+        end_date: '2026-01-31',
+      } as never);
+
+      expect(prisma.admin_activity_log.findMany.mock.calls[0][0].where).toEqual(
+        {
+          admin_id: 11,
+          created_at: {
+            gte: new Date('2026-01-01'),
+            lte: new Date('2026-01-31T23:59:59.999Z'),
+          },
         },
       );
     });
@@ -476,6 +502,51 @@ describe('AdminService', () => {
       expect(
         prisma.admin_activity_log.findMany.mock.calls[0][0].where.OR,
       ).toHaveLength(3);
+    });
+  });
+
+  describe('activity log retention', () => {
+    it('deletes one log and leaves an audit trail of that deletion', async () => {
+      prisma.admin_activity_log.findUnique.mockResolvedValue({
+        id: 8,
+        action: 'update_order_status',
+        table_name: 'orders',
+        record_id: 22,
+      });
+
+      await service.deleteActivityLog(8, 4);
+
+      expect(tx.admin_activity_log.delete).toHaveBeenCalledWith({
+        where: { id: 8 },
+      });
+      expect(tx.admin_activity_log.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          admin_id: 4,
+          action: 'delete_activity_log',
+          record_id: 8,
+        }),
+      });
+    });
+
+    it('requires a cutoff in practice by purging only logs before it', async () => {
+      tx.admin_activity_log.deleteMany.mockResolvedValue({ count: 3 });
+
+      const result = await service.purgeActivityLogs(
+        { before_date: '2026-01-01' } as never,
+        4,
+      );
+
+      expect(tx.admin_activity_log.deleteMany).toHaveBeenCalledWith({
+        where: { created_at: { lt: new Date('2026-01-01') } },
+      });
+      expect(tx.admin_activity_log.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          admin_id: 4,
+          action: 'purge_activity_logs',
+          changes: expect.objectContaining({ deleted_count: 3 }),
+        }),
+      });
+      expect(result.deleted_count).toBe(3);
     });
   });
 });

@@ -324,7 +324,7 @@ export function validate(config: Record<string, unknown>) {
       Boolean(value?.trim()),
     );
 
-    // A persistent volume can preserve the built-in `/app/uploads` storage.
+    // Persistent local storage can preserve the built-in `uploads` directory.
     // R2/S3 remains optional, but when it is configured every field must be
     // present so a half-configured client can never start accepting uploads.
     if (
@@ -336,7 +336,7 @@ export function validate(config: Record<string, unknown>) {
         !validatedConfig.R2_PUBLIC_URL)
     ) {
       throw new Error(
-        'R2/S3 configuration is incomplete: provide account ID or endpoint, access key, secret, bucket, and public URL; or remove all R2_* variables to use local storage backed by a persistent volume.',
+        'R2/S3 configuration is incomplete: provide account ID or endpoint, access key, secret, bucket, and public URL; or remove all R2_* variables to use persistent local storage.',
       );
     }
     if (hasStorageConfiguration) {

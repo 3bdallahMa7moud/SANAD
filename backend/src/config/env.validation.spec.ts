@@ -155,7 +155,7 @@ describe('environment validation', () => {
     ).toThrow(/SWAGGER_ENABLED=false/);
   });
 
-  it('allows volume-backed local storage but rejects incomplete R2/S3 configuration', () => {
+  it('allows persistent local storage but rejects incomplete R2/S3 configuration', () => {
     expect(
       validate({
         ...valid,

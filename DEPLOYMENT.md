@@ -1,33 +1,38 @@
 # دليل نشر SANAD على استضافة عامة
 
-هذا الدليل غير مرتبط بـ Vercel أو Railway. الطريقة الموصى بها هي تشغيل المشروع على خادم Linux أو أي مزوّد يدعم Docker Compose.
+هذا الدليل غير مرتبط بـ Vercel أو Railway. الطريقة الموصى بها هي تشغيل
+المشروع على خادم Linux يدعم Node.js وsystemd.
 
 ## البنية
 
 - `web`: واجهة Next.js تعمل كخادم Node.js كامل، وليست Static Export.
 - `api`: واجهة NestJS الخلفية.
-- `postgres`: قاعدة PostgreSQL مع Volume دائم.
+- `postgres`: قاعدة PostgreSQL تعمل كخدمة نظام أو قاعدة مُدارة.
 - `uploads`: تخزين دائم للملفات عند عدم استخدام R2/S3.
-- `database_backups`: Volume لنسخ قاعدة البيانات.
-- Nginx أو Reverse Proxy مشابه: إنهاء HTTPS وتوجيه الدومينات إلى الحاويات المحلية.
+- `database_backups`: مجلد نسخ احتياطية خارج مستودع المشروع.
+- Nginx أو Reverse Proxy مشابه: إنهاء HTTPS وتوجيه الدومينات إلى خدمات Node.js المحلية.
 
-الخدمات ترتبط بالمضيف على `127.0.0.1` فقط؛ لا يتم كشف Node.js أو PostgreSQL مباشرة للإنترنت.
+خدمتا Node.js ترتبطان بالمضيف على `127.0.0.1` فقط؛ لا يتم كشفهما أو
+PostgreSQL مباشرة للإنترنت.
 
 ## متطلبات الخادم
 
 - Linux حديث بذاكرة 2 GB على الأقل، ويفضل 4 GB للبناء على نفس الخادم.
-- Docker Engine وDocker Compose v2.
+- Node.js 20 أو أحدث وnpm.
+- PostgreSQL 14 أو أحدث يعمل محليًا.
+- systemd وrsync وcurl وعميل PostgreSQL (`pg_dump` و`pg_restore`).
 - دومين يشير إلى الخادم.
 - Nginx ووسيلة إصدار شهادة TLS مثل Certbot، أو Reverse Proxy مُدار.
 - مساحة خارج الخادم لنسخ احتياطية دورية.
 
 ## 1. إعداد متغيرات الإنتاج
 
-من جذر المشروع:
+على الخادم، أنشئ ملف البيئة خارج المشروع:
 
 ```bash
-cp .env.production.example .env.production
-chmod 600 .env.production
+sudo install -d -m 750 /etc/sanad
+sudo cp backend/.env.production.example /etc/sanad/sanad.env
+sudo chmod 640 /etc/sanad/sanad.env
 ```
 
 استبدل كل قيمة `replace-with-*` واضبط على الأقل:
@@ -45,35 +50,51 @@ chmod 600 .env.production
 - `NEXT_PUBLIC_CHECKOUT_MODE=manual`
 - مزود بريد عبر `RESEND_API_KEY` أو إعدادات `SMTP_*`
 
-لاستخدام Gmail SMTP، اضبط `SMTP_HOST=smtp.gmail.com` و`SMTP_PORT=465` و`SMTP_SECURE=true`، ثم ضع عنوان حساب Google الكامل في `SMTP_USER` و**كلمة مرور تطبيق Google** في `SMTP_PASSWORD` (وليست كلمة مرور الحساب). يتطلب إنشاء كلمة مرور التطبيق تفعيل التحقق بخطوتين في الحساب. يرسل التطبيق افتراضيًا من `SMTP_USER`؛ استخدم `SMTP_FROM_EMAIL` فقط إذا كان العنوان مفعّلًا كاسم إرسال بديل في Gmail. يمكن ترك `RESEND_API_KEY` فارغًا، أو ضبطه كمزوّد احتياطي تلقائي عند فشل SMTP. بعد أي تعديل لبيانات البريد، أعد إنشاء حاوية `api` (إعادة التشغيل وحدها لا تعيد تحميل ملف البيئة) وأرسل رسالة اختبار إلى صندوق تملكه للتحقق من التسليم.
+لاستخدام Gmail SMTP، اضبط `SMTP_HOST=smtp.gmail.com` و`SMTP_PORT=465` و`SMTP_SECURE=true`، ثم ضع عنوان حساب Google الكامل في `SMTP_USER` و**كلمة مرور تطبيق Google** في `SMTP_PASSWORD` (وليست كلمة مرور الحساب). يتطلب إنشاء كلمة مرور التطبيق تفعيل التحقق بخطوتين في الحساب. يرسل التطبيق افتراضيًا من `SMTP_USER`؛ استخدم `SMTP_FROM_EMAIL` فقط إذا كان العنوان مفعّلًا كاسم إرسال بديل في Gmail. يمكن ترك `RESEND_API_KEY` فارغًا، أو ضبطه كمزوّد احتياطي تلقائي عند فشل SMTP. بعد أي تعديل لبيانات البريد، أعد تشغيل خدمة `sanad-api` وأرسل رسالة اختبار إلى صندوق تملكه للتحقق من التسليم.
 
-ولّد الأسرار بقيم عشوائية مختلفة، طول كل منها 32 بايت على الأقل. لا تحفظ ملف `.env.production` الحقيقي داخل Git.
+ولّد الأسرار بقيم عشوائية مختلفة، طول كل منها 32 بايت على الأقل. لا تحفظ ملف
+`/etc/sanad/sanad.env` الحقيقي داخل Git.
 
-إذا كانت الملفات ستُحفظ محليًا، اترك جميع متغيرات `R2_*` فارغة وسيستخدم النظام Volume باسم `uploads`. أما عند استخدام R2/S3، فيجب إدخال إعداداته كاملة.
+إذا كانت الملفات ستُحفظ محليًا، اترك جميع متغيرات `R2_*` فارغة وسيستخدم
+النظام المجلد `backend/uploads`. أما عند استخدام R2/S3، فيجب إدخال إعداداته كاملة.
 
-متغيرات `NEXT_PUBLIC_*` تُدمج داخل الواجهة أثناء `docker compose build`. أي تغيير فيها يحتاج إعادة بناء حاوية `web`، وليس مجرد إعادة تشغيلها.
+متغيرات `NEXT_PUBLIC_*` تُدمج داخل الواجهة أثناء `npm run build`. أي تغيير
+فيها يحتاج إعادة بناء الواجهة ثم نشرها، وليس مجرد إعادة تشغيل الخدمة.
 
-## 2. فحص الإعدادات قبل النشر
+## 2. إعداد خدمات Node.js
 
-تحقق أولًا من ملف Compose:
+انسخ وحدات systemd الموجودة في المشروع، ثم فعّلها. يجب إنشاء مستخدم نظام
+غير تفاعلي باسم `sanad` أولًا، وضبط ملكية `/opt/SANAD` و`/var/backups/sanad`
+له حسب سياسة الخادم.
 
 ```bash
-SANAD_ENV_FILE=.env.production docker compose --env-file .env.production -f docker-compose.production.yml config --quiet
+sudo install -m 644 deploy/native/sanad-api.service /etc/systemd/system/
+sudo install -m 644 deploy/native/sanad-web.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable sanad-api sanad-web
 ```
 
-ابنِ الصور:
+ضع ملف البيئة المكتمل في `/etc/sanad/sanad.env` بصلاحية قراءة مستخدم الخدمة
+فقط. ابدأ من `backend/.env.production.example` وأضف متغيرات الواجهة العامة
+من `frontend/.env.production.example` في الملف نفسه. تُقرأ القيم العامة عند
+بناء الواجهة، لذلك يجب وجود الملف قبل أول نشر.
+
+## 3. فحص الإعدادات والنشر
+
+يفحص سكربت النشر بيئة الإنتاج، ويبني الـAPI والواجهة، وينشئ نسخة من قاعدة
+البيانات، ثم يطبق مهاجرات Prisma ويعيد تشغيل خدمتي systemd:
 
 ```bash
-docker compose --env-file .env.production -f docker-compose.production.yml build
+sudo INSTALL_DEPENDENCIES=1 ./deploy/deploy-prelaunch.sh
 ```
 
-حاوية الـAPI تشغّل فحص بيئة الإنتاج ثم `prisma migrate deploy` تلقائيًا قبل بدء التطبيق. إذا كانت قيمة ناقصة أو غير آمنة فسيتوقف النشر بدل تشغيل إعداد غير صالح.
+تُشغّل خدمة الـAPI فحص بيئة الإنتاج و`prisma migrate deploy` كذلك قبل بدء
+التطبيق. إذا كانت قيمة ناقصة أو غير آمنة فسيتوقف النشر بدل تشغيل إعداد غير صالح.
 
-## 3. تشغيل المنظومة
+تحقق من الخدمات:
 
 ```bash
-docker compose --env-file .env.production -f docker-compose.production.yml up -d
-docker compose --env-file .env.production -f docker-compose.production.yml ps
+sudo systemctl status sanad-api sanad-web --no-pager
 ```
 
 تحقق محليًا على الخادم:
@@ -101,17 +122,15 @@ sudo systemctl reload nginx
 
 المهاجرات تعمل تلقائيًا، لكن يجب التأكد مرة واحدة من وجود الباقات المطلوبة وحساب `super_admin`. نفّذ أوامر الـseed فقط بعد مراجعة أنها لن تستبدل بيانات موجودة:
 
-```bash
-docker compose --env-file .env.production -f docker-compose.production.yml exec api npm run db:seed-packages
-docker compose --env-file .env.production -f docker-compose.production.yml exec api npm run db:seed-admin
-```
+شغّل أوامر الـseed من مجلد `backend/` باستخدام مستخدم الخدمة وبيئة الإنتاج
+التي تتضمن `DATABASE_URL` الصحيح.
 
 ## 6. النسخ الاحتياطي
 
-لإنشاء نسخة داخل Volume الدائم:
+لإنشاء نسخة في مجلد النسخ الاحتياطي الدائم (`/var/backups/sanad` افتراضيًا):
 
 ```bash
-docker compose --env-file .env.production -f docker-compose.production.yml exec api npm run db:backup
+sudo -u sanad sh -c 'cd /opt/SANAD/backend && npm run db:backup'
 ```
 
 النسخة وحدها على نفس الخادم لا تكفي. انسخ ملفات `.dump` و`.sha256` دوريًا إلى Object Storage أو خادم آخر، وفعّل Cron أو أداة النسخ الخاصة بمزوّد الاستضافة.
@@ -119,10 +138,10 @@ docker compose --env-file .env.production -f docker-compose.production.yml exec 
 اختبر الاستعادة دوريًا على قاعدة منفصلة فقط:
 
 ```bash
-docker compose --env-file .env.production -f docker-compose.production.yml exec \
-  -e RESTORE_CONFIRM=restore-test-database \
-  -e RESTORE_DATABASE_URL=postgresql://user:password@test-db:5432/sanad_restore \
-  api npm run db:restore:check -- /app/backups/backup-file.dump
+cd /opt/SANAD/backend
+RESTORE_CONFIRM=restore-test-database \
+RESTORE_DATABASE_URL=postgresql://user:password@test-db:5432/sanad_restore \
+npm run db:restore:check -- /var/backups/sanad/backup-file.dump
 ```
 
 السكريبت يرفض الاستعادة إذا كانت قاعدة الاختبار هي نفس قاعدة الإنتاج.
@@ -131,15 +150,14 @@ docker compose --env-file .env.production -f docker-compose.production.yml exec 
 
 ```bash
 git pull --ff-only
-docker compose --env-file .env.production -f docker-compose.production.yml build
-docker compose --env-file .env.production -f docker-compose.production.yml up -d
+sudo ./deploy/deploy-prelaunch.sh
 ```
 
 راجع حالة الخدمات والـlogs بعد كل تحديث:
 
 ```bash
-docker compose --env-file .env.production -f docker-compose.production.yml ps
-docker compose --env-file .env.production -f docker-compose.production.yml logs --tail=200 api web
+sudo systemctl status sanad-api sanad-web --no-pager
+sudo journalctl -u sanad-api -u sanad-web -n 200 --no-pager
 ```
 
 ## 8. بوابة القبول قبل فتح الموقع
@@ -149,7 +167,7 @@ docker compose --env-file .env.production -f docker-compose.production.yml logs 
 - `/health/live` و`/health/ready` يعملان من الدومين النهائي.
 - التسجيل وتسجيل الدخول والتحقق بالبريد تعمل برسائل حقيقية.
 - CORS يسمح للدومين النهائي فقط.
-- رفع ملف وتنزيله ينجحان، ويظل الملف موجودًا بعد إعادة تشغيل الحاويات.
+- رفع ملف وتنزيله ينجحان، ويظل الملف موجودًا بعد إعادة تشغيل الخدمات.
 - حساب العميل لا يستطيع الوصول إلى لوحة الإدارة.
 - إنشاء طلب جديد ينتهي بحالة `pending_payment` ويعرض زر واتساب، ولا ينشئ دفعة صفرية أو يفتح صفحة البطاقة/Apple Pay.
 - صفحة `/checkout/pay` تعيد 404 في وضع `manual` مع بقاء كودها محفوظًا لإعادة تفعيل بوابة الدفع لاحقًا.

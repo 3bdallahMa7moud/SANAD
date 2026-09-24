@@ -16,6 +16,7 @@ export { authApi } from './modules/auth';
 export { adminApi, adminKeys } from './modules/admin';
 export type {
   ActivityLog,
+  ActivityLogQuery,
   AdminCoupon,
   AdminCustomer,
   AdminOffer,
@@ -26,6 +27,7 @@ export type {
   CmsPage,
   DashboardData,
   DashboardQuery,
+  PurgeActivityLogsInput,
   SiteMedia,
   SiteSetting,
 } from './modules/admin';

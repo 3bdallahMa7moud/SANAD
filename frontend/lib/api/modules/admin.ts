@@ -223,6 +223,21 @@ export interface ActivityLog {
   admin: { id: number; name: string; email: string };
 }
 
+export type ActivityLogQuery = Query & {
+  action?: string;
+  table_name?: string;
+  admin_id?: number;
+  start_date?: string;
+  end_date?: string;
+};
+
+export type PurgeActivityLogsInput = Omit<
+  ActivityLogQuery,
+  'page' | 'limit' | 'sortBy' | 'sortOrder'
+> & {
+  before_date: string;
+};
+
 export interface DashboardData {
   payment_mode: string;
   period: {
@@ -661,12 +676,19 @@ export const adminApi = {
         'PATCH /admin/settings',
       ),
   },
-  activityLogs: async (params: Query = {}, options: Options = {}) =>
+  activityLogs: async (params: ActivityLogQuery = {}, options: Options = {}) =>
     paginated<ActivityLog>(
       await api.get<unknown>('/admin/activity-logs', {
         params,
         signal: options.signal,
       }),
       'GET /admin/activity-logs',
+    ),
+  removeActivityLog: async (id: number) =>
+    api.delete<unknown>(`/admin/activity-logs/${id}`),
+  purgeActivityLogs: async (input: PurgeActivityLogsInput) =>
+    object<{ deleted_count: number; message: string }>(
+      await api.post<unknown>('/admin/activity-logs/purge', input),
+      'POST /admin/activity-logs/purge',
     ),
 };

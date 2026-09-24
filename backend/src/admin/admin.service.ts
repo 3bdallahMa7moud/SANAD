@@ -10,8 +10,10 @@ import {
   UpdateCustomerStatusDto,
   ActivityLogFilterDto,
   DashboardFilterDto,
+  PurgeActivityLogsDto,
 } from './dto';
 import { createPaginatedResponse } from '../common/utils';
+import type { Prisma } from '@prisma/client';
 
 interface DashboardDateWindow {
   start: Date | null;
@@ -607,16 +609,7 @@ export class AdminService {
 
   // 5. Activity Logs
   async getActivityLogs(query: ActivityLogFilterDto) {
-    const where: Record<string, any> = {};
-    if (query.action) where.action = query.action;
-    if (query.table_name) where.table_name = query.table_name;
-    if (query.search) {
-      where.OR = [
-        { description: { contains: query.search, mode: 'insensitive' } },
-        { admin: { name: { contains: query.search, mode: 'insensitive' } } },
-        { admin: { email: { contains: query.search, mode: 'insensitive' } } },
-      ];
-    }
+    const where = this.activityLogWhere(query);
 
     const [items, total] = await Promise.all([
       this.prisma.admin_activity_log.findMany({
@@ -632,5 +625,114 @@ export class AdminService {
     ]);
 
     return createPaginatedResponse(items, total, query.page, query.limit);
+  }
+
+  async deleteActivityLog(id: number, adminId: number) {
+    const log = await this.prisma.admin_activity_log.findUnique({
+      where: { id },
+      select: { id: true, action: true, table_name: true, record_id: true },
+    });
+    if (!log) throw new NotFoundException('Activity log not found');
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.admin_activity_log.delete({ where: { id } });
+      await tx.admin_activity_log.create({
+        data: {
+          admin_id: adminId,
+          action: 'delete_activity_log',
+          table_name: 'admin_activity_log',
+          record_id: id,
+          description: `Deleted audit log #${id}.`,
+          changes: {
+            deleted_log: log,
+          },
+        },
+      });
+    });
+
+    return { message: 'Activity log deleted successfully' };
+  }
+
+  async purgeActivityLogs(dto: PurgeActivityLogsDto, adminId: number) {
+    const where = this.activityLogWhere(dto, dto.before_date);
+
+    const deleted = await this.prisma.$transaction(async (tx) => {
+      const result = await tx.admin_activity_log.deleteMany({ where });
+      await tx.admin_activity_log.create({
+        data: {
+          admin_id: adminId,
+          action: 'purge_activity_logs',
+          table_name: 'admin_activity_log',
+          description: `Purged ${result.count} audit log(s) created before ${dto.before_date}.`,
+          changes: {
+            deleted_count: result.count,
+            before_date: dto.before_date,
+            filters: {
+              action: dto.action,
+              table_name: dto.table_name,
+              admin_id: dto.admin_id,
+              search: dto.search,
+              start_date: dto.start_date,
+              end_date: dto.end_date,
+            },
+          },
+        },
+      });
+      return result;
+    });
+
+    return {
+      deleted_count: deleted.count,
+      message: 'Activity logs purged successfully',
+    };
+  }
+
+  private activityLogWhere(
+    query: Pick<
+      ActivityLogFilterDto,
+      | 'action'
+      | 'table_name'
+      | 'admin_id'
+      | 'search'
+      | 'start_date'
+      | 'end_date'
+    >,
+    beforeDate?: string,
+  ): Prisma.admin_activity_logWhereInput {
+    const where: Prisma.admin_activity_logWhereInput = {};
+    if (query.action) {
+      where.action = { contains: query.action, mode: 'insensitive' };
+    }
+    if (query.table_name) {
+      where.table_name = { contains: query.table_name, mode: 'insensitive' };
+    }
+    if (query.admin_id) where.admin_id = query.admin_id;
+
+    const createdAt: Prisma.DateTimeNullableFilter = {};
+    if (query.start_date) createdAt.gte = new Date(query.start_date);
+    if (query.end_date)
+      createdAt.lte = this.endOfActivityLogDate(query.end_date);
+    if (beforeDate) createdAt.lt = new Date(beforeDate);
+    if (Object.keys(createdAt).length) where.created_at = createdAt;
+
+    if (query.search) {
+      where.OR = [
+        { description: { contains: query.search, mode: 'insensitive' } },
+        { admin: { name: { contains: query.search, mode: 'insensitive' } } },
+        { admin: { email: { contains: query.search, mode: 'insensitive' } } },
+      ];
+    }
+
+    return where;
+  }
+
+  private endOfActivityLogDate(value: string): Date {
+    const date = new Date(value);
+    // HTML date fields yield YYYY-MM-DD. Make an end-date include its whole
+    // calendar day while retaining exact timestamps from API clients.
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      date.setUTCHours(23, 59, 59, 999);
+    }
+    return date;
   }
 }

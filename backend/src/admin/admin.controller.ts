@@ -1,6 +1,8 @@
 import {
   Controller,
   Get,
+  Post,
+  Delete,
   Patch,
   Param,
   Body,
@@ -13,6 +15,7 @@ import {
   CustomerFilterDto,
   UpdateCustomerStatusDto,
   ActivityLogFilterDto,
+  PurgeActivityLogsDto,
   DashboardFilterDto,
 } from './dto';
 import { Roles, CurrentUser } from '../common/decorators';
@@ -59,5 +62,27 @@ export class AdminController {
   })
   async getActivityLogs(@Query() query: ActivityLogFilterDto) {
     return this.adminService.getActivityLogs(query);
+  }
+
+  @Post('activity-logs/purge')
+  @Roles(UserRole.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'Permanently remove audit logs before a retention cutoff',
+  })
+  async purgeActivityLogs(
+    @Body() dto: PurgeActivityLogsDto,
+    @CurrentUser('id') adminId: number,
+  ) {
+    return this.adminService.purgeActivityLogs(dto, adminId);
+  }
+
+  @Delete('activity-logs/:id')
+  @Roles(UserRole.SUPER_ADMIN)
+  @ApiOperation({ summary: 'Permanently remove one audit activity log' })
+  async deleteActivityLog(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser('id') adminId: number,
+  ) {
+    return this.adminService.deleteActivityLog(id, adminId);
   }
 }

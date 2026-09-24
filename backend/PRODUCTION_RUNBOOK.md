@@ -2,9 +2,9 @@
 
 ## What is already automated
 
-- The production image runs `prisma migrate deploy` before starting the API.
-- The container runs as an unprivileged user, drops Linux capabilities, blocks
-  privilege escalation, rotates Docker logs, and has liveness/readiness probes.
+- The native API start script runs `prisma migrate deploy` before starting the API.
+- The systemd services run as an unprivileged user, block privilege escalation,
+  and provide restart and readiness checks.
 - Production validation rejects insecure secrets, HTTP frontend/CORS origins,
   enabled Swagger, incomplete R2 storage, missing email delivery, and the mock
   payment provider. `PAYMENT_PROVIDER=manual` enables reconciled external
@@ -26,17 +26,15 @@ hosting provider's secret manager. Never upload `.env` to source control.
 Deploy immutable image tags such as the commit SHA, not `latest`. Keep the
 previous known-good image tag available for application rollback.
 
-For a Docker Compose deployment, copy `.env.production.example` to an
-untracked `.env.production`, fill it from the secret manager, then run:
+For a native Node.js deployment, store the filled environment file outside the
+repository (by default `/etc/sanad/sanad.env`), then deploy with:
 
 ```bash
-docker compose --env-file .env.production \
-  -f docker-compose.yml -f docker-compose.production.yml \
-  up -d --build
+sudo INSTALL_DEPENDENCIES=1 ./deploy/deploy-prelaunch.sh
 ```
 
-The production override forces `NODE_ENV=production`, disables Swagger, makes
-the API filesystem read-only, and provides only a small temporary `/tmp` mount.
+The deployment script builds the API and frontend, backs up PostgreSQL, applies
+migrations, and restarts the native systemd services.
 
 ## Staging smoke test
 

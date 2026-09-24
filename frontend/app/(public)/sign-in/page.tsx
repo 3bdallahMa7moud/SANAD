@@ -1,6 +1,11 @@
 import { Suspense } from 'react';
+import type { Metadata } from 'next';
 
 import { SignInFlow } from '@/components/auth';
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default function SignInRoute() {
   return (
