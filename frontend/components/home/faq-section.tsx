@@ -12,99 +12,100 @@ import {
 } from '@/components/motion/motion-reveal';
 
 interface FaqItem {
-  answer: string;
+  answerAr: string;
+  answerEn: string;
   link?: {
     href: string;
-    label: string;
+    labelAr: string;
+    labelEn: string;
   };
-  question: string;
+  questionAr: string;
+  questionEn: string;
 }
 
 const faqItems: readonly FaqItem[] = [
   {
-    question: 'What career services does SANAD offer?',
-    answer:
-      'SANAD supports professional CV writing, LinkedIn profile optimization, Cover Letters, and bundled career-document packages designed for a coordinated professional presentation.',
+    questionEn: 'Is SANAD only for customers in the UAE?',
+    questionAr: 'هل تقتصر خدمات سند على العملاء في الإمارات؟',
+    answerEn:
+      'SANAD primarily supports professionals targeting opportunities in the UAE. Professional CV, Cover Letter, LinkedIn Profile Optimization, and Professional Package services may also be suitable for customers outside the UAE. The UAE Job Application Guide and Job Application Service are specifically designed for the UAE job market.',
+    answerAr:
+      'تركز سند بشكل أساسي على دعم الباحثين عن فرص عمل في دولة الإمارات. ويمكن أن تناسب خدمات السيرة الذاتية وخطاب التقديم وتحسين ملف LinkedIn والباقة الاحترافية عملاء من خارج الإمارات أيضًا. أما دليل التقديم على الوظائف وخدمة التقديم على الوظائف فهما مخصصان لسوق العمل الإماراتي.',
     link: {
       href: PUBLIC_SERVICES_HREF,
-      label: 'View career services',
+      labelEn: 'View career services',
+      labelAr: 'استعرض الخدمات المهنية',
     },
   },
   {
-    question: 'Who are SANAD\u2019s services designed for?',
-    answer:
-      'The services are designed for professionals at different career stages — from those entering the workforce to experienced mid-career and senior professionals — with a primary focus on opportunities in the UAE and wider Gulf market.',
+    questionEn: 'How will I receive my files?',
+    questionAr: 'كيف سأستلم ملفاتي؟',
+    answerEn:
+      'After your order and payment are confirmed, SANAD contacts you through the official WhatsApp number to collect the required information. Drafts, final files, revision updates, and service reports are delivered through the agreed WhatsApp conversation. The account dashboard is used for order tracking and does not currently store completed files.',
+    answerAr:
+      'بعد تأكيد الطلب والدفع، يتواصل معك فريق سند عبر رقم واتساب الرسمي لجمع المعلومات المطلوبة. يتم تسليم المسودات والملفات النهائية والتعديلات وتقارير الخدمة من خلال محادثة واتساب المتفق عليها. تُستخدم لوحة الحساب لمتابعة حالة الطلب فقط، ولا تُخزّن فيها الملفات النهائية حاليًا.',
   },
   {
-    question: 'How do I get started?',
-    answer:
-      'Browse the available services, select the one that fits your current needs, and place your order. Once confirmed, SANAD will reach out to collect the information required to begin your service.',
+    questionEn: 'Which language can I choose for the Professional CV?',
+    questionAr: 'أي لغة يمكنني اختيارها للسيرة الذاتية الاحترافية؟',
+    answerEn:
+      'The Professional CV service includes one CV in either Arabic or English. You select your preferred language during checkout. The completed CV is delivered in Word and PDF formats.',
+    answerAr:
+      'تشمل خدمة السيرة الذاتية الاحترافية سيرة ذاتية واحدة باللغة العربية أو الإنجليزية. تختار اللغة المطلوبة أثناء إتمام الطلب، ويتم تسليم السيرة بصيغتي Word وPDF.',
+  },
+  {
+    questionEn: 'Does the Professional Package include both languages?',
+    questionAr: 'هل تشمل الباقة الاحترافية اللغتين؟',
+    answerEn:
+      'No. The Professional Package is provided in one selected language. It includes a Professional CV, a role-specific Cover Letter in the same language, and LinkedIn Profile Optimization.',
+    answerAr:
+      'لا. تُقدم الباقة الاحترافية بلغة واحدة يختارها العميل، وتشمل سيرة ذاتية احترافية، وخطاب تقديم مخصصًا لوظيفة مستهدفة باللغة نفسها، وتحسين ملف LinkedIn.',
+  },
+  {
+    questionEn: 'Does the Premium Bilingual Package include job applications?',
+    questionAr:
+      'هل تشمل الباقة الثنائية اللغة المميزة التقديم الفعلي على الوظائف؟',
+    answerEn:
+      'No. The Premium Bilingual Package includes Arabic and English CVs, Arabic and English Cover Letters, LinkedIn Profile Optimization, and the UAE Job Application Guide. Done-for-you job applications are available only through the separate Job Application Service.',
+    answerAr:
+      'لا. تشمل الباقة الثنائية اللغة المميزة سيرة ذاتية بالعربية والإنجليزية، وخطاب تقديم بالعربية والإنجليزية، وتحسين ملف LinkedIn، ودليل التقديم على الوظائف في الإمارات. أما التقديم الفعلي على الوظائف بالنيابة عن العميل فهو خدمة مستقلة.',
+  },
+  {
+    questionEn: 'How does the Job Application Service work?',
+    questionAr: 'كيف تعمل خدمة التقديم على الوظائف؟',
+    answerEn:
+      'SANAD searches for suitable opportunities matching your experience and target roles, then submits applications on your behalf. The service covers up to 60 suitable applications and runs for up to 30 calendar days, or until 60 suitable applications are submitted, whichever occurs first. If fewer suitable opportunities are available, SANAD will not submit irrelevant applications merely to reach the maximum number.',
+    answerAr:
+      'تبحث سند عن فرص مناسبة تتوافق مع خبراتك والوظائف المستهدفة، ثم تقدم الطلبات بالنيابة عنك. تشمل الخدمة حتى 60 طلب توظيف مناسبًا، وتستمر لمدة تصل إلى 30 يومًا تقويميًا أو حتى إتمام 60 طلبًا مناسبًا، أيهما يحدث أولًا. وإذا لم تتوفر فرص مناسبة كافية، فلن تقدم سند على وظائف غير ملائمة لمجرد الوصول إلى الحد الأقصى.',
+  },
+  {
+    questionEn:
+      'What happens if an application platform requires verification?',
+    questionAr: 'ماذا يحدث إذا تطلبت منصة التقديم تحققًا؟',
+    answerEn:
+      'Most applications are completed using the information and email provided by the client. If a platform requires OTP verification, email verification, personal account access, or another candidate-only step, SANAD may ask the client to complete that step before the application can continue. SANAD avoids requesting account passwords unless access is genuinely necessary and separately agreed.',
+    answerAr:
+      'يتم تنفيذ معظم الطلبات باستخدام المعلومات والبريد الإلكتروني اللذين يقدمهما العميل. إذا تطلبت المنصة رمز OTP أو تأكيد البريد الإلكتروني أو الدخول إلى حساب شخصي أو خطوة لا يستطيع تنفيذها إلا المرشح، فقد تطلب سند من العميل إتمام هذه الخطوة قبل متابعة التقديم. وتتجنب سند طلب كلمات المرور إلا إذا كان الوصول ضروريًا وتم الاتفاق عليه بشكل منفصل.',
+  },
+  {
+    questionEn: 'Does SANAD guarantee a job?',
+    questionAr: 'هل تضمن سند الحصول على وظيفة؟',
+    answerEn:
+      'No. SANAD does not guarantee interviews, job offers, or employment. Hiring decisions are made entirely by employers and recruiters.',
+    answerAr:
+      'لا. لا تضمن سند الحصول على مقابلة أو عرض وظيفي أو وظيفة، حيث تخضع قرارات التوظيف بالكامل للشركات وجهات التوظيف.',
+  },
+  {
+    questionEn: 'How can I contact SANAD about my order?',
+    questionAr: 'كيف أتواصل مع سند بخصوص طلبي؟',
+    answerEn:
+      'Use the official WhatsApp contact shared with you after ordering. For general questions before ordering, use the contact option on the services page.',
+    answerAr:
+      'استخدم وسيلة التواصل الرسمية عبر واتساب التي تُشارك معك بعد الطلب. وللاستفسارات العامة قبل الطلب، استخدم خيار التواصل في صفحة الخدمات.',
     link: {
       href: PUBLIC_SERVICES_HREF,
-      label: 'Browse services',
-    },
-  },
-  {
-    question: 'What information will I need to provide?',
-    answer:
-      'You will usually need to share your current CV or employment history, the roles and industries you are targeting, key achievements and qualifications, and — where relevant — your LinkedIn profile link. Exact requirements are confirmed when your order begins.',
-  },
-  {
-    question: 'Can I choose a service based on my specific career needs?',
-    answer:
-      'Yes. Each service focuses on a different part of your professional presentation. You can start with a standalone CV, add a cover letter, include LinkedIn optimization, or select a bundled package that covers multiple deliverables at once.',
-    link: {
-      href: PUBLIC_SERVICES_HREF,
-      label: 'Compare services',
-    },
-  },
-  {
-    question: 'How long does it take to receive my completed documents?',
-    answer:
-      'Turnaround time depends on the selected service and the information provided. SANAD confirms the expected delivery timeline when your order is reviewed. Providing complete and accurate information at the start helps avoid delays.',
-  },
-  {
-    question: 'How will I receive my completed documents?',
-    answer:
-      'After your order is confirmed, the SANAD team coordinates document exchange with you through the official WhatsApp number. Final files are delivered through the same agreed channel and are not currently stored in the order dashboard.',
-  },
-  {
-    question: 'Are the services focused on the UAE and Gulf job market?',
-    answer:
-      'Yes. SANAD\u2019s services are shaped with the UAE and broader Gulf market in mind, including the expectations of regional employers, industry norms, and the way professional documents are evaluated in this context.',
-  },
-  {
-    question: 'Can SANAD help with documents in both Arabic and English?',
-    answer:
-      'Service language and document format are confirmed at the time of ordering. If you have a specific language requirement, mention it when you place your order so SANAD can confirm what is available for your chosen service.',
-  },
-  {
-    question: 'Is my personal and career information kept private?',
-    answer:
-      'Yes. The information you provide is used solely to deliver your service. SANAD does not share, sell, or use your personal career details for any purpose outside of your order.',
-  },
-  {
-    question: 'Will SANAD need access to my LinkedIn account?',
-    answer:
-      'The LinkedIn optimization service delivers refined content for you to apply yourself. If any direct profile access is required, this must be confirmed and arranged separately with SANAD before work begins. Never share account passwords through an enquiry message.',
-  },
-  {
-    question: 'What can I do with the documents after I receive them?',
-    answer:
-      'The completed documents are yours to use for professional networking and career development. They are tailored to your background and target direction at the time of the service.',
-  },
-  {
-    question: 'Does SANAD guarantee interviews or employment?',
-    answer:
-      'No. SANAD provides professional career-document services that improve the clarity and quality of your professional presentation. Interviews, job offers, and employment decisions remain with individual employers and cannot be guaranteed.',
-  },
-  {
-    question: 'How do I contact SANAD if I have a question about my order?',
-    answer:
-      'You can reach SANAD through the contact details provided in your order confirmation. For general enquiries before placing an order, use the contact option available on the services page.',
-    link: {
-      href: PUBLIC_SERVICES_HREF,
-      label: 'View services and contact options',
+      labelEn: 'View services and contact options',
+      labelAr: 'استعرض الخدمات ووسائل التواصل',
     },
   },
 ];
@@ -141,28 +142,32 @@ export function FaqSection() {
         </div>
 
         <MotionStaggerList className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {faqItems.map(({ answer, link, question }) => (
-            <MotionStaggerItem key={question}>
-              <div className="border-t-2 border-accent pt-5">
-                <h3 className="type-h5 text-primary">{_copy(question)}</h3>
-                <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                  {_copy(answer)}
-                </p>
-                {link ? (
-                  <Link
-                    className="group mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary underline decoration-accent underline-offset-4 transition-colors duration-200 hover:text-secondary"
-                    href={link.href}
-                  >
-                    {_copy(link.label)}
-                    <ArrowRight
-                      aria-hidden="true"
-                      className="size-3.5 transition-transform duration-200 ease-[var(--ease-standard)] motion-safe:group-hover:translate-x-0.5 motion-safe:group-focus-visible:translate-x-0.5 motion-reduce:transition-none"
-                    />
-                  </Link>
-                ) : null}
-              </div>
-            </MotionStaggerItem>
-          ))}
+          {faqItems.map(
+            ({ answerAr, answerEn, link, questionAr, questionEn }) => (
+              <MotionStaggerItem key={questionEn}>
+                <div className="border-t-2 border-accent pt-5">
+                  <h3 className="type-h5 text-primary">
+                    {_copy(questionEn, questionAr)}
+                  </h3>
+                  <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                    {_copy(answerEn, answerAr)}
+                  </p>
+                  {link ? (
+                    <Link
+                      className="group mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary underline decoration-accent underline-offset-4 transition-colors duration-200 hover:text-secondary"
+                      href={link.href}
+                    >
+                      {_copy(link.labelEn, link.labelAr)}
+                      <ArrowRight
+                        aria-hidden="true"
+                        className="size-3.5 transition-transform duration-200 ease-[var(--ease-standard)] motion-safe:group-hover:translate-x-0.5 motion-safe:group-focus-visible:translate-x-0.5 motion-reduce:transition-none"
+                      />
+                    </Link>
+                  ) : null}
+                </div>
+              </MotionStaggerItem>
+            ),
+          )}
         </MotionStaggerList>
       </div>
     </section>

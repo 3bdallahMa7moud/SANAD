@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic';
 const fallbackMetadata: Metadata = {
   title: 'Privacy Policy | SANAD',
   description:
-    'How SANAD collects, uses, and protects your personal and professional information.',
+    'How SANAD uses personal and professional information to deliver career and UAE job application services.',
   alternates: { canonical: '/pages/privacy-policy' },
 };
 
@@ -24,8 +24,8 @@ export async function generateMetadata(): Promise<Metadata> {
     return await getLocalizedMetadata({
       title: _copy('Privacy Policy | SANAD', 'سياسة الخصوصية | سند'),
       description: _copy(
-        'How SANAD collects, uses, and protects your personal and professional information.',
-        'كيف تقوم منصة سند بجمع واستخدام وحماية معلوماتك الشخصية والمهنية.',
+        'How SANAD uses personal and professional information to deliver career and UAE job application services.',
+        'كيف تستخدم سند المعلومات الشخصية والمهنية لتقديم الخدمات المهنية وخدمة التقديم على الوظائف في الإمارات.',
       ),
       alternates: fallbackMetadata.alternates,
     });
@@ -36,7 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
     _copy(page.meta_description_en, page.meta_description_ar) ??
     _copy(
       fallbackMetadata.description as string,
-      'كيف تقوم منصة سند بجمع واستخدام وحماية معلوماتك الشخصية والمهنية.',
+      'كيف تستخدم سند المعلومات الشخصية والمهنية لتقديم الخدمات المهنية وخدمة التقديم على الوظائف في الإمارات.',
     );
 
   return await getLocalizedMetadata({
@@ -49,57 +49,88 @@ export async function generateMetadata(): Promise<Metadata> {
 const sections = [
   {
     id: 'information-we-collect',
-    title: 'Information We Collect',
-    content: [
-      'When you place an order or create an account, we collect your name, email address, phone number, and LinkedIn profile URL. During the service fulfilment process, you provide your existing CV, employment history, target roles, and related career context.',
-      'Payment arrangements are handled directly through SANAD’s official communication channels. We record only the transaction details needed to confirm and reconcile your order.',
+    titleEn: 'Information We Collect',
+    titleAr: 'المعلومات التي نجمعها',
+    contentEn: [
+      'SANAD may collect the customer’s name, email address, phone number, CV, employment and education history, qualifications, skills, target roles, preferred language, LinkedIn profile information, order details, and other information supplied for the purchased service.',
+    ],
+    contentAr: [
+      'قد تجمع سند اسم العميل وبريده الإلكتروني ورقم هاتفه وسيرته الذاتية وتاريخه الوظيفي والتعليمي ومؤهلاته ومهاراته والوظائف المستهدفة واللغة المختارة ومعلومات ملف LinkedIn وبيانات الطلب وأي معلومات أخرى يقدمها لتنفيذ الخدمة المشتراة.',
     ],
   },
   {
     id: 'how-we-use-your-data',
-    title: 'How We Use Your Data',
-    content: [
-      'Your information is used exclusively to deliver the career-document services you have requested: writing and formatting CVs, optimising LinkedIn profiles, developing cover letters, and communicating revision feedback.',
-      'We do not use your data for marketing profiling, behavioural targeting, or any purpose beyond the scope of your order.',
+    titleEn: 'How We Use Your Data',
+    titleAr: 'كيف نستخدم معلوماتك',
+    contentEn: [
+      'Information is used to manage orders, communicate through WhatsApp, prepare CVs and Cover Letters, optimize LinkedIn profiles, provide the UAE Job Application Guide, perform the Job Application Service when purchased, process payments, provide revisions, and deliver service reports.',
+    ],
+    contentAr: [
+      'تُستخدم المعلومات لإدارة الطلبات والتواصل عبر واتساب وإعداد السير الذاتية وخطابات التقديم وتحسين ملفات LinkedIn وتوفير دليل التقديم على الوظائف في الإمارات وتنفيذ خدمة التقديم على الوظائف عند شرائها ومعالجة المدفوعات وتقديم التعديلات وتسليم تقارير الخدمة.',
     ],
   },
   {
-    id: 'confidentiality',
-    title: 'Confidentiality',
-    content: [
-      'All SANAD writers and editors work under binding non-disclosure agreements. Your documents, employer details, and career plans are never shared with recruiters, employers, or any third party without your explicit written consent.',
-      'We recognise that many clients are employed professionals exploring opportunities in confidence. Discretion is built into every layer of our process.',
+    id: 'job-application-service-data',
+    titleEn: 'Job Application Service Data Sharing',
+    titleAr: 'مشاركة بيانات خدمة التقديم على الوظائف',
+    contentEn: [
+      'When the Job Application Service is purchased, SANAD may share the customer’s CV and relevant application information with employers, recruiters, recruitment websites, job platforms, and employer career portals solely to search for suitable opportunities and submit authorized applications.',
+      'SANAD uses only the information reasonably required for the relevant application. The customer remains responsible for ensuring that the supplied information is complete and accurate.',
+    ],
+    contentAr: [
+      'عند شراء خدمة التقديم على الوظائف، يجوز لسند مشاركة السيرة الذاتية ومعلومات التقديم ذات الصلة مع أصحاب العمل ومسؤولي التوظيف ومواقع ومنصات التوظيف وبوابات الشركات، وذلك فقط للبحث عن فرص مناسبة وتقديم الطلبات التي فوض العميل سند بتنفيذها.',
+      'تستخدم سند المعلومات اللازمة بصورة معقولة لكل طلب، ويظل العميل مسؤولًا عن اكتمال ودقة المعلومات المقدمة.',
     ],
   },
   {
-    id: 'data-security',
-    title: 'Data Security',
-    content: [
-      'We use encrypted HTTPS connections for the platform. Access to customer information is limited to authorised SANAD team members who need it to fulfil or support the order.',
+    id: 'whatsapp-and-service-providers',
+    titleEn: 'WhatsApp and Service Providers',
+    titleAr: 'واتساب ومزودو الخدمات',
+    contentEn: [
+      'SANAD uses WhatsApp as its primary communication and delivery channel. Information sent through WhatsApp is also subject to WhatsApp’s applicable privacy terms.',
+      'SANAD may use service providers required for website hosting, email delivery, file storage, payment processing, technical support, and customer communication. Information is shared only as reasonably necessary for those services.',
+    ],
+    contentAr: [
+      'تستخدم سند واتساب كقناة أساسية للتواصل والتسليم. وتخضع المعلومات المرسلة عبر واتساب كذلك لشروط الخصوصية المطبقة لدى واتساب.',
+      'قد تستخدم سند مزودي خدمات للاستضافة وإرسال البريد الإلكتروني وتخزين الملفات ومعالجة المدفوعات والدعم التقني والتواصل مع العملاء. ولا تُشارك المعلومات إلا بالقدر اللازم بصورة معقولة لتقديم هذه الخدمات.',
     ],
   },
   {
-    id: 'third-party-sharing',
-    title: 'Third-Party Sharing',
-    content: [
-      'We do not sell, rent, or trade your personal information. Data is shared only with service providers needed for hosting, email delivery, storage, and customer communication, subject to their applicable privacy obligations.',
+    id: 'data-access-and-security',
+    titleEn: 'Data Access and Security',
+    titleAr: 'الوصول إلى البيانات وأمنها',
+    contentEn: [
+      'Access to customer information is limited to team members and service providers who need it to perform or support the purchased service. No method of online transmission or storage can be guaranteed to be completely secure.',
+    ],
+    contentAr: [
+      'يقتصر الوصول إلى معلومات العملاء على أعضاء الفريق ومزودي الخدمات الذين يحتاجون إليها لتنفيذ الخدمة المشتراة أو دعمها. ولا يمكن ضمان الأمان الكامل لأي وسيلة نقل أو تخزين إلكتروني.',
     ],
   },
   {
     id: 'retention-and-deletion',
-    title: 'Retention & Deletion',
-    content: [
-      'Documents exchanged for the service are currently sent through the agreed WhatsApp channel and are not stored in the order dashboard. We retain order and contact records only as needed to provide the service and meet legal obligations. You may contact support to request deletion of eligible personal data.',
+    titleEn: 'Retention and Deletion',
+    titleAr: 'الاحتفاظ بالبيانات وحذفها',
+    contentEn: [
+      'SANAD retains order, communication, payment, and service records for as long as reasonably necessary to provide the service, resolve disputes, maintain business records, and meet applicable obligations.',
+      'Customers may contact SANAD to request access to, correction of, or deletion of eligible personal information. Some information may need to be retained where reasonably required for payment, fraud prevention, recordkeeping, dispute resolution, or legal obligations.',
+    ],
+    contentAr: [
+      'تحتفظ سند بسجلات الطلبات والتواصل والمدفوعات والخدمات للمدة اللازمة بصورة معقولة لتقديم الخدمة وحل النزاعات والاحتفاظ بسجلات الأعمال والوفاء بالالتزامات المطبقة.',
+      'يمكن للعملاء التواصل مع سند لطلب الوصول إلى معلوماتهم الشخصية المؤهلة أو تصحيحها أو حذفها. وقد يلزم الاحتفاظ ببعض المعلومات لأغراض المدفوعات أو منع الاحتيال أو حفظ السجلات أو حل النزاعات أو الوفاء بالالتزامات القانونية.',
     ],
   },
   {
     id: 'contact',
-    title: 'Contact',
-    content: [
-      'For privacy-related questions or data requests, contact SANAD through the support email or official WhatsApp number published on the website.',
+    titleEn: 'Contact',
+    titleAr: 'التواصل',
+    contentEn: [
+      'For privacy questions or requests, contact SANAD through the official WhatsApp number published on the website. The published support email may also be used as a secondary contact method.',
+    ],
+    contentAr: [
+      'للأسئلة أو الطلبات المتعلقة بالخصوصية، تواصل مع سند عبر رقم واتساب الرسمي المنشور على الموقع. ويمكن استخدام بريد الدعم المنشور كوسيلة تواصل ثانوية.',
     ],
   },
-] as const;
+];
 
 export default async function PrivacyPolicyPage() {
   const _copy = await getCopy();
@@ -131,50 +162,63 @@ export default async function PrivacyPolicyPage() {
             {_copy('Legal')}
           </p>
           <h1 className="type-h2 mt-5 max-w-[20ch]">
-            {_copy(cmsPage?.title_en ?? 'Privacy Policy')}
+            {_copy(
+              cmsPage?.title_en ?? 'Privacy Policy',
+              cmsPage?.title_ar ?? 'سياسة الخصوصية',
+            )}
           </h1>
           <p className="mt-6 max-w-[42rem] text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8">
             {_copy(
               cmsPage?.meta_description_en ??
-                'How SANAD handles the professional and personal information you share with us during the career-document process.',
+                'How SANAD handles information used to deliver professional career services.',
+              cmsPage?.meta_description_ar ??
+                'كيف تتعامل سند مع المعلومات المستخدمة لتقديم الخدمات المهنية.',
             )}
           </p>
-          {!cmsPage ? (
-            <p className="mt-4 text-sm text-muted-foreground">
-              {_copy('Last updated January 2026')}
-            </p>
-          ) : null}
+          <p className="mt-4 text-sm text-muted-foreground">
+            {_copy(
+              'Last updated September 24, 2026',
+              'آخر تحديث: 24 سبتمبر 2026',
+            )}
+          </p>
         </div>
       </div>
 
       <div className="layout-container layout-section">
         <div className="mx-auto max-w-3xl">
-          {cmsPage?.content_en ? (
-            <CmsRichText content={cmsPage.content_en} />
+          {cmsPage?.content_en || cmsPage?.content_ar ? (
+            <CmsRichText
+              content={_copy(
+                cmsPage?.content_en ?? '',
+                cmsPage?.content_ar ?? '',
+              )}
+            />
           ) : (
             <div className="space-y-12">
-              {sections.map(({ content, id, title }, index) => (
-                <section id={id} key={id}>
-                  <h2 className="type-h4 text-primary">
-                    {_copy.number(index + 1, { useGrouping: false })}
-                    {_copy('.')}
-                    {_copy(title)}
-                  </h2>
-                  <div className="mt-4 space-y-4">
-                    {content.map((paragraph) => (
-                      <p
-                        className="text-sm leading-7 text-foreground/80 sm:text-base sm:leading-8"
-                        key={paragraph.slice(0, 40)}
-                      >
-                        {_copy(paragraph)}
-                      </p>
-                    ))}
-                  </div>
-                  {index < sections.length - 1 && (
-                    <Separator className="mt-12" />
-                  )}
-                </section>
-              ))}
+              {sections.map(
+                ({ contentAr, contentEn, id, titleAr, titleEn }, index) => (
+                  <section id={id} key={id}>
+                    <h2 className="type-h4 text-primary">
+                      {_copy.number(index + 1, { useGrouping: false })}
+                      {_copy('.')}
+                      {_copy(titleEn, titleAr)}
+                    </h2>
+                    <div className="mt-4 space-y-4">
+                      {_copy(contentEn, contentAr).map((paragraph) => (
+                        <p
+                          className="text-sm leading-7 text-foreground/80 sm:text-base sm:leading-8"
+                          key={paragraph.slice(0, 40)}
+                        >
+                          {paragraph}
+                        </p>
+                      ))}
+                    </div>
+                    {index < sections.length - 1 && (
+                      <Separator className="mt-12" />
+                    )}
+                  </section>
+                ),
+              )}
             </div>
           )}
         </div>
