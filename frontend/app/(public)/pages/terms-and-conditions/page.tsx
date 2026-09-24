@@ -1,5 +1,6 @@
 import { getLocalizedMetadata } from '@/lib/i18n/metadata';
 
+import { hasArabicTranslation } from '@/lib/i18n/has-arabic-translation';
 import { getCopy } from '@/lib/i18n/server-copy';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -31,13 +32,16 @@ export async function generateMetadata(): Promise<Metadata> {
     });
   }
 
-  const title = _copy(page.title_en, page.title_ar);
-  const description =
-    _copy(page.meta_description_en, page.meta_description_ar) ??
-    _copy(
-      fallbackMetadata.description as string,
-      'شروط خدمات سند المهنية والتسليم عبر واتساب والتعديلات والاسترداد وخدمة التقديم على الوظائف.',
-    );
+  const title = _copy(
+    page.title_en || 'Terms & Conditions',
+    hasArabicTranslation(page.title_ar) ? page.title_ar : 'الشروط والأحكام',
+  );
+  const description = _copy(
+    page.meta_description_en || (fallbackMetadata.description as string),
+    hasArabicTranslation(page.meta_description_ar)
+      ? page.meta_description_ar
+      : 'شروط خدمات سند المهنية والتسليم عبر واتساب والتعديلات والاسترداد وخدمة التقديم على الوظائف.',
+  );
 
   return await getLocalizedMetadata({
     title: `${title} | ${_copy('SANAD', 'سند')}`,
@@ -153,6 +157,9 @@ export default async function TermsAndConditionsPage() {
   const _copy = await getCopy();
 
   const cmsPage = await getPublishedCmsPage('terms-and-conditions');
+  const cmsHasBilingualContent =
+    Boolean(cmsPage?.content_en?.trim()) &&
+    hasArabicTranslation(cmsPage?.content_ar);
 
   return (
     <div className="bg-background">
@@ -181,15 +188,18 @@ export default async function TermsAndConditionsPage() {
           <h1 className="type-h2 mt-5 max-w-[22ch]">
             {_copy(
               cmsPage?.title_en ?? 'Terms & Conditions',
-              cmsPage?.title_ar ?? 'الشروط والأحكام',
+              hasArabicTranslation(cmsPage?.title_ar)
+                ? cmsPage.title_ar
+                : 'الشروط والأحكام',
             )}
           </h1>
           <p className="mt-6 max-w-[42rem] text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8">
             {_copy(
               cmsPage?.meta_description_en ??
                 'The terms that govern SANAD professional career services.',
-              cmsPage?.meta_description_ar ??
-                'الشروط التي تنظم خدمات سند المهنية.',
+              hasArabicTranslation(cmsPage?.meta_description_ar)
+                ? cmsPage.meta_description_ar
+                : 'الشروط التي تنظم خدمات سند المهنية.',
             )}
           </p>
           <p className="mt-4 text-sm text-muted-foreground">
@@ -203,7 +213,7 @@ export default async function TermsAndConditionsPage() {
 
       <div className="layout-container layout-section">
         <div className="mx-auto max-w-3xl">
-          {cmsPage?.content_en || cmsPage?.content_ar ? (
+          {cmsHasBilingualContent ? (
             <CmsRichText
               content={_copy(
                 cmsPage?.content_en ?? '',

@@ -1,5 +1,6 @@
 import { getLocalizedMetadata } from '@/lib/i18n/metadata';
 
+import { hasArabicTranslation } from '@/lib/i18n/has-arabic-translation';
 import { getCopy } from '@/lib/i18n/server-copy';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -31,13 +32,16 @@ export async function generateMetadata(): Promise<Metadata> {
     });
   }
 
-  const title = _copy(page.title_en, page.title_ar);
-  const description =
-    _copy(page.meta_description_en, page.meta_description_ar) ??
-    _copy(
-      fallbackMetadata.description as string,
-      'كيف تستخدم سند المعلومات الشخصية والمهنية لتقديم الخدمات المهنية وخدمة التقديم على الوظائف في الإمارات.',
-    );
+  const title = _copy(
+    page.title_en || 'Privacy Policy',
+    hasArabicTranslation(page.title_ar) ? page.title_ar : 'سياسة الخصوصية',
+  );
+  const description = _copy(
+    page.meta_description_en || (fallbackMetadata.description as string),
+    hasArabicTranslation(page.meta_description_ar)
+      ? page.meta_description_ar
+      : 'كيف تستخدم سند المعلومات الشخصية والمهنية لتقديم الخدمات المهنية وخدمة التقديم على الوظائف في الإمارات.',
+  );
 
   return await getLocalizedMetadata({
     title: `${title} | ${_copy('SANAD', 'سند')}`,
@@ -136,6 +140,9 @@ export default async function PrivacyPolicyPage() {
   const _copy = await getCopy();
 
   const cmsPage = await getPublishedCmsPage('privacy-policy');
+  const cmsHasBilingualContent =
+    Boolean(cmsPage?.content_en?.trim()) &&
+    hasArabicTranslation(cmsPage?.content_ar);
 
   return (
     <div className="bg-background">
@@ -164,15 +171,18 @@ export default async function PrivacyPolicyPage() {
           <h1 className="type-h2 mt-5 max-w-[20ch]">
             {_copy(
               cmsPage?.title_en ?? 'Privacy Policy',
-              cmsPage?.title_ar ?? 'سياسة الخصوصية',
+              hasArabicTranslation(cmsPage?.title_ar)
+                ? cmsPage.title_ar
+                : 'سياسة الخصوصية',
             )}
           </h1>
           <p className="mt-6 max-w-[42rem] text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8">
             {_copy(
               cmsPage?.meta_description_en ??
                 'How SANAD handles information used to deliver professional career services.',
-              cmsPage?.meta_description_ar ??
-                'كيف تتعامل سند مع المعلومات المستخدمة لتقديم الخدمات المهنية.',
+              hasArabicTranslation(cmsPage?.meta_description_ar)
+                ? cmsPage.meta_description_ar
+                : 'كيف تتعامل سند مع المعلومات المستخدمة لتقديم الخدمات المهنية.',
             )}
           </p>
           <p className="mt-4 text-sm text-muted-foreground">
@@ -186,7 +196,7 @@ export default async function PrivacyPolicyPage() {
 
       <div className="layout-container layout-section">
         <div className="mx-auto max-w-3xl">
-          {cmsPage?.content_en || cmsPage?.content_ar ? (
+          {cmsHasBilingualContent ? (
             <CmsRichText
               content={_copy(
                 cmsPage?.content_en ?? '',
