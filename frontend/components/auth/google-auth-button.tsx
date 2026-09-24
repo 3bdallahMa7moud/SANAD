@@ -50,6 +50,7 @@ interface GoogleAuthButtonProps {
 }
 
 export function GoogleAuthButton({
+  flow,
   loading = false,
   onCredential,
   onError,
@@ -107,7 +108,7 @@ export function GoogleAuthButton({
         shape: 'rectangular',
         logo_alignment: 'left',
         locale: 'en',
-        text: 'signin_with',
+        text: flow === 'sign_up' ? 'signup_with' : 'signin_with',
         width,
       });
     } catch {
@@ -116,7 +117,7 @@ export function GoogleAuthButton({
         'Could not initialize Google authentication. Please try again.',
       );
     }
-  }, [clientId]);
+  }, [clientId, flow]);
 
   React.useEffect(() => {
     renderGoogleButton();
