@@ -231,14 +231,16 @@ export default async function TermsAndConditionsPage() {
                       {_copy(titleEn, titleAr)}
                     </h2>
                     <div className="mt-4 space-y-4">
-                      {_copy(contentEn, contentAr).map((paragraph) => (
-                        <p
-                          className="text-sm leading-7 text-foreground/80 sm:text-base sm:leading-8"
-                          key={paragraph.slice(0, 40)}
-                        >
-                          {paragraph}
-                        </p>
-                      ))}
+                      {(_copy.locale === 'ar' ? contentAr : contentEn).map(
+                        (paragraph) => (
+                          <p
+                            className="text-sm leading-7 text-foreground/80 sm:text-base sm:leading-8"
+                            key={paragraph.slice(0, 40)}
+                          >
+                            {paragraph}
+                          </p>
+                        ),
+                      )}
                     </div>
                     {index < sections.length - 1 && (
                       <Separator className="mt-12" />
