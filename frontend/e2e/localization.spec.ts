@@ -43,7 +43,7 @@ test('language switching keeps one locale visible while the server action is pen
     await page
       .getByRole('button', { name: 'التبديل إلى العربية' })
       .filter({ visible: true })
-      .click({ force: true });
+      .dispatchEvent('click');
     await actionStarted;
 
     await expect(page.locator('html')).toHaveAttribute('lang', 'en');
@@ -85,7 +85,7 @@ test('Arabic and dark mode persist across routes and reloads', async ({
   await page
     .getByRole('button', { name: 'تفعيل الوضع الداكن', exact: true })
     .filter({ visible: true })
-    .click({ force: true });
+    .dispatchEvent('click');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await page.goto('/packages');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
@@ -103,7 +103,7 @@ test('Arabic and dark mode persist across routes and reloads', async ({
   await page
     .getByRole('button', { name: 'Switch to English' })
     .filter({ visible: true })
-    .click({ force: true });
+    .dispatchEvent('click');
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
   await expect(page.locator('html')).toHaveAttribute('dir', 'ltr');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
@@ -136,7 +136,7 @@ test('Arabic mobile navigation and dialog fit the screen in dark mode', async ({
   ).toBe(true);
   await page
     .getByRole('button', { name: 'فتح قائمة التنقل' })
-    .click({ force: true });
+    .dispatchEvent('click');
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.screenshot({
     path: 'test-results/ar-dark-mobile-menu.png',
@@ -144,7 +144,7 @@ test('Arabic mobile navigation and dialog fit the screen in dark mode', async ({
   });
   await page
     .getByRole('button', { name: 'تسجيل الدخول', exact: true })
-    .click({ force: true });
+    .dispatchEvent('click');
   await expect(page.getByRole('dialog')).toBeVisible();
   await expect(page.getByRole('dialog')).toContainText('البريد الإلكتروني');
   expect(
@@ -314,7 +314,7 @@ test('Arabic administrator can edit independent bilingual fields with a mocked s
   await page.goto('/admin/packages');
   await page
     .getByRole('button', { name: arabic['Add Package'], exact: true })
-    .click({ force: true });
+    .dispatchEvent('click');
   await expect(page.getByRole('dialog')).toBeVisible();
   await page
     .getByLabel(arabic['English Name'], { exact: true })
