@@ -95,9 +95,10 @@ function parsePublicReviews(
       averageRating: result.data.summary.average_rating,
       totalReviews: result.data.summary.total_reviews,
       distribution: Object.fromEntries(
-        Object.entries(result.data.summary.distribution).map(
-          ([key, value]) => [Number(key), value],
-        ),
+        Object.entries(result.data.summary.distribution).map(([key, value]) => [
+          Number(key),
+          value,
+        ]),
       ),
     },
   };

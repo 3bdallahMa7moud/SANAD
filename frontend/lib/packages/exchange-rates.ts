@@ -30,7 +30,10 @@ export async function getSecondaryExchangeRates(): Promise<SecondaryExchangeRate
     }
 
     const rateDate = Date.parse(`${egp.date}T00:00:00Z`);
-    if (!Number.isFinite(rateDate) || Math.abs(Date.now() - rateDate) > 7 * 86400000) {
+    if (
+      !Number.isFinite(rateDate) ||
+      Math.abs(Date.now() - rateDate) > 7 * 86400000
+    ) {
       return null;
     }
 

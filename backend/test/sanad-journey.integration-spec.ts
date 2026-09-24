@@ -284,7 +284,7 @@ describe('SANAD real customer-to-public journey', () => {
     expect(publicReview).toMatchObject({
       rating: 4,
       verified_customer: true,
-      customer_display_name: 'Journey C.',
+      customer_display_name: 'Journey Customer',
     });
     expect(publicReview).not.toHaveProperty('email');
     expect(publicReview).not.toHaveProperty('phone');
