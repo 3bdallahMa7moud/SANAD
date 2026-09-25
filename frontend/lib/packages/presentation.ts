@@ -37,6 +37,15 @@ export function getPackagePrimaryImage(
   })[0];
 }
 
+export function getPackageFeaturePairs(
+  packageItem: Pick<CareerPackage, 'features' | 'featuresAr'>,
+): Array<{ en: string; ar?: string }> {
+  return packageItem.features.map((feature, index) => ({
+    en: feature,
+    ar: packageItem.featuresAr?.[index],
+  }));
+}
+
 export function getPackageIdFromSlug(slug: string): number | null {
   const match = slug.match(/(?:^|-)(\d+)$/);
   if (!match) return null;

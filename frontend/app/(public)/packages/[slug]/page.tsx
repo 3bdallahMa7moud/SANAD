@@ -53,6 +53,7 @@ import { getPackageDetailContent } from '@/lib/packages/detail-content';
 import {
   getBestPackageOffer,
   getPackageCurrentPrice,
+  getPackageFeaturePairs,
   getPackageHref,
   getPackageIdFromSlug,
   getPackagePrimaryImage,
@@ -226,6 +227,7 @@ export default async function PackageDetailPage({
   const feedbackItems = feedback?.items ?? [];
   const feedbackRating = feedback?.summary.averageRating ?? 0;
   const content = getPackageDetailContent(packageItem);
+  const featurePairs = getPackageFeaturePairs(packageItem);
   const scopeQuestions = getScopeQuestions(packageItem);
   const contactHref = whatsappHref(
     contactNumber,
@@ -352,26 +354,22 @@ export default async function PackageDetailPage({
                   )}
                 </p>
 
-                {packageItem.features.length > 0 ? (
+                {featurePairs.length > 0 ? (
                   <ul className="mt-5 grid gap-x-6 gap-y-2.5 text-sm leading-6 text-primary-foreground/90 sm:grid-cols-2">
-                    {packageItem.features
-                      .slice(0, 3)
-                      .map((feature, featureIndex) => (
-                        <li className="flex items-start gap-2.5" key={feature}>
-                          <span
-                            aria-hidden="true"
-                            className="mt-1 grid size-5 shrink-0 place-items-center rounded-full bg-accent/20 text-accent"
-                          >
-                            <Check className="size-3.5" strokeWidth={2.5} />
-                          </span>
-                          <span>
-                            {_copy(
-                              feature,
-                              packageItem.featuresAr?.[featureIndex],
-                            )}
-                          </span>
-                        </li>
-                      ))}
+                    {featurePairs.map((feature, featureIndex) => (
+                      <li
+                        className="flex items-start gap-2.5"
+                        key={`${feature.en}-${featureIndex}`}
+                      >
+                        <span
+                          aria-hidden="true"
+                          className="mt-1 grid size-5 shrink-0 place-items-center rounded-full bg-accent/20 text-accent"
+                        >
+                          <Check className="size-3.5" strokeWidth={2.5} />
+                        </span>
+                        <span>{_copy(feature.en, feature.ar)}</span>
+                      </li>
+                    ))}
                   </ul>
                 ) : null}
 
@@ -637,12 +635,12 @@ export default async function PackageDetailPage({
                   )}
                 </p>
 
-                {packageItem.features.length > 0 ? (
+                {featurePairs.length > 0 ? (
                   <ul className="mt-8 grid gap-4 sm:grid-cols-2 sm:gap-x-8">
-                    {packageItem.features.map((feature, featureIndex) => (
+                    {featurePairs.map((feature, featureIndex) => (
                       <li
                         className="flex items-start gap-3 border-b border-border/70 pb-4 text-sm leading-6 text-foreground"
-                        key={feature}
+                        key={`${feature.en}-${featureIndex}`}
                       >
                         <span
                           aria-hidden="true"
@@ -650,12 +648,7 @@ export default async function PackageDetailPage({
                         >
                           <Check className="size-4" strokeWidth={2.2} />
                         </span>
-                        <span>
-                          {_copy(
-                            feature,
-                            packageItem.featuresAr?.[featureIndex],
-                          )}
-                        </span>
+                        <span>{_copy(feature.en, feature.ar)}</span>
                       </li>
                     ))}
                   </ul>

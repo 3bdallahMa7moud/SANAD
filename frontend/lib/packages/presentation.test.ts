@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import type { CareerPackage } from '@/types/domain';
-import { formatDeliveryEstimate, getPackageCurrentPrice } from './presentation';
+import {
+  formatDeliveryEstimate,
+  getPackageCurrentPrice,
+  getPackageFeaturePairs,
+} from './presentation';
 
 function packageWithLimitedOffer(price: number): CareerPackage {
   return {
@@ -44,5 +48,19 @@ describe('delivery estimate copy', () => {
     expect(formatDeliveryEstimate(3, 'en')).toBe('3 days estimated');
     expect(formatDeliveryEstimate(1, 'ar')).toBe('يوم تقريبًا');
     expect(formatDeliveryEstimate(3, 'ar')).toBe('3 أيام تقريبًا');
+  });
+});
+
+describe('package feature presentation', () => {
+  it('keeps every admin-defined feature in its published order', () => {
+    const features = ['First', 'Second', 'Third', 'Fourth', 'Fifth'];
+    const featuresAr = ['الأولى', 'الثانية', 'الثالثة', 'الرابعة', 'الخامسة'];
+
+    expect(getPackageFeaturePairs({ features, featuresAr })).toEqual(
+      features.map((feature, index) => ({
+        en: feature,
+        ar: featuresAr[index],
+      })),
+    );
   });
 });
