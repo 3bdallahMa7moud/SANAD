@@ -49,6 +49,8 @@ interface GoogleAuthButtonProps {
   onError(message: string): void;
 }
 
+const GOOGLE_BUTTON_LOCALE = 'en' as const;
+
 export function GoogleAuthButton({
   flow,
   loading = false,
@@ -60,7 +62,7 @@ export function GoogleAuthButton({
   const callbackRef = React.useRef(onCredential);
   const errorRef = React.useRef(onError);
   const initializedRef = React.useRef(false);
-  const renderedWidthRef = React.useRef(0);
+  const renderedConfigurationRef = React.useRef('');
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID?.trim();
 
   React.useEffect(() => {
@@ -75,10 +77,11 @@ export function GoogleAuthButton({
       400,
       Math.max(240, Math.floor(containerRef.current.clientWidth)),
     );
+    const renderedConfiguration = `${GOOGLE_BUTTON_LOCALE}:${flow}:${width}`;
 
-    if (renderedWidthRef.current === width) return;
+    if (renderedConfigurationRef.current === renderedConfiguration) return;
 
-    renderedWidthRef.current = width;
+    renderedConfigurationRef.current = renderedConfiguration;
     const renderTarget = document.createElement('div');
     renderTarget.dir = 'ltr';
     renderTarget.style.height = '44px';
@@ -107,12 +110,12 @@ export function GoogleAuthButton({
         size: 'large',
         shape: 'rectangular',
         logo_alignment: 'left',
-        locale: 'en',
+        locale: GOOGLE_BUTTON_LOCALE,
         text: flow === 'sign_up' ? 'signup_with' : 'signin_with',
         width,
       });
     } catch {
-      renderedWidthRef.current = 0;
+      renderedConfigurationRef.current = '';
       errorRef.current(
         'Could not initialize Google authentication. Please try again.',
       );
@@ -154,7 +157,7 @@ export function GoogleAuthButton({
           )
         }
         onReady={renderGoogleButton}
-        src="https://accounts.google.com/gsi/client"
+        src={`https://accounts.google.com/gsi/client?hl=${GOOGLE_BUTTON_LOCALE}`}
         strategy="afterInteractive"
       />
       <div

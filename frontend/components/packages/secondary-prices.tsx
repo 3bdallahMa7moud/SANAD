@@ -23,6 +23,7 @@ export function SecondaryPrices({
         `أسعار صرف استرشادية بتاريخ ${rates.date}`,
       )}
     >
+      {_copy('Approximately', 'يعادل تقريبًا')}{' '}
       <span dir="ltr" className="inline-block whitespace-nowrap">
         {_copy.money(amount * rates.EGP, 'EGP')}
       </span>

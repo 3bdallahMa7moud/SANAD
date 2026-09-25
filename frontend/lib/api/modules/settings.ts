@@ -12,7 +12,7 @@ export const settingsKeys = {
 
 export const settingsApi = {
   async getPublic(
-    options: Pick<ApiRequestOptions, 'signal'> = {},
+    options: Pick<ApiRequestOptions, 'signal' | 'timeout'> = {},
   ): Promise<PublicSettings> {
     const result = publicSettingsSchema.safeParse(
       await api.get<unknown>('/settings/public', {

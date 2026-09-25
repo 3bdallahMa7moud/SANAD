@@ -7,13 +7,20 @@ import {
   MotionReveal,
 } from '@/components/motion/motion-reveal';
 import { BrandLogo } from '@/components/shared/brand-logo';
+import type { PublicSettings } from '@/lib/api';
 import { PublicSocialLinks } from './public-social-links';
 
 const footerLinkClassName =
   'inline-flex min-h-11 items-center text-sm leading-6 text-primary-foreground/75 transition-colors duration-200 hover:text-primary-foreground';
 const SUPPORT_EMAIL = 'saanadcv@gmail.com';
 
-export async function PublicFooter() {
+interface PublicFooterProps {
+  initialSettings?: PublicSettings | null;
+}
+
+export async function PublicFooter({
+  initialSettings = null,
+}: PublicFooterProps) {
   const _copy = await getCopy();
 
   const year = new Date().getFullYear();
@@ -75,7 +82,10 @@ export async function PublicFooter() {
             <p className="max-w-sm text-sm leading-7 text-primary-foreground/75">
               {_copy(t('footer.tagline'))}
             </p>
-            <PublicSocialLinks className="pt-1" />
+            <PublicSocialLinks
+              className="pt-1"
+              initialSettings={initialSettings}
+            />
           </MotionReveal>
 
           {footerGroups.map((group, index) => (

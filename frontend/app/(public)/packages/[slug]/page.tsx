@@ -33,10 +33,7 @@ import {
   PackageOrderCard,
 } from '@/components/packages/package-order-card';
 import { PackageRelatedCard } from '@/components/packages/package-related-card';
-import {
-  PackageOfferBanner,
-  PackageOfferFlag,
-} from '@/components/packages/package-offer-visual';
+import { PackageOfferFlag } from '@/components/packages/package-offer-visual';
 import {
   Accordion,
   AccordionContent,
@@ -327,55 +324,56 @@ export default async function PackageDetailPage({
             </ol>
           </nav>
 
-          <div className="grid items-start gap-8 lg:grid-cols-12 lg:gap-8 xl:gap-12">
-            {/* Column 1: Service Image Gallery Showcase */}
-            <div className="sanad-detail-enter sanad-detail-enter-delay-1 lg:col-span-6 lg:mt-1">
-              <div className="relative rounded-2xl border border-primary-foreground/10 bg-primary-foreground/[0.035] p-2 shadow-[0_24px_56px_rgb(0_0_0_/_0.24)] sm:p-3">
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-x-8 top-0 h-px bg-linear-to-r from-transparent via-accent/70 to-transparent"
-                />
-                <PackageGallery
-                  images={packageItem.images}
-                  packageName={_copy(packageItem.name, packageItem.nameAr)}
-                  variant="hero"
-                />
-                <p className="px-2 pt-3 pb-1 text-center text-xs leading-5 text-primary-foreground/65">
-                  {_copy(
-                    'Click to enlarge image · Scope and samples confirmed with SANAD',
-                    'انقر على الصورة للتكبير · نماذج الأعمال وتنسيقها يتم تأكيدها مع سند',
-                  )}
-                </p>
-              </div>
-            </div>
-
-            {/* Column 2: Service Title, Description, Key Stats, Pricing & Action Buttons */}
-            <div className="sanad-detail-enter sanad-detail-enter-delay-2 lg:col-span-6">
-              <div className="max-w-xl lg:pt-4 xl:pt-6">
+          <div className="grid items-start gap-8 lg:grid-cols-12 lg:gap-10 xl:gap-14">
+            {/* Decision content comes first for reading order and mobile UX. */}
+            <div className="sanad-detail-enter sanad-detail-enter-delay-1 lg:col-span-7">
+              <div className="max-w-2xl">
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge className="border-primary-foreground/20 bg-primary-foreground/10 text-primary-foreground">
                     {_copy('Career service', 'خدمة مهنية')}
                   </Badge>
+                  {bestOffer ? (
+                    <PackageOfferFlag
+                      className="min-h-8 px-2.5 py-1 text-xs shadow-none"
+                      discountPercentage={bestOffer.discountPercentage}
+                    />
+                  ) : null}
                 </div>
 
-                {bestOffer ? (
-                  <PackageOfferBanner
-                    className="mt-5 max-w-xl"
-                    offer={bestOffer}
-                  />
-                ) : null}
-
-                <h1 className="type-h1 mt-4 text-primary-foreground">
+                <h1 className="type-h1 mt-4 max-w-2xl text-primary-foreground">
                   {_copy(packageItem.name, packageItem.nameAr)}
                 </h1>
 
-                <p className="mt-4 max-w-xl text-base leading-7 text-primary-foreground/80 sm:text-lg sm:leading-8">
+                <p className="mt-4 max-w-2xl text-base leading-7 text-primary-foreground/85 sm:text-lg sm:leading-8">
                   {_copy(
                     packageItem.description ??
                       'A focused service for presenting your professional experience with greater clarity.',
                     packageItem.descriptionAr,
                   )}
                 </p>
+
+                {packageItem.features.length > 0 ? (
+                  <ul className="mt-5 grid gap-x-6 gap-y-2.5 text-sm leading-6 text-primary-foreground/90 sm:grid-cols-2">
+                    {packageItem.features
+                      .slice(0, 3)
+                      .map((feature, featureIndex) => (
+                        <li className="flex items-start gap-2.5" key={feature}>
+                          <span
+                            aria-hidden="true"
+                            className="mt-1 grid size-5 shrink-0 place-items-center rounded-full bg-accent/20 text-accent"
+                          >
+                            <Check className="size-3.5" strokeWidth={2.5} />
+                          </span>
+                          <span>
+                            {_copy(
+                              feature,
+                              packageItem.featuresAr?.[featureIndex],
+                            )}
+                          </span>
+                        </li>
+                      ))}
+                  </ul>
+                ) : null}
 
                 <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
                   {hasRating ? (
@@ -387,7 +385,7 @@ export default async function PackageDetailPage({
                       <strong className="font-semibold">
                         {_copy(packageItem.ratingAverage?.toFixed(1))}
                       </strong>
-                      <span className="text-primary-foreground/60">
+                      <span className="text-primary-foreground/65">
                         ({_copy(packageItem.ratingCount)}{' '}
                         {_copy(
                           packageItem.ratingCount === 1 ? 'review' : 'reviews',
@@ -403,33 +401,15 @@ export default async function PackageDetailPage({
                   </span>
                 </div>
 
-                <dl className="mt-6 grid max-w-xl grid-cols-2 overflow-hidden rounded-xl border border-primary-foreground/15 bg-primary-foreground/[0.055] shadow-inner shadow-black/5 backdrop-blur-sm">
-                  <div className="p-4 sm:p-4.5">
-                    <dt className="flex items-center gap-2 text-xs font-semibold tracking-[0.08em] text-primary-foreground/65 uppercase">
-                      <Clock3
-                        aria-hidden="true"
-                        className="size-4 text-accent"
-                      />
-                      {_copy('Delivery', 'التسليم')}
-                    </dt>
-                    <dd className="mt-1.5 font-semibold text-primary-foreground">
-                      {formatDeliveryEstimate(
-                        packageItem.deliveryDays,
-                        _copy.locale,
-                      )}
-                    </dd>
-                  </div>
-                </dl>
-
-                <div className="mt-5 max-w-xl rounded-xl border border-primary-foreground/15 bg-primary-foreground/10 p-5 shadow-[0_14px_30px_rgb(0_0_0_/_0.12)] backdrop-blur-sm sm:p-5.5">
-                  {pricing ? (
+                <div className="mt-6 max-w-2xl rounded-2xl border border-primary-foreground/15 bg-linear-to-br from-primary-foreground/10 to-primary-foreground/[0.035] p-5 shadow-[0_18px_42px_rgb(0_0_0_/_0.16)] backdrop-blur-sm sm:p-6">
+                  <div className="grid items-center gap-5 md:grid-cols-[minmax(0,0.85fr)_minmax(15rem,1.15fr)] md:gap-7">
                     <div>
-                      <div className="flex flex-wrap items-baseline justify-between gap-3">
-                        <div>
+                      {pricing ? (
+                        <>
                           <span className="block text-xs font-semibold tracking-wider text-primary-foreground/70 uppercase">
                             {_copy('Total price', 'السعر الإجمالي')}
                           </span>
-                          <div className="mt-1 flex items-baseline gap-3">
+                          <div className="mt-1.5 flex flex-wrap items-baseline gap-3">
                             <span className="font-display text-3xl font-bold tracking-tight text-primary-foreground sm:text-4xl">
                               {_copy(
                                 _copy.money(
@@ -439,7 +419,7 @@ export default async function PackageDetailPage({
                               )}
                             </span>
                             {pricing.offerDiscountAmount > 0 ? (
-                              <span className="text-base text-primary-foreground/60 line-through">
+                              <span className="text-sm text-primary-foreground/60 line-through sm:text-base">
                                 {_copy(
                                   _copy.money(
                                     pricing.originalPrice,
@@ -449,136 +429,163 @@ export default async function PackageDetailPage({
                               </span>
                             ) : null}
                           </div>
-                        </div>
+                          <SecondaryPrices
+                            amount={pricing.finalAmount}
+                            currency={pricing.currency}
+                            rates={rates}
+                            onDark
+                          />
+                          {pricing.offerDiscountAmount > 0 ? (
+                            <p className="mt-2 text-xs font-semibold text-accent">
+                              {_copy('You save', 'وفّرت')}{' '}
+                              {_copy(
+                                _copy.money(
+                                  pricing.offerDiscountAmount,
+                                  pricing.currency,
+                                ),
+                              )}{' '}
+                              ({pricing.offerDiscountPercentage}%)
+                            </p>
+                          ) : null}
+                        </>
+                      ) : (
+                        <>
+                          <span className="block text-xs font-semibold tracking-wider text-primary-foreground/70 uppercase">
+                            {_copy('Price', 'السعر')}
+                          </span>
+                          <span className="mt-1.5 block font-display text-3xl font-bold tracking-tight text-primary-foreground sm:text-4xl">
+                            {displayPrice}
+                          </span>
+                          <SecondaryPrices
+                            amount={getPackageCurrentPrice(packageItem)}
+                            rates={rates}
+                            onDark
+                          />
+                        </>
+                      )}
+                    </div>
 
-                        {pricing.offerDiscountAmount > 0 ? (
-                          <Badge className="border-accent/40 bg-accent/25 px-2.5 py-1 font-semibold text-primary-foreground">
-                            {_copy('Save', 'توفير')}{' '}
-                            {_copy(
-                              _copy.money(
-                                pricing.offerDiscountAmount,
-                                pricing.currency,
-                              ),
-                            )}{' '}
-                            ({pricing.offerDiscountPercentage}%)
-                          </Badge>
+                    <div>
+                      <Button
+                        asChild
+                        className="group min-h-[3.75rem] w-full bg-accent px-7 text-base font-bold text-accent-foreground shadow-lg shadow-black/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent/90 hover:shadow-accent/20"
+                        size="lg"
+                      >
+                        <Link href={checkoutHref}>
+                          {_copy('Order this service now', 'اطلب الباقة الآن')}
+                          <ArrowRight
+                            aria-hidden="true"
+                            className="size-4 transition-transform duration-200 motion-safe:group-hover:translate-x-1 rtl:rotate-180 rtl:motion-safe:group-hover:-translate-x-1"
+                          />
+                        </Link>
+                      </Button>
+                      <div className="mt-2.5 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs font-semibold text-primary-foreground/80">
+                        <a
+                          className="inline-flex min-h-9 items-center underline-offset-4 hover:text-primary-foreground hover:underline"
+                          href="#included-heading"
+                        >
+                          {_copy('See what is included', 'اعرض محتويات الباقة')}
+                        </a>
+                        {contactHref ? (
+                          <a
+                            className="inline-flex min-h-9 items-center gap-1.5 underline-offset-4 hover:text-primary-foreground hover:underline"
+                            href={contactHref}
+                            rel="noopener noreferrer"
+                            target="_blank"
+                          >
+                            <MessageCircle
+                              aria-hidden="true"
+                              className="size-3.5"
+                            />
+                            {_copy('Ask SANAD', 'استفسر من سند')}
+                          </a>
                         ) : null}
                       </div>
-
-                      <SecondaryPrices
-                        amount={pricing.finalAmount}
-                        currency={pricing.currency}
-                        rates={rates}
-                        onDark
-                      />
-
-                      <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-primary-foreground/10 pt-2.5 text-xs text-primary-foreground/75">
-                        <span>
-                          {_copy('Subtotal', 'المجموع الفرعي')}:{' '}
-                          {_copy(
-                            _copy.money(
-                              pricing.subtotalAfterDiscounts,
-                              pricing.currency,
-                            ),
-                          )}
-                        </span>
-                        <span>•</span>
-                        <span>
-                          {_copy(
-                            'Comprehensive scope included',
-                            'شامل جميع المخرجات المذكورة',
-                          )}
-                        </span>
-                      </div>
                     </div>
-                  ) : (
-                    <div>
-                      <span className="block text-xs font-semibold tracking-wider text-primary-foreground/70 uppercase">
-                        {_copy('Price', 'السعر')}
-                      </span>
-                      <span className="mt-1 block font-display text-3xl font-bold tracking-tight text-primary-foreground sm:text-4xl">
-                        {displayPrice}
-                      </span>
-                      <SecondaryPrices
-                        amount={getPackageCurrentPrice(packageItem)}
-                        rates={rates}
-                        onDark
-                      />
+                  </div>
+
+                  <dl className="mt-5 grid gap-y-4 border-t border-primary-foreground/10 pt-5 sm:grid-cols-2 sm:gap-y-0">
+                    <div className="sm:border-e sm:border-primary-foreground/10 sm:pe-5">
+                      <dt className="flex items-center gap-2 text-xs font-semibold tracking-[0.08em] text-primary-foreground/70 uppercase">
+                        <Clock3
+                          aria-hidden="true"
+                          className="size-4 text-accent"
+                        />
+                        {_copy('Estimated delivery', 'التسليم المتوقع')}
+                      </dt>
+                      <dd className="mt-1.5 font-semibold text-primary-foreground">
+                        {formatDeliveryEstimate(
+                          packageItem.deliveryDays,
+                          _copy.locale,
+                        )}
+                      </dd>
                     </div>
-                  )}
-                </div>
+                    <div className="border-t border-primary-foreground/10 pt-4 sm:border-t-0 sm:ps-5 sm:pt-0">
+                      <dt className="flex items-center gap-2 text-xs font-semibold tracking-[0.08em] text-primary-foreground/70 uppercase">
+                        <MessageCircle
+                          aria-hidden="true"
+                          className="size-4 text-accent"
+                        />
+                        {_copy('Service follow-up', 'متابعة الخدمة')}
+                      </dt>
+                      <dd className="mt-1.5 font-semibold text-primary-foreground">
+                        {_copy('Directly on WhatsApp', 'مباشرة عبر واتساب')}
+                      </dd>
+                    </div>
+                  </dl>
 
-                <div className="mt-4 flex max-w-xl items-start gap-3 rounded-lg border border-primary-foreground/10 bg-primary-foreground/[0.045] px-4 py-3 text-xs leading-5 text-primary-foreground/75">
-                  <ShieldCheck
-                    aria-hidden="true"
-                    className="mt-0.5 size-4 shrink-0 text-accent"
-                  />
-                  <span>
+                  <p className="mt-4 flex items-center gap-2 border-t border-primary-foreground/10 pt-4 text-xs leading-5 text-primary-foreground/75">
+                    <ShieldCheck
+                      aria-hidden="true"
+                      className="size-4 shrink-0 text-accent"
+                    />
                     {_copy(
-                      'Secure order — payment options and the final total are shown before confirmation.',
-                      'طلب آمن — تظهر خيارات الدفع والإجمالي النهائي قبل التأكيد.',
+                      'Review the final total before confirmation',
+                      'راجع الإجمالي النهائي قبل التأكيد',
                     )}
-                  </span>
+                  </p>
                 </div>
-
-                <div className="mt-5 grid max-w-xl gap-3 sm:grid-cols-2">
-                  <Button
-                    asChild
-                    className="group min-h-[3.5rem] w-full bg-accent px-7 font-bold text-accent-foreground shadow-lg shadow-black/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent/90 hover:shadow-accent/20"
-                    size="lg"
-                  >
-                    <Link href={checkoutHref}>
-                      {_copy('Continue to checkout', 'المتابعة لإتمام الطلب')}
-                      <ArrowRight
-                        aria-hidden="true"
-                        className="size-4 transition-transform duration-200 motion-safe:group-hover:translate-x-1 rtl:rotate-180 rtl:motion-safe:group-hover:-translate-x-1"
-                      />
-                    </Link>
-                  </Button>
-
-                  <Button
-                    asChild
-                    className="min-h-[3.5rem] w-full border-primary-foreground/25 bg-primary-foreground/5 text-primary-foreground hover:bg-primary-foreground/15 hover:text-primary-foreground"
-                    size="lg"
-                    variant="outline"
-                  >
-                    <Link href="#included-heading">
-                      {_copy('Review the service scope', 'راجع نطاق الخدمة')}
-                    </Link>
-                  </Button>
-
-                  {contactHref ? (
-                    <Button
-                      asChild
-                      className="min-h-11 justify-self-start text-primary-foreground/85 hover:bg-primary-foreground/10 hover:text-primary-foreground sm:col-span-2"
-                      size="lg"
-                      variant="ghost"
-                    >
-                      <a
-                        href={contactHref}
-                        rel="noopener noreferrer"
-                        target="_blank"
-                      >
-                        <MessageCircle aria-hidden="true" className="size-4" />
-                        {_copy('Ask SANAD', 'استفسر من سند')}
-                      </a>
-                    </Button>
-                  ) : null}
-                </div>
-
-                <p className="mt-4 flex max-w-xl items-start gap-2 text-xs leading-5 text-primary-foreground/70">
-                  <CircleCheckBig
-                    aria-hidden="true"
-                    className="mt-0.5 size-4 shrink-0 text-accent"
-                  />
-                  <span>
-                    {_copy(
-                      'Review your order before confirming. After confirmation, continue on WhatsApp to share your requirements with SANAD.',
-                      'راجع طلبك قبل تأكيده، ثم تابع عبر واتساب لمشاركة متطلباتك مع سند.',
-                    )}
-                  </span>
-                </p>
               </div>
+            </div>
+
+            {/* The supporting visual follows the decision content on mobile. */}
+            <div className="sanad-detail-enter sanad-detail-enter-delay-2 lg:col-span-5 lg:mt-1 lg:pt-10">
+              <PackageGallery
+                className="drop-shadow-[0_24px_48px_rgb(0_0_0_/_0.22)]"
+                images={packageItem.images}
+                packageName={_copy(packageItem.name, packageItem.nameAr)}
+                variant="hero"
+              />
+              <section
+                aria-labelledby="best-for-heading"
+                className="mt-5 rounded-xl border border-primary-foreground/15 bg-primary-foreground/[0.055] p-5 backdrop-blur-sm"
+              >
+                <div className="flex items-start gap-4">
+                  <span
+                    aria-hidden="true"
+                    className="grid size-10 shrink-0 place-items-center rounded-lg border border-accent/25 bg-accent/10 text-accent"
+                  >
+                    <Target className="size-5" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold tracking-[0.14em] text-primary-foreground/60 uppercase">
+                      {_copy('Package fit', 'مدى ملاءمة الخدمة')}
+                    </p>
+                    <h2
+                      className="mt-1.5 text-lg font-semibold text-primary-foreground"
+                      id="best-for-heading"
+                    >
+                      {_copy(
+                        'Who this service is for',
+                        'لمن تناسب هذه الخدمة؟',
+                      )}
+                    </h2>
+                    <p className="mt-2 text-sm leading-6 text-primary-foreground/75">
+                      {_copy(content.bestFor, content.bestForAr)}
+                    </p>
+                  </div>
+                </div>
+              </section>
             </div>
           </div>
         </div>
@@ -610,37 +617,9 @@ export default async function PackageDetailPage({
         <div className="layout-container layout-section">
           <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_23rem] lg:items-start lg:gap-16 xl:gap-20">
             <div className="min-w-0">
-              <section aria-labelledby="best-for-heading">
-                <p className="flex items-center gap-3 text-xs font-semibold tracking-[0.18em] text-secondary uppercase sm:text-sm">
-                  <span aria-hidden="true" className="h-px w-8 bg-accent" />
-                  {_copy('Package fit')}
-                </p>
-                <div className="mt-5 rounded-lg border border-border bg-surface-muted p-6 sm:p-8">
-                  <div className="flex items-start gap-4">
-                    <span
-                      aria-hidden="true"
-                      className="grid size-11 shrink-0 place-items-center rounded-md bg-primary text-primary-foreground"
-                    >
-                      <Target className="size-5" />
-                    </span>
-                    <div>
-                      <h2
-                        className="type-h3 text-primary"
-                        id="best-for-heading"
-                      >
-                        {_copy('Who this service is for')}
-                      </h2>
-                      <p className="mt-3 text-base leading-7 text-muted-foreground">
-                        {_copy(content.bestFor)}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </section>
-
               <section
                 aria-labelledby="included-heading"
-                className="mt-14 scroll-mt-24"
+                className="scroll-mt-24"
               >
                 <p className="text-xs font-semibold tracking-[0.16em] text-secondary uppercase">
                   {_copy('Deliverables')}
@@ -706,20 +685,27 @@ export default async function PackageDetailPage({
                     'The published scope is listed above. Ask SANAD about these details if they matter to your decision.',
                   )}
                 </p>
-                <ul className="mt-4 grid gap-3 text-sm leading-6">
-                  {scopeQuestions.map((question) => (
-                    <li key={question} className="flex gap-2">
-                      <MessageCircle
-                        className="mt-1 size-4 shrink-0 text-secondary"
-                        aria-hidden="true"
-                      />
-                      <span>{_copy(question)}</span>
-                    </li>
+                <Accordion
+                  className="mt-4 border-t border-border"
+                  collapsible
+                  defaultValue="scope-0"
+                  type="single"
+                >
+                  {scopeQuestions.map((question, index) => (
+                    <AccordionItem key={question.en} value={`scope-${index}`}>
+                      <AccordionTrigger className="py-4 text-sm text-primary">
+                        {_copy(question.en, question.ar)}
+                      </AccordionTrigger>
+                      <AccordionContent className="pb-4 text-sm leading-7">
+                        {_copy(question.answerEn, question.answerAr)}
+                      </AccordionContent>
+                    </AccordionItem>
                   ))}
-                </ul>
+                </Accordion>
                 <p className="mt-4 text-sm leading-6 text-muted-foreground">
                   {_copy(
-                    'Confirm whether the delivery estimate uses working or calendar days and when the timeline starts.',
+                    'The delivery estimate uses calendar days and begins after payment is confirmed and SANAD receives the information required to start. Time waiting for required information or verification is not counted.',
+                    'تُحسب مدة التسليم بالأيام التقويمية، وتبدأ بعد تأكيد الدفع واستلام سند المعلومات المطلوبة للبدء. ولا تُحتسب مدة انتظار المعلومات أو خطوات التحقق المطلوبة.',
                   )}
                 </p>
                 {contactHref ? (
@@ -735,7 +721,9 @@ export default async function PackageDetailPage({
                   </Button>
                 ) : (
                   <Button asChild className="mt-5" variant="outline">
-                    <Link href="/faq">{_copy('Read the FAQ')}</Link>
+                    <Link href="#service-faq">
+                      {_copy('View all service FAQs', 'عرض جميع أسئلة الخدمة')}
+                    </Link>
                   </Button>
                 )}
               </section>
@@ -869,7 +857,7 @@ export default async function PackageDetailPage({
                       {_copy('Important before you continue')}
                     </h2>
                     <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                      {_copy(content.importantNote)}
+                      {_copy(content.importantNote, content.importantNoteAr)}
                     </p>
                   </div>
                 </div>
@@ -919,15 +907,16 @@ export default async function PackageDetailPage({
             <Accordion
               className="border-t border-border"
               collapsible
+              defaultValue="faq-0"
               type="single"
             >
               {content.faqs.map((item, index) => (
                 <AccordionItem key={item.question} value={`faq-${index}`}>
                   <AccordionTrigger className="py-5 text-base text-primary">
-                    {_copy(item.question)}
+                    {_copy(item.question, item.questionAr)}
                   </AccordionTrigger>
                   <AccordionContent className="max-w-2xl pb-5 text-sm leading-7">
-                    {_copy(item.answer)}
+                    {_copy(item.answer, item.answerAr)}
                   </AccordionContent>
                 </AccordionItem>
               ))}
@@ -1019,7 +1008,7 @@ export default async function PackageDetailPage({
           </div>
           <Button asChild className="group min-w-0 shrink-0" size="lg">
             <Link href={checkoutHref}>
-              {_copy('Continue')}
+              {_copy('Order now', 'اطلب الآن')}
               <ArrowRight
                 aria-hidden="true"
                 className="size-4 transition-transform motion-safe:group-hover:translate-x-0.5"

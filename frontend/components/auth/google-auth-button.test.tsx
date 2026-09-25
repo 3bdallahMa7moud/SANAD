@@ -1,11 +1,25 @@
-import { render, waitFor } from '@/test/render';
+import { cleanup, render, waitFor } from '@/test/render';
+import { NextIntlClientProvider } from 'next-intl';
+import type { ReactElement, ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { GoogleAuthButton } from './google-auth-button';
 
 vi.mock('next/script', () => ({
-  default: () => null,
+  default: ({ src }: { src: string }) => (
+    <span data-google-script-src={src} data-testid="google-script" />
+  ),
 }));
+
+function renderInArabic(ui: ReactElement) {
+  return render(ui, {
+    wrapper: ({ children }: { children: ReactNode }) => (
+      <NextIntlClientProvider locale="ar" messages={{}} timeZone="Asia/Dubai">
+        {children}
+      </NextIntlClientProvider>
+    ),
+  });
+}
 
 describe('GoogleAuthButton', () => {
   const initialize = vi.fn();
@@ -27,6 +41,7 @@ describe('GoogleAuthButton', () => {
   });
 
   afterEach(() => {
+    cleanup();
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
   });
@@ -96,6 +111,28 @@ describe('GoogleAuthButton', () => {
         shape: 'rectangular',
         text: 'signup_with',
       }),
+    );
+  });
+
+  it('keeps the official Google button English on an Arabic page', () => {
+    const { getByTestId } = renderInArabic(
+      <GoogleAuthButton
+        flow="sign_in"
+        onCredential={vi.fn()}
+        onError={vi.fn()}
+      />,
+    );
+
+    expect(renderButton).toHaveBeenCalledWith(
+      expect.any(HTMLElement),
+      expect.objectContaining({
+        locale: 'en',
+        text: 'signin_with',
+      }),
+    );
+    expect(getByTestId('google-script')).toHaveAttribute(
+      'data-google-script-src',
+      'https://accounts.google.com/gsi/client?hl=en',
     );
   });
 

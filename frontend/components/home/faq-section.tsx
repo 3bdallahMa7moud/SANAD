@@ -74,9 +74,9 @@ const faqItems: readonly FaqItem[] = [
     questionEn: 'How does the Job Application Service work?',
     questionAr: 'كيف تعمل خدمة التقديم على الوظائف؟',
     answerEn:
-      'SANAD searches for suitable opportunities matching your experience and target roles, then submits applications on your behalf. The service covers up to 60 suitable applications and runs for up to 30 calendar days, or until 60 suitable applications are submitted, whichever occurs first. If fewer suitable opportunities are available, SANAD will not submit irrelevant applications merely to reach the maximum number.',
+      'SANAD searches for suitable opportunities matching your experience and target roles, then submits applications on your behalf. The service covers up to 60 suitable applications and runs for up to 3 calendar days, or until 60 suitable applications are submitted, whichever occurs first. If fewer suitable opportunities are available, SANAD will not submit irrelevant applications merely to reach the maximum number.',
     answerAr:
-      'تبحث سند عن فرص مناسبة تتوافق مع خبراتك والوظائف المستهدفة، ثم تقدم الطلبات بالنيابة عنك. تشمل الخدمة حتى 60 طلب توظيف مناسبًا، وتستمر لمدة تصل إلى 30 يومًا تقويميًا أو حتى إتمام 60 طلبًا مناسبًا، أيهما يحدث أولًا. وإذا لم تتوفر فرص مناسبة كافية، فلن تقدم سند على وظائف غير ملائمة لمجرد الوصول إلى الحد الأقصى.',
+      'تبحث سند عن فرص مناسبة تتوافق مع خبراتك والوظائف المستهدفة، ثم تقدم الطلبات بالنيابة عنك. تشمل الخدمة حتى 60 طلب توظيف مناسبًا، وتستمر لمدة تصل إلى 3 أيام تقويمية أو حتى إتمام 60 طلبًا مناسبًا، أيهما يحدث أولًا. وإذا لم تتوفر فرص مناسبة كافية، فلن تقدم سند على وظائف غير ملائمة لمجرد الوصول إلى الحد الأقصى.',
   },
   {
     questionEn:

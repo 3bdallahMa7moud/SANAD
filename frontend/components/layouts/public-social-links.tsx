@@ -4,9 +4,8 @@ import { useCopy } from '@/lib/i18n/use-copy';
 import { useQuery } from '@tanstack/react-query';
 import { ExternalLink, Mail } from 'lucide-react';
 import type { SVGProps } from 'react';
-import { useSyncExternalStore } from 'react';
 
-import { settingsApi, settingsKeys } from '@/lib/api';
+import { settingsApi, settingsKeys, type PublicSettings } from '@/lib/api';
 import { whatsappHref } from '@/lib/orders/presentation';
 
 type SocialPlatformKey =
@@ -109,52 +108,8 @@ const PLATFORM_ICONS: Record<
   tiktok: TikTokIcon,
 };
 
-const DEFAULT_WHATSAPP_NUMBER =
-  process.env.NEXT_PUBLIC_DEFAULT_WHATSAPP_NUMBER || '971500000000';
-const DEFAULT_SUPPORT_EMAIL = 'saanadcv@gmail.com';
-const subscribeToHydration = () => () => {};
-
-const DEFAULT_SOCIAL_LINKS: PublicSocialLink[] = [
-  {
-    platform: 'instagram',
-    href: 'https://instagram.com',
-    label: 'Instagram',
-    ariaLabel: 'Follow us on Instagram',
-  },
-  {
-    platform: 'whatsapp',
-    href: `https://wa.me/${DEFAULT_WHATSAPP_NUMBER}?text=${encodeURIComponent('Hello, I would like to ask about SANAD career services.')}`,
-    label: 'WhatsApp',
-    ariaLabel: 'Contact us on WhatsApp',
-  },
-  {
-    platform: 'email',
-    href: `mailto:${DEFAULT_SUPPORT_EMAIL}`,
-    label: 'Email',
-    ariaLabel: 'Send us an email',
-  },
-  {
-    platform: 'linkedin',
-    href: 'https://linkedin.com',
-    label: 'LinkedIn',
-    ariaLabel: 'Follow us on LinkedIn',
-  },
-  {
-    platform: 'facebook',
-    href: 'https://facebook.com',
-    label: 'Facebook',
-    ariaLabel: 'Follow us on Facebook',
-  },
-  {
-    platform: 'tiktok',
-    href: 'https://tiktok.com',
-    label: 'TikTok',
-    ariaLabel: 'Follow us on TikTok',
-  },
-];
-
 function configuredLinks(
-  settings: Record<string, string | null> | undefined,
+  settings: PublicSettings | null | undefined,
 ): PublicSocialLink[] {
   const links: PublicSocialLink[] = [];
   if (settings) {
@@ -221,31 +176,26 @@ function configuredLinks(
     );
   }
 
-  return links.length > 0 ? links : DEFAULT_SOCIAL_LINKS;
+  return links;
 }
 
 interface PublicSocialLinksProps {
   className?: string;
+  initialSettings?: PublicSettings | null;
 }
 
-export function PublicSocialLinks({ className = '' }: PublicSocialLinksProps) {
+export function PublicSocialLinks({
+  className = '',
+  initialSettings = null,
+}: PublicSocialLinksProps) {
   const _copy = useCopy();
-  // The public settings API can return different data on the server and in
-  // the browser. Start with the same default on both sides, then load live
-  // settings after hydration so React never receives mismatched link props.
-  const isMounted = useSyncExternalStore(
-    subscribeToHydration,
-    () => true,
-    () => false,
-  );
-
   const settings = useQuery({
     queryKey: settingsKeys.public,
     queryFn: ({ signal }) => settingsApi.getPublic({ signal }),
     staleTime: 5 * 60 * 1000,
-    enabled: isMounted,
+    initialData: initialSettings ?? undefined,
   });
-  const links = configuredLinks(isMounted ? settings.data : undefined);
+  const links = configuredLinks(settings.data ?? initialSettings);
 
   if (links.length === 0) return null;
 

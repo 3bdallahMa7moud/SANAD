@@ -5,13 +5,19 @@ import { AnnouncementBar } from '@/components/layouts/announcement-bar';
 import { PublicFooter } from '@/components/layouts/public-footer';
 import { PublicNavbar } from '@/components/layouts/public-navbar';
 import { ScrollToTopButton } from '@/components/shared/scroll-to-top-button';
+import type { PublicSettings } from '@/lib/api';
 
 export interface PublicLayoutProps {
   announcement?: ReactNode;
   children: ReactNode;
+  initialSettings?: PublicSettings | null;
 }
 
-export function PublicLayout({ announcement, children }: PublicLayoutProps) {
+export function PublicLayout({
+  announcement,
+  children,
+  initialSettings = null,
+}: PublicLayoutProps) {
   const _copy = useCopy();
 
   return (
@@ -23,7 +29,7 @@ export function PublicLayout({ announcement, children }: PublicLayoutProps) {
         {_copy('Skip to main content')}
       </a>
       <div className="sticky top-0 z-40">
-        <AnnouncementBar>
+        <AnnouncementBar initialSettings={initialSettings}>
           {announcement ? _copy(announcement) : undefined}
         </AnnouncementBar>
         <PublicNavbar />
@@ -31,7 +37,7 @@ export function PublicLayout({ announcement, children }: PublicLayoutProps) {
       <main className="min-w-0 flex-1" id="main-content" tabIndex={-1}>
         {_copy(children)}
       </main>
-      <PublicFooter />
+      <PublicFooter initialSettings={initialSettings} />
       <ScrollToTopButton />
     </div>
   );

@@ -4,22 +4,22 @@ import { useQuery } from '@tanstack/react-query';
 import { useLocale } from 'next-intl';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
-import { settingsApi, settingsKeys } from '@/lib/api';
+import { settingsApi, settingsKeys, type PublicSettings } from '@/lib/api';
 import { useCopy } from '@/lib/i18n/use-copy';
 import { cn } from '@/lib/utils/cn';
 
 export interface AnnouncementBarProps {
   children?: ReactNode;
   className?: string;
+  initialSettings?: PublicSettings | null;
 }
 
-const defaultBanner = {
-  ar: 'خصم 50% على باقات مختارة لفترة محدودة — اكتشف العروض الآن',
-  en: '50% off selected packages for a limited time — explore the offers now',
-};
-
 /** A public promotion controlled through the Admin > Settings screen. */
-export function AnnouncementBar({ children, className }: AnnouncementBarProps) {
+export function AnnouncementBar({
+  children,
+  className,
+  initialSettings = null,
+}: AnnouncementBarProps) {
   const _copy = useCopy();
   const locale = useLocale();
   const viewportRef = useRef<HTMLDivElement>(null);
@@ -29,15 +29,18 @@ export function AnnouncementBar({ children, className }: AnnouncementBarProps) {
     queryKey: settingsKeys.public,
     queryFn: ({ signal }) => settingsApi.getPublic({ signal }),
     staleTime: 60_000,
+    initialData: initialSettings ?? undefined,
   });
-  const values = settings.data;
-  const isEnabled = values?.banner_enabled !== 'false';
+  const values = settings.data ?? initialSettings;
+  const hasCustomContent = children !== undefined && children !== null;
+  const isEnabled = hasCustomContent
+    ? values?.banner_enabled !== 'false'
+    : values !== null &&
+      values !== undefined &&
+      values.banner_enabled !== 'false';
   const configuredText =
     locale === 'ar' ? values?.banner_text_ar : values?.banner_text_en;
-  const content =
-    children ??
-    configuredText?.trim() ??
-    defaultBanner[locale === 'ar' ? 'ar' : 'en'];
+  const content = children ?? configuredText?.trim() ?? null;
   const displayContent = _copy(content);
 
   useEffect(() => {
