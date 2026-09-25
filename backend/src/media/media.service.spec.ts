@@ -49,6 +49,7 @@ describe('MediaService', () => {
     storage = {
       upload: vi.fn(async (key: string) => ({ key, url: `/${key}`, size: 10 })),
       getSignedUrl: vi.fn(async (key: string) => `signed:${key}`),
+      getPublicMediaUrl: vi.fn((key: string) => `public:${key}`),
       delete: vi.fn().mockResolvedValue(undefined),
     };
     imageOptimizer = {
@@ -104,7 +105,7 @@ describe('MediaService', () => {
   });
 
   describe('getPublicMedia', () => {
-    it('returns active assets with signed URLs', async () => {
+    it('returns active assets with stable public URLs', async () => {
       prisma.site_media.findMany.mockResolvedValue([
         { id: 1, media_key: 'logo', media_path: 'media/site/logo.png' },
       ]);
@@ -114,7 +115,8 @@ describe('MediaService', () => {
       expect(prisma.site_media.findMany.mock.calls[0][0].where).toEqual({
         is_active: true,
       });
-      expect(result[0].url).toBe('signed:media/site/logo.png');
+      expect(result[0].url).toBe('public:media/site/logo.png');
+      expect(storage.getSignedUrl).not.toHaveBeenCalled();
     });
   });
 
@@ -139,6 +141,9 @@ describe('MediaService', () => {
         Buffer.from('optimized-webp'),
       );
       expect(storage.upload.mock.calls[0][2]).toBe('image/webp');
+      expect(storage.upload.mock.calls[0][3]).toEqual({
+        cacheControl: 'public, max-age=31536000, immutable',
+      });
       expect(tx.site_media.upsert.mock.calls[0][0].where).toEqual({
         media_key: 'hero_banner',
       });
@@ -282,6 +287,9 @@ describe('MediaService', () => {
         Buffer.from('optimized-webp'),
       );
       expect(storage.upload.mock.calls[0][2]).toBe('image/webp');
+      expect(storage.upload.mock.calls[0][3]).toEqual({
+        cacheControl: 'public, max-age=31536000, immutable',
+      });
       expect(tx.package_images.create.mock.calls[0][0].data).toEqual(
         expect.objectContaining({
           is_primary: true,

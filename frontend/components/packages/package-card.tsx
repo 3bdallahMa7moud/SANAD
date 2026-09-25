@@ -34,6 +34,9 @@ interface PackageCardProps {
   rates?: SecondaryExchangeRates | null;
 }
 
+const SERVICE_IMAGE_PLACEHOLDER =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'%3E%3Crect width='16' height='10' fill='%23182738'/%3E%3Cpath d='M0 9 6 4l3 2 3-3 4 4v3H0Z' fill='%23d7b56d' fill-opacity='.22'/%3E%3C/svg%3E";
+
 export function PackageCard({
   categoryLabel = 'Career service',
   index,
@@ -68,7 +71,10 @@ export function PackageCard({
                 `Professional presentation for ${packageItem.name}`,
             )}
             className="object-cover transition-transform duration-500 ease-[var(--ease-standard)] motion-safe:group-hover:scale-[1.04] motion-reduce:transition-none"
+            fetchPriority={index === 0 ? 'high' : undefined}
             fill
+            loading={index < 3 ? 'eager' : 'lazy'}
+            placeholder={SERVICE_IMAGE_PLACEHOLDER}
             quality={85}
             sizes="(max-width: 767px) calc(100vw - 2rem), (max-width: 1023px) 50vw, 33vw"
             src={primaryImage.url}

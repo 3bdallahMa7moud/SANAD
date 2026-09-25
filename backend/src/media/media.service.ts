@@ -5,7 +5,10 @@ import {
   Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { StorageService } from '../files/storage.service';
+import {
+  PUBLIC_MEDIA_CACHE_CONTROL,
+  StorageService,
+} from '../files/storage.service';
 import {
   UpdatePackageImageDto,
   UpdateSiteMediaDto,
@@ -58,9 +61,9 @@ export class MediaService {
     });
 
     return Promise.all(
-      media.map(async (m) => ({
+      media.map((m) => ({
         ...m,
-        url: await this.storageService.getSignedUrl(m.media_path, 86400),
+        url: this.storageService.getPublicMediaUrl(m.media_path),
       })),
     );
   }
@@ -101,6 +104,7 @@ export class MediaService {
       storageKey,
       optimizedImage.buffer,
       optimizedImage.mimetype,
+      { cacheControl: PUBLIC_MEDIA_CACHE_CONTROL },
     );
 
     let media;
@@ -234,6 +238,7 @@ export class MediaService {
       storageKey,
       optimizedImage.buffer,
       optimizedImage.mimetype,
+      { cacheControl: PUBLIC_MEDIA_CACHE_CONTROL },
     );
 
     let image;

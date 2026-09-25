@@ -24,6 +24,15 @@ export interface UploadResult {
   size: number;
 }
 
+export interface UploadOptions {
+  cacheControl?: string;
+}
+
+export const PUBLIC_MEDIA_CACHE_CONTROL = 'public, max-age=31536000, immutable';
+
+const PUBLIC_MEDIA_KEY =
+  /^(?:packages\/\d+|media\/site)\/[a-z0-9][a-z0-9._-]*\.(?:avif|jpe?g|png|webp)$/i;
+
 @Injectable()
 export class StorageService {
   private readonly logger = new Logger(StorageService.name);
@@ -75,6 +84,7 @@ export class StorageService {
     key: string,
     buffer: Buffer,
     contentType: string,
+    options: UploadOptions = {},
   ): Promise<UploadResult> {
     const sanitizedKey = key.replace(/\\/g, '/').replace(/^\/+/, '');
 
@@ -85,6 +95,7 @@ export class StorageService {
           Key: sanitizedKey,
           Body: buffer,
           ContentType: contentType,
+          CacheControl: options.cacheControl,
         }),
       );
 
@@ -126,6 +137,41 @@ export class StorageService {
       const signature = this.signLocalUrl(sanitizedKey, expires);
       return `/api/v1/storage/local?key=${encodeURIComponent(sanitizedKey)}&expires=${expires}&signature=${signature}`;
     }
+  }
+
+  /**
+   * Marketing images are intentionally public and use content-address-like
+   * UUID names. Return a stable URL so browsers and Next's image optimizer can
+   * reuse the same cached object across page renders. Private order files keep
+   * using expiring signed URLs through getSignedUrl().
+   */
+  getPublicMediaUrl(key: string): string {
+    const sanitizedKey = this.validatePublicMediaKey(key);
+
+    if (this.isS3Configured) {
+      if (!this.publicUrl) {
+        throw new NotFoundException('Public media storage is not configured');
+      }
+      const encodedKey = sanitizedKey
+        .split('/')
+        .map((segment) => encodeURIComponent(segment))
+        .join('/');
+      return `${this.publicUrl.replace(/\/$/, '')}/${encodedKey}`;
+    }
+
+    return `/api/v1/storage/public?key=${encodeURIComponent(sanitizedKey)}`;
+  }
+
+  getPublicLocalMediaPath(key: string): string {
+    if (this.isS3Configured) {
+      throw new NotFoundException('Local storage is not enabled');
+    }
+    const sanitizedKey = this.validatePublicMediaKey(key);
+    const filePath = this.resolveLocalPath(sanitizedKey);
+    if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
+      throw new NotFoundException('File not found');
+    }
+    return filePath;
   }
 
   async delete(key: string): Promise<void> {
@@ -186,6 +232,14 @@ export class StorageService {
       .createHmac('sha256', this.signingSecret)
       .update(`${key}:${expires}`)
       .digest('hex');
+  }
+
+  private validatePublicMediaKey(key: string): string {
+    const sanitizedKey = key.replace(/\\/g, '/').replace(/^\/+/, '');
+    if (!PUBLIC_MEDIA_KEY.test(sanitizedKey)) {
+      throw new NotFoundException('Public media not found');
+    }
+    return sanitizedKey;
   }
 
   private resolveLocalPath(key: string): string {

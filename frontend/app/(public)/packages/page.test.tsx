@@ -6,11 +6,13 @@ vi.mock('next-intl/server', () => ({ getLocale: async () => 'en' }));
 vi.mock('@/lib/packages/exchange-rates', () => ({
   getSecondaryExchangeRates: async () => null,
 }));
+vi.mock('@/lib/api/public-settings-server', () => ({
+  getInitialPublicSettings: async () => ({}),
+}));
 
 const { list } = vi.hoisted(() => ({ list: vi.fn() }));
 vi.mock('@/lib/api', () => ({
   packagesApi: { list },
-  settingsApi: { getPublic: vi.fn().mockResolvedValue({}) },
 }));
 vi.mock('@/components/packages/services-catalog', () => ({
   ServicesCatalog: ({ packages }: { packages: unknown[] }) => (

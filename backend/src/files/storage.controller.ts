@@ -2,7 +2,7 @@ import { Controller, Get, Query, Res } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
 import { Response } from 'express';
 import { Public } from '../common/decorators';
-import { StorageService } from './storage.service';
+import { PUBLIC_MEDIA_CACHE_CONTROL, StorageService } from './storage.service';
 
 @Public()
 @ApiExcludeController()
@@ -22,6 +22,15 @@ export class StorageController {
       expires,
       signature,
     );
+    return response.sendFile(filePath);
+  }
+
+  @Get('public')
+  downloadPublicMedia(@Query('key') key: string, @Res() response: Response) {
+    const filePath = this.storageService.getPublicLocalMediaPath(key);
+    response.setHeader('Cache-Control', PUBLIC_MEDIA_CACHE_CONTROL);
+    response.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    response.setHeader('X-Content-Type-Options', 'nosniff');
     return response.sendFile(filePath);
   }
 }

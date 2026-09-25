@@ -110,6 +110,7 @@ const nextConfig: NextConfig = {
   },
   images: {
     maximumDiskCacheSize: 128_000_000,
+    minimumCacheTTL: 86_400,
     qualities: [75, 85],
     remotePatterns,
   },

@@ -65,4 +65,29 @@ describe('StorageService local signed URLs', () => {
       service.upload('../outside.pdf', Buffer.from('x'), 'application/pdf'),
     ).rejects.toBeInstanceOf(BadRequestException);
   });
+
+  it('provides a stable, cacheable URL only for public marketing images', async () => {
+    const service = createService();
+    const key = `packages/3/${randomUUID()}.webp`;
+
+    try {
+      await service.upload(key, Buffer.from('webp-test'), 'image/webp');
+
+      const firstUrl = service.getPublicMediaUrl(key);
+      const secondUrl = service.getPublicMediaUrl(key);
+      expect(firstUrl).toBe(
+        `/api/v1/storage/public?key=${encodeURIComponent(key)}`,
+      );
+      expect(secondUrl).toBe(firstUrl);
+      expect(service.getPublicLocalMediaPath(key)).toMatch(
+        /uploads[\\/]packages[\\/]3/,
+      );
+
+      expect(() =>
+        service.getPublicMediaUrl(`customer-files/${randomUUID()}.pdf`),
+      ).toThrow(NotFoundException);
+    } finally {
+      await service.delete(key);
+    }
+  });
 });

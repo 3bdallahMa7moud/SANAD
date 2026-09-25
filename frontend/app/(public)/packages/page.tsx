@@ -8,7 +8,8 @@ import { ServicesCatalog } from '@/components/packages/services-catalog';
 import { getServiceCategory } from '@/lib/packages/categories';
 import { PackageComparison } from '@/components/packages/package-comparison';
 import { Button } from '@/components/ui/button';
-import { packagesApi, settingsApi } from '@/lib/api';
+import { packagesApi } from '@/lib/api';
+import { getInitialPublicSettings } from '@/lib/api/public-settings-server';
 import { whatsappHref } from '@/lib/orders/presentation';
 import { getSecondaryExchangeRates } from '@/lib/packages/exchange-rates';
 
@@ -30,7 +31,7 @@ export default async function PackagesPage() {
 
   const [catalog, settingsResult, rates] = await Promise.all([
     packagesApi.list({ limit: 100 }),
-    settingsApi.getPublic().catch(() => null),
+    getInitialPublicSettings(),
     getSecondaryExchangeRates(),
   ]);
   const rawPackages = catalog?.items ?? [];

@@ -26,6 +26,10 @@ describe('PackagesService', () => {
     };
     storage = {
       getSignedUrl: vi.fn(async (key: string) => `signed:${key}`),
+      getPublicMediaUrl: vi.fn(
+        (key: string) =>
+          `/api/v1/storage/public?key=${encodeURIComponent(key)}`,
+      ),
     };
     service = new PackagesService(prisma as PrismaService, storage);
   });
@@ -113,7 +117,7 @@ describe('PackagesService', () => {
       });
     });
 
-    it('adds a usable URL for package images stored by the admin', async () => {
+    it('adds a stable public URL for package images stored by the admin', async () => {
       prisma.packages.findMany.mockResolvedValue([
         {
           id: 1,
@@ -126,9 +130,10 @@ describe('PackagesService', () => {
 
       expect(result.data.items[0].package_images[0]).toEqual(
         expect.objectContaining({
-          image_url: 'signed:packages/1/image.png',
+          image_url: '/api/v1/storage/public?key=packages%2F1%2Fimage.png',
         }),
       );
+      expect(storage.getSignedUrl).not.toHaveBeenCalled();
     });
   });
 

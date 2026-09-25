@@ -28,7 +28,7 @@ export class PackagesService {
             image.image_path.startsWith('/') ||
             /^https?:\/\//i.test(image.image_path)
               ? image.image_path
-              : await this.storage.getSignedUrl(image.image_path, 86400),
+              : this.storage.getPublicMediaUrl(image.image_path),
         })),
       ),
     };

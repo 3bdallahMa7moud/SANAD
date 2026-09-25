@@ -112,7 +112,7 @@ export function PackageGallery({
                 variant === 'hero' ? 'object-cover' : 'object-contain',
               )}
               fill
-              priority
+              preload
               quality={85}
               sizes="(max-width: 1023px) calc(100vw - 2rem), 46vw"
               src={selectedImage.url!}

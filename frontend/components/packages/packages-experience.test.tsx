@@ -168,6 +168,31 @@ describe('Package selection experience', () => {
     expect(screen.getByText('20%')).toBeVisible();
   });
 
+  it('loads the first service row eagerly and keeps later images lazy', () => {
+    const imagePackages = [1, 2, 3, 4].map((id) => ({
+      ...service(id, `Service ${id}`, 100 + id, [`Feature ${id}`]),
+      images: [
+        {
+          id,
+          path: `/images/packages/service-${id}.webp`,
+          url: `/images/packages/service-${id}.webp`,
+          altText: `Service ${id} preview`,
+          isPrimary: true,
+          displayOrder: 0,
+        },
+      ],
+    }));
+
+    render(<ServicesCatalog packages={imagePackages} />);
+
+    const images = screen.getAllByRole('img');
+    images
+      .slice(0, 3)
+      .forEach((image) => expect(image).toHaveAttribute('loading', 'eager'));
+    expect(images[0]).toHaveAttribute('fetchpriority', 'high');
+    expect(images[3]).toHaveAttribute('loading', 'lazy');
+  });
+
   it('opens a service illustration and restores keyboard focus after Escape', async () => {
     const user = userEvent.setup();
     render(
