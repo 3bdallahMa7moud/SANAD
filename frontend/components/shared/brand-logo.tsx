@@ -1,4 +1,5 @@
 import { useCopy } from '@/lib/i18n/use-copy';
+import Image from 'next/image';
 
 import { cn } from '@/lib/utils/cn';
 
@@ -19,6 +20,7 @@ export interface BrandLogoProps {
 export function BrandLogo({
   alt = 'SANAD',
   className,
+  loading = 'lazy',
   size = 'md',
   tone = 'adaptive',
 }: BrandLogoProps) {
@@ -34,6 +36,27 @@ export function BrandLogo({
         className,
       )}
       role="img"
-    />
+    >
+      <Image
+        alt=""
+        aria-hidden="true"
+        className="brand-logo__image brand-logo__image--light"
+        height={769}
+        loading={loading}
+        src="/brand/sanad-logo-navy.png"
+        unoptimized
+        width={1239}
+      />
+      <Image
+        alt=""
+        aria-hidden="true"
+        className="brand-logo__image brand-logo__image--dark"
+        height={769}
+        loading={loading}
+        src="/brand/sanad-logo-dark.png"
+        unoptimized
+        width={1239}
+      />
+    </span>
   );
 }

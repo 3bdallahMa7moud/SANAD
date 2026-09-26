@@ -26,6 +26,7 @@ import { getScopeQuestions } from '@/lib/packages/scope-questions';
 import { whatsappHref } from '@/lib/orders/presentation';
 import { VerifiedReviewCard } from '@/components/feedback/verified-review-card';
 import { FeedbackSummary } from '@/components/feedback/feedback-summary';
+import { PackageCheckoutButton } from '@/components/packages/package-checkout-button';
 import { PackageOrderCard } from '@/components/packages/package-order-card';
 import { PackageOfferFlag } from '@/components/packages/package-offer-visual';
 import {
@@ -209,6 +210,7 @@ export default async function PackageDetailPage({
     `Hello, I would like to confirm the scope and delivery timing for ${packageItem.name} before ordering.`,
   );
   const bestOffer = getBestPackageOffer(packageItem);
+  const checkoutMode = getCheckoutMode();
   const displayPrice = getOrderDisplayPrice(packageItem, pricing, _copy.locale);
   const fallbackCurrentPrice = getPackageCurrentPrice(packageItem);
   const fallbackOriginalPrice = getPackageOriginalPrice(packageItem);
@@ -489,19 +491,15 @@ export default async function PackageDetailPage({
               </div>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                <Button
-                  asChild
+                <PackageCheckoutButton
                   className="group min-h-14 bg-accent px-6 text-base font-bold text-accent-foreground shadow-lg shadow-black/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent/90"
-                  size="lg"
-                >
-                  <Link href={checkoutHref}>
-                    {_copy('Order this service now', 'اطلب الخدمة الآن')}
-                    <ArrowRight
-                      aria-hidden="true"
-                      className="size-4 transition-transform duration-200 motion-safe:group-hover:translate-x-1 rtl:rotate-180 rtl:motion-safe:group-hover:-translate-x-1"
-                    />
-                  </Link>
-                </Button>
+                  checkoutHref={checkoutHref}
+                  checkoutMode={checkoutMode}
+                  label="Order this service now"
+                  labelAr="اطلب الخدمة الآن"
+                  packageItem={packageItem}
+                  pricing={pricing}
+                />
                 {contactHref ? (
                   <Button
                     asChild
@@ -885,7 +883,7 @@ export default async function PackageDetailPage({
             >
               <PackageOrderCard
                 checkoutHref={checkoutHref}
-                checkoutMode={getCheckoutMode()}
+                checkoutMode={checkoutMode}
                 packageItem={packageItem}
                 pricing={pricing}
                 rates={rates}
@@ -978,15 +976,16 @@ export default async function PackageDetailPage({
               {_copy(displayPrice)}
             </p>
           </div>
-          <Button asChild className="group min-w-0 shrink-0" size="lg">
-            <Link href={checkoutHref}>
-              {_copy('Order now', 'اطلب الآن')}
-              <ArrowRight
-                aria-hidden="true"
-                className="size-4 transition-transform motion-safe:group-hover:translate-x-0.5"
-              />
-            </Link>
-          </Button>
+          <PackageCheckoutButton
+            className="group"
+            checkoutHref={checkoutHref}
+            checkoutMode={checkoutMode}
+            containerClassName="min-w-0 shrink-0"
+            label="Order now"
+            labelAr="اطلب الآن"
+            packageItem={packageItem}
+            pricing={pricing}
+          />
         </div>
       </div>
     </div>
