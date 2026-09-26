@@ -28,7 +28,7 @@ export async function CareerStory() {
       <div className="layout-container layout-section">
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-center lg:gap-16 xl:gap-24">
           <MotionMediaReveal
-            className="relative aspect-[4/3] overflow-hidden rounded-lg border border-border bg-surface shadow-md"
+            className="relative aspect-[4/3] overflow-hidden rounded-lg border border-border bg-surface shadow-md lg:scale-[1.04] ltr:lg:origin-left rtl:lg:origin-right"
             parallax
           >
             <Image

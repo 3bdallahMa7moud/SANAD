@@ -14,6 +14,7 @@ import {
   MotionStaggerItem,
   MotionStaggerList,
 } from '@/components/motion/motion-reveal';
+
 const sanadCareerServicesHero =
   '/images/home/sanad-career-services-hero-v4.webp';
 
@@ -37,12 +38,13 @@ export async function HeroSection() {
         aria-hidden="true"
         className="sanad-hero-orbit absolute top-20 right-[-9rem] size-72 rounded-full border border-accent/20 sm:size-96 lg:top-12 lg:right-[-5rem] lg:size-[30rem]"
       />
+
       <div
         aria-hidden="true"
         className="absolute top-0 right-0 hidden h-full w-[42%] border-s border-border/60 bg-surface/45 lg:block"
       />
 
-      <div className="layout-container relative grid items-center gap-12 py-14 sm:gap-16 sm:py-18 md:py-20 lg:min-h-[42rem] lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)] lg:gap-5 lg:py-14 xl:min-h-[44rem] xl:gap-8">
+      <div className="layout-container relative grid items-center gap-12 py-14 sm:gap-16 sm:py-18 md:py-20 lg:min-h-[42rem] lg:grid-cols-[minmax(0,0.68fr)_minmax(0,1.32fr)] lg:gap-5 lg:py-14 xl:min-h-[44rem] xl:gap-8">
         <div className="max-w-2xl lg:py-8">
           <MotionReveal delay={0.05} direction="none">
             <p className="flex items-center gap-3 text-xs font-semibold tracking-[0.18em] text-secondary uppercase sm:text-sm">
@@ -77,6 +79,7 @@ export async function HeroSection() {
                   />
                 </a>
               </Button>
+
               <Button
                 asChild
                 className="w-full bg-surface/70 sm:w-auto"
@@ -110,6 +113,7 @@ export async function HeroSection() {
                     strokeWidth={1.8}
                   />
                 </span>
+
                 {_copy(label)}
               </MotionStaggerItem>
             ))}
@@ -117,7 +121,19 @@ export async function HeroSection() {
         </div>
 
         <MotionMediaReveal
-          className="relative mx-auto w-full max-w-[50rem] lg:mx-0 lg:translate-x-6 lg:justify-self-end xl:translate-x-10"
+          className="
+            relative mx-auto w-full max-w-[62rem]
+            lg:mx-0
+            lg:w-[calc(100%+4rem)]
+            lg:max-w-[66rem]
+            lg:justify-self-end
+            lg:translate-x-14
+            xl:w-[calc(100%+6rem)]
+            xl:max-w-[72rem]
+            xl:translate-x-20
+            rtl:lg:-translate-x-14
+            rtl:xl:-translate-x-20
+          "
           delay={0.16}
         >
           <HeroOfferVisual imageAlt={t('imageAlt')} />
@@ -137,7 +153,7 @@ function HeroOfferVisual({ imageAlt }: { imageAlt: string }) {
         className="object-cover"
         fill
         preload
-        sizes="(max-width: 1023px) calc(100vw - 2rem), 50vw"
+        sizes="(max-width: 1023px) calc(100vw - 2rem), 55vw"
         src={sanadCareerServicesHero}
       />
     </div>

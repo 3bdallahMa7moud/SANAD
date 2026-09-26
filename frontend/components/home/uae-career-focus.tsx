@@ -65,7 +65,7 @@ export async function UaeCareerFocus() {
           </div>
 
           <MotionMediaReveal
-            className="relative aspect-[16/10] overflow-hidden rounded-lg border border-border bg-surface-muted shadow-md"
+            className="relative aspect-[16/10] overflow-hidden rounded-lg border border-border bg-surface-muted shadow-md lg:scale-[1.04] ltr:lg:origin-right rtl:lg:origin-left"
             parallax
           >
             <Image

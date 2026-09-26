@@ -149,7 +149,7 @@ export function FeaturedPackageCard({
           aria-hidden="true"
           className="absolute inset-x-0 top-0 z-10 h-0.5 origin-left scale-x-0 bg-primary transition-transform duration-500 ease-[var(--ease-standard)] motion-safe:group-hover:scale-x-100 motion-safe:group-focus-within:scale-x-100 motion-reduce:transition-none"
         />
-        <div className="relative aspect-[16/9] overflow-hidden border-b border-border bg-surface-muted">
+        <div className="relative aspect-[16/10] overflow-hidden border-b border-border bg-surface-muted">
           <Image
             alt={serviceImageAlt}
             className="object-cover transition-transform duration-500 ease-[var(--ease-standard)] motion-safe:group-hover:scale-[1.035] motion-safe:group-focus-within:scale-[1.035] motion-reduce:transition-none"
