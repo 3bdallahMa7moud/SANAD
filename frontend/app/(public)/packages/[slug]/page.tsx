@@ -26,10 +26,7 @@ import { getScopeQuestions } from '@/lib/packages/scope-questions';
 import { whatsappHref } from '@/lib/orders/presentation';
 import { VerifiedReviewCard } from '@/components/feedback/verified-review-card';
 import { FeedbackSummary } from '@/components/feedback/feedback-summary';
-import {
-  getOrderDisplayPrice,
-  PackageOrderCard,
-} from '@/components/packages/package-order-card';
+import { PackageOrderCard } from '@/components/packages/package-order-card';
 import { PackageOfferFlag } from '@/components/packages/package-offer-visual';
 import {
   Accordion,
@@ -55,6 +52,7 @@ import {
   getPackageHref,
   getPackageOriginalPrice,
   getPackageIdFromSlug,
+  getOrderDisplayPrice,
   getPackagePrimaryImage,
   getPackageSlug,
   formatDeliveryEstimate,

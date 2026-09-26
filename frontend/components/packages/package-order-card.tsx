@@ -26,11 +26,9 @@ import { useAuthModal } from '@/components/auth/auth-modal';
 import { checkoutApi, isApiError, ordersApi } from '@/lib/api';
 import {
   getBestPackageOffer,
-  getPackageCurrentPrice,
   formatDeliveryEstimate,
 } from '@/lib/packages/presentation';
 import type { CareerPackage, CheckoutPricing } from '@/types/domain';
-import { formatMoney } from '@/lib/orders/presentation';
 
 interface PackageOrderCardProps {
   checkoutHref: string;
@@ -360,14 +358,4 @@ export function PackageOrderCard({
       </div>
     </aside>
   );
-}
-
-export function getOrderDisplayPrice(
-  packageItem: CareerPackage,
-  pricing: CheckoutPricing | null,
-  locale = 'en',
-): string {
-  return pricing
-    ? formatMoney(pricing.finalAmount, pricing.currency, locale)
-    : formatMoney(getPackageCurrentPrice(packageItem), 'AED', locale);
 }

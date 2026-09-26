@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { CareerPackage } from '@/types/domain';
 import {
   formatDeliveryEstimate,
+  getOrderDisplayPrice,
   getPackageCurrentPrice,
   getPackageDiscountAmount,
   getPackageFeaturePairs,
@@ -44,6 +45,40 @@ describe('limited package pricing', () => {
 
   it('calculates the saving amount from the original and offer prices', () => {
     expect(getPackageDiscountAmount(packageWithLimitedOffer(250))).toBe(125);
+  });
+
+  it('formats the API checkout price for server-rendered package metadata', () => {
+    expect(
+      getOrderDisplayPrice(
+        packageWithLimitedOffer(250),
+        {
+          packageId: 1,
+          packageName: 'Package',
+          deliveryDays: 1,
+          currency: 'AED',
+          originalPrice: 250,
+          secondaryPackageId: null,
+          secondaryPackageName: null,
+          secondaryOriginalPrice: 0,
+          secondaryDiscountAmount: 0,
+          offerId: 1,
+          offerDiscountPercentage: 50,
+          offerDiscountAmount: 125,
+          couponCode: null,
+          couponDiscountAmount: 0,
+          subtotalAfterDiscounts: 125,
+          totalAmount: 125,
+          finalAmount: 125,
+        },
+        'en',
+      ),
+    ).toBe('AED\u00a0125');
+  });
+
+  it('formats the published offer price when checkout preview is unavailable', () => {
+    expect(getOrderDisplayPrice(packageWithLimitedOffer(250), null, 'en')).toBe(
+      'AED\u00a0125',
+    );
   });
 });
 

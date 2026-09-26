@@ -1,4 +1,10 @@
-import type { CareerPackage, PackageImage, PackageOffer } from '@/types/domain';
+import { formatMoney } from '@/lib/orders/presentation';
+import type {
+  CareerPackage,
+  CheckoutPricing,
+  PackageImage,
+  PackageOffer,
+} from '@/types/domain';
 
 const PRICE_FORMATTER = new Intl.NumberFormat('en-AE', {
   style: 'currency',
@@ -104,6 +110,16 @@ export function getPackageDiscountAmount(packageItem: CareerPackage): number {
     0,
     getPackageOriginalPrice(packageItem) - getPackageCurrentPrice(packageItem),
   );
+}
+
+export function getOrderDisplayPrice(
+  packageItem: CareerPackage,
+  pricing: CheckoutPricing | null,
+  locale = 'en',
+): string {
+  return pricing
+    ? formatMoney(pricing.finalAmount, pricing.currency, locale)
+    : formatMoney(getPackageCurrentPrice(packageItem), 'AED', locale);
 }
 
 // Use the published name and description, so admin edits stay consistent
