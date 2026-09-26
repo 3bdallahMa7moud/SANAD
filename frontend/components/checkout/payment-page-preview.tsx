@@ -74,7 +74,10 @@ export function PaymentPagePreview({
 
             <div className="mt-8">
               <p className="text-xs font-semibold tracking-[0.16em] text-secondary uppercase">
-                {_copy('Pay securely by bank card', 'ادفع بأمان بالبطاقة البنكية')}
+                {_copy(
+                  'Pay securely by bank card',
+                  'ادفع بأمان بالبطاقة البنكية',
+                )}
               </p>
               <h1 className="type-h3 mt-2 text-primary">
                 {_copy('Complete your payment', 'أكمل عملية الدفع')}
@@ -113,89 +116,103 @@ export function PaymentPagePreview({
                   </span>
                 ) : null}
               </button>
-
             </div>
 
             <div className="mt-8 grid gap-5" data-testid="card-preview">
-                <div>
-                  <label
-                    className="type-label text-foreground"
-                    htmlFor="preview-card-number"
+              <div>
+                <label
+                  className="type-label text-foreground"
+                  htmlFor="preview-card-number"
+                >
+                  {_copy('Card number', 'رقم البطاقة')}
+                </label>
+                <div className="relative mt-2">
+                  <CreditCard
+                    aria-hidden="true"
+                    className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+                  />
+                  <Input
+                    autoComplete="off"
+                    className="ps-10 font-mono tracking-[0.12em]"
+                    id="preview-card-number"
+                    inputMode="numeric"
+                    maxLength={19}
+                    placeholder="4242 4242 4242 4242"
+                  />
+                  <div
+                    aria-label="Visa and Mastercard accepted"
+                    className="pointer-events-none absolute top-1/2 end-3 flex -translate-y-1/2 items-center gap-2"
                   >
-                    {_copy('Card number', 'رقم البطاقة')}
-                  </label>
-                  <div className="relative mt-2">
-                    <CreditCard
-                      aria-hidden="true"
-                      className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
-                    />
-                    <Input
-                      autoComplete="off"
-                      className="ps-10 font-mono tracking-[0.12em]"
-                      id="preview-card-number"
-                      inputMode="numeric"
-                      maxLength={19}
-                      placeholder="4242 4242 4242 4242"
-                    />
+                    <span className="text-[0.65rem] font-black tracking-tight text-[#1434CB] italic">
+                      VISA
+                    </span>
+                    <span
+                      aria-label="Mastercard"
+                      className="relative block h-4 w-7"
+                    >
+                      <span className="absolute top-0 left-0 size-4 rounded-full bg-[#EB001B]" />
+                      <span className="absolute top-0 right-0 size-4 rounded-full bg-[#F79E1B] opacity-90" />
+                    </span>
                   </div>
                 </div>
+              </div>
+              <div>
+                <label
+                  className="type-label text-foreground"
+                  htmlFor="preview-card-name"
+                >
+                  {_copy('Name on card', 'الاسم على البطاقة')}
+                </label>
+                <Input
+                  autoComplete="off"
+                  className="mt-2"
+                  id="preview-card-name"
+                  placeholder={_copy('CARDHOLDER NAME', 'اسم حامل البطاقة')}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label
                     className="type-label text-foreground"
-                    htmlFor="preview-card-name"
+                    htmlFor="preview-expiry"
                   >
-                    {_copy('Name on card', 'الاسم على البطاقة')}
+                    {_copy('Expiry date', 'تاريخ الانتهاء')}
                   </label>
                   <Input
                     autoComplete="off"
-                    className="mt-2"
-                    id="preview-card-name"
-                    placeholder={_copy('CARDHOLDER NAME', 'اسم حامل البطاقة')}
+                    className="mt-2 font-mono"
+                    id="preview-expiry"
+                    inputMode="numeric"
+                    maxLength={5}
+                    placeholder="MM/YY"
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label
-                      className="type-label text-foreground"
-                      htmlFor="preview-expiry"
-                    >
-                      {_copy('Expiry date', 'تاريخ الانتهاء')}
-                    </label>
-                    <Input
-                      autoComplete="off"
-                      className="mt-2 font-mono"
-                      id="preview-expiry"
-                      inputMode="numeric"
-                      maxLength={5}
-                      placeholder="MM/YY"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      className="type-label text-foreground"
-                      htmlFor="preview-cvc"
-                    >
-                      CVC
-                    </label>
-                    <Input
-                      autoComplete="off"
-                      className="mt-2 font-mono"
-                      id="preview-cvc"
-                      inputMode="numeric"
-                      maxLength={4}
-                      placeholder="•••"
-                      type="password"
-                    />
-                  </div>
+                <div>
+                  <label
+                    className="type-label text-foreground"
+                    htmlFor="preview-cvc"
+                  >
+                    CVC
+                  </label>
+                  <Input
+                    autoComplete="off"
+                    className="mt-2 font-mono"
+                    id="preview-cvc"
+                    inputMode="numeric"
+                    maxLength={4}
+                    placeholder="•••"
+                    type="password"
+                  />
                 </div>
-                <Button
-                  className="mt-1 w-full"
-                  onClick={() => setShowNotice(true)}
-                  size="lg"
-                >
-                  <LockKeyhole aria-hidden="true" className="size-4" />
-                  {_copy('Pay', 'ادفع')} {_copy(_copy.money(amount, 'AED'))}
-                </Button>
+              </div>
+              <Button
+                className="mt-1 w-full"
+                onClick={() => setShowNotice(true)}
+                size="lg"
+              >
+                <LockKeyhole aria-hidden="true" className="size-4" />
+                {_copy('Pay', 'ادفع')} {_copy(_copy.money(amount, 'AED'))}
+              </Button>
             </div>
 
             {showNotice ? (
@@ -268,8 +285,8 @@ export function PaymentPagePreview({
                   </p>
                   <p className="mt-1 text-xs leading-5 text-primary-foreground/70">
                     {_copy(
-                  'The live version will be processed on the PCI-compliant XPay checkout.',
-                  'ستتم معالجة النسخة الفعلية عبر صفحة XPay المتوافقة مع معايير PCI.',
+                      'The live version will be processed on the PCI-compliant XPay checkout.',
+                      'ستتم معالجة النسخة الفعلية عبر صفحة XPay المتوافقة مع معايير PCI.',
                     )}
                   </p>
                 </div>

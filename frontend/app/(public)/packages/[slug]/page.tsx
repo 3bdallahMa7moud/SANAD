@@ -60,6 +60,7 @@ import {
   formatDeliveryEstimate,
 } from '@/lib/packages/presentation';
 import type { CareerPackage, CheckoutPricing } from '@/types/domain';
+import { getCheckoutMode } from '@/lib/env/public-env';
 
 export const dynamic = 'force-dynamic';
 
@@ -886,6 +887,7 @@ export default async function PackageDetailPage({
             >
               <PackageOrderCard
                 checkoutHref={checkoutHref}
+                checkoutMode={getCheckoutMode()}
                 packageItem={packageItem}
                 pricing={pricing}
                 rates={rates}
