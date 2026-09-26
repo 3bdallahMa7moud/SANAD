@@ -5,12 +5,25 @@ import { useState } from 'react';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { adminApi } from '@/lib/api';
 import { isApiError } from '@/lib/api/errors';
 import { useCopy } from '@/lib/i18n/use-copy';
 import type { Administrator } from '@/lib/api/modules/admin';
 import { useAuth } from '@/hooks/use-auth';
+import {
+  ADMIN_PERMISSIONS,
+  type AdminPermission,
+} from '@/lib/admin/permissions';
 import { AdminPageHeader, ConfirmDialog, DataState } from './admin-ui';
+import { AdminPermissionsEditor } from './admin-permissions-editor';
 
 export function AdministratorsManager() {
   const _copy = useCopy();
@@ -21,11 +34,16 @@ export function AdministratorsManager() {
     email: '',
     password: '',
     role: 'admin' as 'admin' | 'super_admin',
+    permissions: [] as AdminPermission[],
   });
   const [passwords, setPasswords] = useState<Record<number, string>>({});
   const [names, setNames] = useState<Record<number, string>>({});
   const [savedNameId, setSavedNameId] = useState<number | null>(null);
   const [deleting, setDeleting] = useState<Administrator | null>(null);
+  const [editingPermissions, setEditingPermissions] = useState<{
+    administrator: Administrator;
+    permissions: AdminPermission[];
+  } | null>(null);
   const query = useQuery({
     queryKey: ['admin', 'administrators'],
     queryFn: () => adminApi.administrators.list(),
@@ -36,7 +54,13 @@ export function AdministratorsManager() {
   const create = useMutation({
     mutationFn: () => adminApi.administrators.create(form),
     onSuccess: () => {
-      setForm({ name: '', email: '', password: '', role: 'admin' });
+      setForm({
+        name: '',
+        email: '',
+        password: '',
+        role: 'admin',
+        permissions: [],
+      });
       void refresh();
     },
   });
@@ -50,6 +74,7 @@ export function AdministratorsManager() {
         name?: string;
         role?: 'admin' | 'super_admin';
         active?: boolean;
+        permissions?: AdminPermission[];
       };
     }) => adminApi.administrators.update(id, input),
     onSuccess: (administrator, variables) => {
@@ -67,6 +92,9 @@ export function AdministratorsManager() {
           return next;
         });
         setSavedNameId(variables.id);
+      }
+      if (variables.input.permissions !== undefined) {
+        setEditingPermissions(null);
       }
       void refresh();
     },
@@ -146,12 +174,31 @@ export function AdministratorsManager() {
               setForm({
                 ...form,
                 role: e.target.value as 'admin' | 'super_admin',
+                permissions:
+                  e.target.value === 'super_admin' ? [] : form.permissions,
               })
             }
           >
             <option value="admin">{_copy('Admin')}</option>
             <option value="super_admin">{_copy('Super Admin')}</option>
           </select>
+          {form.role === 'admin' ? (
+            <div className="sm:col-span-2">
+              <AdminPermissionsEditor
+                onChange={(permissions) =>
+                  setForm((current) => ({ ...current, permissions }))
+                }
+                value={form.permissions}
+              />
+            </div>
+          ) : (
+            <p className="sm:col-span-2 text-sm text-muted-foreground">
+              {_copy(
+                'Super Admin accounts always have full access, including administrator management.',
+                'حسابات السوبر أدمن تمتلك جميع الصلاحيات دائمًا، بما فيها إدارة الأدمنز.',
+              )}
+            </p>
+          )}
           <Button
             className="sm:col-span-2"
             type="submit"
@@ -181,12 +228,13 @@ export function AdministratorsManager() {
         empty={query.data?.length === 0}
       >
         <section className="overflow-x-auto border border-border bg-surface shadow-sm">
-          <table className="w-full min-w-[720px] text-start text-sm">
+          <table className="w-full min-w-[900px] text-start text-sm">
             <thead className="bg-surface-muted text-secondary">
               <tr>
                 <th className="p-4">{_copy('Name')}</th>
                 <th className="p-4">{_copy('Role')}</th>
                 <th className="p-4">{_copy('Status')}</th>
+                <th className="p-4">{_copy('Permissions', 'الصلاحيات')}</th>
                 <th className="p-4">{_copy('Password')}</th>
                 <th className="p-4">{_copy('Actions')}</th>
               </tr>
@@ -270,6 +318,39 @@ export function AdministratorsManager() {
                     )}
                   </td>
                   <td className="p-4">
+                    {administrator.role === 'super_admin' ? (
+                      <span className="font-semibold text-primary">
+                        {_copy('Full access', 'صلاحيات كاملة')}
+                      </span>
+                    ) : (
+                      <div className="grid gap-2">
+                        <span className="text-xs text-muted-foreground">
+                          {administrator.admin_permissions === null
+                            ? _copy('Legacy full access', 'صلاحيات كاملة قديمة')
+                            : _copy(
+                                `${administrator.admin_permissions.length} permissions`,
+                                `${administrator.admin_permissions.length} صلاحية`,
+                              )}
+                        </span>
+                        <Button
+                          onClick={() =>
+                            setEditingPermissions({
+                              administrator,
+                              permissions: administrator.admin_permissions ?? [
+                                ...ADMIN_PERMISSIONS,
+                              ],
+                            })
+                          }
+                          size="sm"
+                          type="button"
+                          variant="outline"
+                        >
+                          {_copy('Manage permissions', 'إدارة الصلاحيات')}
+                        </Button>
+                      </div>
+                    )}
+                  </td>
+                  <td className="p-4">
                     <div className="flex gap-2">
                       <Input
                         type="password"
@@ -303,6 +384,7 @@ export function AdministratorsManager() {
                   <td className="p-4">
                     <div className="flex flex-wrap gap-2">
                       <Button
+                        disabled={administrator.id === user?.id}
                         type="button"
                         variant="outline"
                         onClick={() =>
@@ -342,6 +424,67 @@ export function AdministratorsManager() {
           />
         ) : null}
       </DataState>
+      <Dialog
+        open={Boolean(editingPermissions)}
+        onOpenChange={(open) => {
+          if (!open) setEditingPermissions(null);
+        }}
+      >
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>
+              {_copy('Administrator permissions', 'صلاحيات الأدمن')}
+            </DialogTitle>
+            <DialogDescription>
+              {editingPermissions
+                ? _copy(
+                    `Choose what ${editingPermissions.administrator.name} can view or manage. Saving signs this administrator out of existing sessions.`,
+                    `حدد ما يستطيع ${editingPermissions.administrator.name} مشاهدته أو إدارته. الحفظ سينهي جلساته الحالية.`,
+                  )
+                : null}
+            </DialogDescription>
+          </DialogHeader>
+          {editingPermissions ? (
+            <AdminPermissionsEditor
+              onChange={(permissions) =>
+                setEditingPermissions((current) =>
+                  current ? { ...current, permissions } : null,
+                )
+              }
+              value={editingPermissions.permissions}
+            />
+          ) : null}
+          {update.error ? (
+            <Alert
+              description={_copy(update.error.userMessage)}
+              title={_copy('Could not save permissions', 'تعذر حفظ الصلاحيات')}
+              variant="error"
+            />
+          ) : null}
+          <DialogFooter>
+            <Button
+              onClick={() => setEditingPermissions(null)}
+              type="button"
+              variant="outline"
+            >
+              {_copy('Cancel', 'إلغاء')}
+            </Button>
+            <Button
+              loading={update.isPending}
+              onClick={() => {
+                if (!editingPermissions) return;
+                update.mutate({
+                  id: editingPermissions.administrator.id,
+                  input: { permissions: editingPermissions.permissions },
+                });
+              }}
+              type="button"
+            >
+              {_copy('Save permissions', 'حفظ الصلاحيات')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <ConfirmDialog
         confirmLabel="Delete administrator"
         description="This permanently removes the administrator account. This cannot be undone."

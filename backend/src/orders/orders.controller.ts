@@ -17,8 +17,9 @@ import {
   UpdateOrderAdminDto,
   BulkCompleteOrdersDto,
 } from './dto';
-import { CurrentUser, Roles } from '../common/decorators';
+import { AdminPermissions, CurrentUser, Roles } from '../common/decorators';
 import { UserRole } from '../common/enums';
+import { AdminPermission } from '../common/permissions';
 
 @ApiTags('Orders')
 @ApiBearerAuth('bearer')
@@ -81,18 +82,21 @@ export class AdminOrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Get()
+  @AdminPermissions(AdminPermission.ORDERS_VIEW)
   @ApiOperation({ summary: 'List all orders with filters (Admin)' })
   async findAll(@Query() query: OrderFilterDto) {
     return this.ordersService.findAllAdmin(query);
   }
 
   @Get(':id')
+  @AdminPermissions(AdminPermission.ORDERS_VIEW)
   @ApiOperation({ summary: 'Get complete order details (Admin)' })
   async findOne(@Param('id', ParseIntPipe) id: number) {
     return this.ordersService.findOneAdmin(id);
   }
 
   @Patch('bulk/complete')
+  @AdminPermissions(AdminPermission.ORDERS_MANAGE)
   @ApiOperation({
     summary: 'Mark up to 100 paid active orders as completed (Admin)',
   })
@@ -104,6 +108,7 @@ export class AdminOrdersController {
   }
 
   @Patch(':id/status')
+  @AdminPermissions(AdminPermission.ORDERS_MANAGE)
   @ApiOperation({ summary: 'Update order status with audit trail (Admin)' })
   async updateStatus(
     @Param('id', ParseIntPipe) id: number,
@@ -114,6 +119,7 @@ export class AdminOrdersController {
   }
 
   @Patch(':id')
+  @AdminPermissions(AdminPermission.ORDERS_MANAGE)
   @ApiOperation({
     summary: 'Update order admin notes or delivery date (Admin)',
   })

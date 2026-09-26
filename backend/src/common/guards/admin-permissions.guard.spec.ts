@@ -30,25 +30,31 @@ describe('AdminPermissionsGuard', () => {
     expect(guard.canActivate(contextFor({ role: 'customer' }))).toBe(true);
   });
 
+  it('leaves shared customer endpoints to their ownership checks', () => {
+    requirePermission(['orders.view']);
+
+    expect(guard.canActivate(contextFor({ role: 'customer' }))).toBe(true);
+  });
+
   it('allows a limited administrator only in an explicitly granted area', () => {
-    requirePermission(['orders']);
+    requirePermission(['orders.view']);
 
     expect(
       guard.canActivate(
-        contextFor({ role: 'admin', admin_permissions: ['orders'] }),
+        contextFor({ role: 'admin', admin_permissions: ['orders.view'] }),
       ),
     ).toBe(true);
 
-    requirePermission(['payments']);
+    requirePermission(['payments.view']);
     expect(
       guard.canActivate(
-        contextFor({ role: 'admin', admin_permissions: ['orders'] }),
+        contextFor({ role: 'admin', admin_permissions: ['orders.view'] }),
       ),
     ).toBe(false);
   });
 
   it('denies an explicitly empty or malformed permissions value', () => {
-    requirePermission(['orders']);
+    requirePermission(['orders.view']);
 
     expect(
       guard.canActivate(contextFor({ role: 'admin', admin_permissions: [] })),
@@ -61,7 +67,7 @@ describe('AdminPermissionsGuard', () => {
   });
 
   it('keeps legacy null-permission administrators fully authorized', () => {
-    requirePermission(['orders']);
+    requirePermission(['orders.view']);
 
     expect(
       guard.canActivate(contextFor({ role: 'admin', admin_permissions: null })),
@@ -69,10 +75,12 @@ describe('AdminPermissionsGuard', () => {
   });
 
   it('always allows a super admin', () => {
-    requirePermission(['orders']);
+    requirePermission(['orders.view']);
 
     expect(
-      guard.canActivate(contextFor({ role: 'super_admin', admin_permissions: [] })),
+      guard.canActivate(
+        contextFor({ role: 'super_admin', admin_permissions: [] }),
+      ),
     ).toBe(true);
   });
 });

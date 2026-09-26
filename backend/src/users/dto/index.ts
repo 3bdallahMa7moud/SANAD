@@ -7,10 +7,16 @@ import {
   IsEmail,
   IsBoolean,
   IsObject,
+  IsArray,
+  ArrayUnique,
   ValidateNested,
 } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
+import {
+  ADMIN_PERMISSIONS,
+  type AdminPermission,
+} from '../../common/permissions';
 
 export class CareerProfileDto {
   @IsOptional() @IsString() @MaxLength(255) target_job_title?: string;
@@ -71,12 +77,26 @@ export class CreateAdministratorDto {
   @IsEmail() @MaxLength(255) email!: string;
   @IsString() @MinLength(12) password!: string;
   @IsIn(['admin', 'super_admin']) role!: 'admin' | 'super_admin';
+
+  @ApiPropertyOptional({ enum: ADMIN_PERMISSIONS, isArray: true })
+  @IsOptional()
+  @IsArray()
+  @ArrayUnique()
+  @IsIn(ADMIN_PERMISSIONS, { each: true })
+  permissions?: AdminPermission[];
 }
 
 export class UpdateAdministratorDto {
   @IsOptional() @IsString() @MinLength(2) @MaxLength(255) name?: string;
   @IsOptional() @IsIn(['admin', 'super_admin']) role?: 'admin' | 'super_admin';
   @IsOptional() @IsBoolean() active?: boolean;
+
+  @ApiPropertyOptional({ enum: ADMIN_PERMISSIONS, isArray: true })
+  @IsOptional()
+  @IsArray()
+  @ArrayUnique()
+  @IsIn(ADMIN_PERMISSIONS, { each: true })
+  permissions?: AdminPermission[];
 }
 
 export class ResetAdministratorPasswordDto {

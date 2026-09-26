@@ -20,6 +20,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { adminApi, adminKeys, type AdminCoupon } from '@/lib/api';
+import { useAdminPermission } from '@/hooks/use-admin-permission';
 
 import {
   AdminPageHeader,
@@ -71,6 +72,7 @@ function day(value: string | null) {
 }
 export function CouponsManager() {
   const _copy = useCopy();
+  const canManage = useAdminPermission('coupons.manage');
 
   const client = useQueryClient();
   const [editing, setEditing] = useState<AdminCoupon | null | undefined>(
@@ -166,9 +168,11 @@ export function CouponsManager() {
           'Control discount codes, limits, minimum amounts, and availability.',
         )}
         action={
-          <Button onClick={() => setEditing(null)}>
-            {_copy('Add Coupon')}
-          </Button>
+          canManage ? (
+            <Button onClick={() => setEditing(null)}>
+              {_copy('Add Coupon')}
+            </Button>
+          ) : undefined
         }
       />
       <DataState
@@ -220,24 +224,28 @@ export function CouponsManager() {
                     {_copy(c.is_active ? 'Active' : 'Inactive')}
                   </td>
                   <td className="px-4 py-4">
-                    <div className="flex gap-2">
-                      <Button
-                        aria-label={_copy('Edit coupon')}
-                        onClick={() => setEditing(c)}
-                        size="icon"
-                        variant="outline"
-                      >
-                        <Pencil className="size-4" />
-                      </Button>
-                      <Button
-                        aria-label={_copy('Delete coupon')}
-                        onClick={() => setDeleting(c)}
-                        size="icon"
-                        variant="outline"
-                      >
-                        <Trash2 className="size-4" />
-                      </Button>
-                    </div>
+                    {canManage ? (
+                      <div className="flex gap-2">
+                        <Button
+                          aria-label={_copy('Edit coupon')}
+                          onClick={() => setEditing(c)}
+                          size="icon"
+                          variant="outline"
+                        >
+                          <Pencil className="size-4" />
+                        </Button>
+                        <Button
+                          aria-label={_copy('Delete coupon')}
+                          onClick={() => setDeleting(c)}
+                          size="icon"
+                          variant="outline"
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -246,7 +254,7 @@ export function CouponsManager() {
         </AdminTable>
       </DataState>
       <Dialog
-        open={editing !== undefined}
+        open={canManage && editing !== undefined}
         onOpenChange={(open) => {
           if (!open) setEditing(undefined);
         }}

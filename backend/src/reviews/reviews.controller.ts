@@ -10,8 +10,14 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Public, Roles } from '../common/decorators';
+import {
+  AdminPermissions,
+  CurrentUser,
+  Public,
+  Roles,
+} from '../common/decorators';
 import { ReviewStatus, UserRole } from '../common/enums';
+import { AdminPermission } from '../common/permissions';
 import {
   AdminReviewFilterDto,
   CreateReviewDto,
@@ -78,16 +84,19 @@ export class AdminReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 
   @Get()
+  @AdminPermissions(AdminPermission.REVIEWS_VIEW)
   list(@Query() query: AdminReviewFilterDto) {
     return this.reviewsService.listAdmin(query);
   }
 
   @Get(':id')
+  @AdminPermissions(AdminPermission.REVIEWS_VIEW)
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.reviewsService.findOneAdmin(id);
   }
 
   @Patch(':id/status')
+  @AdminPermissions(AdminPermission.REVIEWS_MANAGE)
   moderate(
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser('id') adminId: number,
@@ -103,6 +112,7 @@ export class AdminReviewsController {
   }
 
   @Patch(':id/home-featured')
+  @AdminPermissions(AdminPermission.REVIEWS_MANAGE)
   featureOnHome(
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser('id') adminId: number,

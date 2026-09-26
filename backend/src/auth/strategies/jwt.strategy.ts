@@ -38,6 +38,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
         id: true,
         email: true,
         role: true,
+        admin_permissions: true,
         account_locked: true,
         locked_until: true,
         token_version: true,
@@ -59,6 +60,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       id: user.id,
       email: user.email,
       role: user.role,
+      admin_permissions: user.admin_permissions,
     };
   }
 }

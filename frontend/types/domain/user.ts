@@ -36,6 +36,7 @@ export interface User {
   email: string;
   phone: string | null;
   role: UserRole;
+  adminPermissions?: import('@/lib/admin/permissions').AdminPermission[] | null;
   emailVerified: boolean;
   firstName?: string | null;
   lastName?: string | null;

@@ -13,8 +13,9 @@ import {
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { TestimonialsService } from './testimonials.service';
 import { CreateTestimonialDto, UpdateTestimonialDto } from './dto';
-import { Public, Roles } from '../common/decorators';
+import { AdminPermissions, Public, Roles } from '../common/decorators';
 import { UserRole } from '../common/enums';
+import { AdminPermission } from '../common/permissions';
 import { PaginationDto } from '../common/utils';
 
 @ApiTags('Testimonials')
@@ -50,24 +51,28 @@ export class AdminTestimonialsController {
   constructor(private readonly testimonialsService: TestimonialsService) {}
 
   @Get()
+  @AdminPermissions(AdminPermission.REVIEWS_VIEW)
   @ApiOperation({ summary: 'List all testimonials (Admin)' })
   async findAll(@Query() query: PaginationDto) {
     return this.testimonialsService.findAllAdmin(query);
   }
 
   @Get(':id')
+  @AdminPermissions(AdminPermission.REVIEWS_VIEW)
   @ApiOperation({ summary: 'Get testimonial details (Admin)' })
   async findOne(@Param('id', ParseIntPipe) id: number) {
     return this.testimonialsService.findOne(id);
   }
 
   @Post()
+  @AdminPermissions(AdminPermission.REVIEWS_MANAGE)
   @ApiOperation({ summary: 'Create a new testimonial (Admin)' })
   async create(@Body() dto: CreateTestimonialDto) {
     return this.testimonialsService.create(dto);
   }
 
   @Patch(':id')
+  @AdminPermissions(AdminPermission.REVIEWS_MANAGE)
   @ApiOperation({ summary: 'Update a testimonial (Admin)' })
   async update(
     @Param('id', ParseIntPipe) id: number,
@@ -77,6 +82,7 @@ export class AdminTestimonialsController {
   }
 
   @Delete(':id')
+  @AdminPermissions(AdminPermission.REVIEWS_MANAGE)
   @ApiOperation({ summary: 'Delete a testimonial (Admin)' })
   async remove(@Param('id', ParseIntPipe) id: number) {
     return this.testimonialsService.remove(id);

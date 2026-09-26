@@ -111,7 +111,10 @@ describe('home visual sections', () => {
   it('renders the hero media', async () => {
     renderWithEnglish(await HeroSection());
 
-    expect(screen.getByRole('img')).toBeInTheDocument();
+    expect(screen.getByRole('img')).toHaveAttribute(
+      'data-src',
+      '/images/home/sanad-career-services-hero-v4.webp',
+    );
   });
 
   it.each([

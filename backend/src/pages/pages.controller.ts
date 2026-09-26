@@ -11,8 +11,9 @@ import {
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { PagesService } from './pages.service';
 import { CreatePageDto, UpdatePageDto } from './dto';
-import { Public, Roles } from '../common/decorators';
+import { AdminPermissions, Public, Roles } from '../common/decorators';
 import { UserRole } from '../common/enums';
+import { AdminPermission } from '../common/permissions';
 import { PaginationDto } from '../common/utils';
 
 @ApiTags('Pages')
@@ -38,24 +39,28 @@ export class AdminPagesController {
   constructor(private readonly pagesService: PagesService) {}
 
   @Get()
+  @AdminPermissions(AdminPermission.PAGES_VIEW)
   @ApiOperation({ summary: 'List all CMS pages (Admin)' })
   async findAll(@Query() query: PaginationDto) {
     return this.pagesService.findAllAdmin(query);
   }
 
   @Get(':id')
+  @AdminPermissions(AdminPermission.PAGES_VIEW)
   @ApiOperation({ summary: 'Get CMS page details (Admin)' })
   async findOne(@Param('id', ParseIntPipe) id: number) {
     return this.pagesService.findOneAdmin(id);
   }
 
   @Post()
+  @AdminPermissions(AdminPermission.PAGES_MANAGE)
   @ApiOperation({ summary: 'Create a new CMS page (Admin)' })
   async create(@Body() dto: CreatePageDto) {
     return this.pagesService.create(dto);
   }
 
   @Patch(':id')
+  @AdminPermissions(AdminPermission.PAGES_MANAGE)
   @ApiOperation({ summary: 'Update a CMS page (Admin)' })
   async update(
     @Param('id', ParseIntPipe) id: number,

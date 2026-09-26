@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { ApiQueryParams, PaginatedData } from '@/types/api';
+import type { AdminPermission } from '@/lib/admin/permissions';
 import { ApiError } from '../errors';
 import { createFileFormData } from '../form-data';
 import { api, type ApiRequestOptions } from '../request';
@@ -81,6 +82,7 @@ export interface Administrator {
   name: string;
   email: string;
   role: 'admin' | 'super_admin';
+  admin_permissions: AdminPermission[] | null;
   email_verified: boolean;
   account_locked: boolean | null;
   last_login?: string | null;
@@ -373,6 +375,7 @@ export const adminApi = {
       email: string;
       password: string;
       role: 'admin' | 'super_admin';
+      permissions?: AdminPermission[];
     }) =>
       object<Administrator>(
         await api.post<unknown>('/admin/administrators', input),
@@ -384,6 +387,7 @@ export const adminApi = {
         name?: string;
         role?: 'admin' | 'super_admin';
         active?: boolean;
+        permissions?: AdminPermission[];
       },
     ) =>
       object<Administrator>(

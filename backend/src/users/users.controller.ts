@@ -50,8 +50,11 @@ export class AdministratorsController {
   @Get() list() {
     return this.usersService.listAdministrators();
   }
-  @Post() create(@Body() dto: CreateAdministratorDto) {
-    return this.usersService.createAdministrator(dto);
+  @Post() create(
+    @Body() dto: CreateAdministratorDto,
+    @CurrentUser('id') requesterId: number,
+  ) {
+    return this.usersService.createAdministrator(dto, requesterId);
   }
   @Patch(':id') update(
     @Param('id', ParseIntPipe) id: number,
@@ -69,7 +72,8 @@ export class AdministratorsController {
   @Post(':id/reset-password') resetPassword(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: ResetAdministratorPasswordDto,
+    @CurrentUser('id') requesterId: number,
   ) {
-    return this.usersService.resetAdministratorPassword(id, dto);
+    return this.usersService.resetAdministratorPassword(id, dto, requesterId);
   }
 }

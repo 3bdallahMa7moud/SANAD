@@ -116,7 +116,12 @@ fi
 chown -R "$API_USER:$API_GROUP" "$BACKEND_DIR/node_modules"
 
 echo "Building backend..."
-(cd "$BACKEND_DIR" && npm run build && NODE_ENV=production npm run preflight)
+(
+  cd "$BACKEND_DIR"
+  ./node_modules/.bin/prisma generate
+  npm run build
+  NODE_ENV=production npm run preflight
+)
 chown -R "$API_USER:$API_GROUP" "$BACKEND_DIR/dist"
 echo "Building frontend..."
 (cd "$FRONTEND_DIR" && npm run build)

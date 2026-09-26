@@ -10,6 +10,7 @@ import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { adminApi, adminKeys, settingsKeys, type SiteSetting } from '@/lib/api';
+import { useAdminPermission } from '@/hooks/use-admin-permission';
 import { AdminPageHeader, DataState } from './admin-ui';
 const schema = z
   .record(z.string(), z.string().max(10000))
@@ -112,6 +113,7 @@ function settingsFields(existing: SiteSetting[]): SiteSetting[] {
 
 export function SettingsForm() {
   const _copy = useCopy();
+  const canManage = useAdminPermission('settings.manage');
 
   const client = useQueryClient();
   const query = useQuery({
@@ -196,6 +198,7 @@ export function SettingsForm() {
                     <select
                       className="h-10 rounded-md border border-[var(--control-border)] bg-surface px-3 text-sm text-foreground shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       {...register(item.setting_key)}
+                      disabled={!canManage}
                     >
                       <option value="true">{_copy('Visible')}</option>
                       <option value="false">{_copy('Hidden')}</option>
@@ -204,6 +207,7 @@ export function SettingsForm() {
                     <Input
                       dir={item.setting_key.endsWith('_ar') ? 'rtl' : undefined}
                       {...register(item.setting_key)}
+                      disabled={!canManage}
                     />
                   )}
                   {errors[item.setting_key]?.message ? (
@@ -214,11 +218,13 @@ export function SettingsForm() {
                 </label>
               ))}
             </div>
-            <div className="mt-7 border-t border-border pt-6">
-              <Button loading={save.isPending} type="submit">
-                {_copy(save.isPending ? 'Saving...' : 'Save Settings')}
-              </Button>
-            </div>
+            {canManage ? (
+              <div className="mt-7 border-t border-border pt-6">
+                <Button loading={save.isPending} type="submit">
+                  {_copy(save.isPending ? 'Saving...' : 'Save Settings')}
+                </Button>
+              </div>
+            ) : null}
           </form>
         ) : null}
       </DataState>

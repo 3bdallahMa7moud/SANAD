@@ -15,11 +15,17 @@ describe('UsersService', () => {
     prisma = {
       users: {
         findUnique: vi.fn(),
+        count: vi.fn(),
         create: vi.fn(),
         delete: vi.fn(),
         update: vi.fn(),
       },
+      user_sessions: { updateMany: vi.fn() },
+      admin_activity_log: { create: vi.fn() },
     };
+    prisma.$transaction = vi.fn(async (callback: (tx: any) => unknown) =>
+      callback(prisma),
+    );
     service = new UsersService(prisma as PrismaService);
   });
 
@@ -127,12 +133,15 @@ describe('UsersService', () => {
       prisma.users.findUnique.mockResolvedValue({ id: 7 });
 
       await expect(
-        service.createAdministrator({
-          name: 'Mostafa',
-          email: 'elsrogy498@gmail.com',
-          password: 'secure-password',
-          role: 'super_admin',
-        }),
+        service.createAdministrator(
+          {
+            name: 'Mostafa',
+            email: 'elsrogy498@gmail.com',
+            password: 'secure-password',
+            role: 'super_admin',
+          },
+          1,
+        ),
       ).rejects.toBeInstanceOf(ConflictException);
 
       expect(prisma.users.create).not.toHaveBeenCalled();
@@ -141,10 +150,17 @@ describe('UsersService', () => {
 
   describe('updateAdministrator', () => {
     it('allows a super admin to update an administrator name', async () => {
-      prisma.users.findUnique.mockResolvedValue({ id: 7, role: 'super_admin' });
+      prisma.users.findUnique.mockResolvedValue({
+        id: 7,
+        name: 'Old Name',
+        email: 'admin@example.com',
+        role: 'super_admin',
+        account_locked: false,
+        admin_permissions: null,
+      });
       prisma.users.update.mockResolvedValue({ id: 7, name: 'Mostafa' });
 
-      await service.updateAdministrator(7, { name: ' Mostafa ' });
+      await service.updateAdministrator(7, { name: ' Mostafa ' }, 1);
 
       expect(prisma.users.update).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -162,6 +178,59 @@ describe('UsersService', () => {
       ).rejects.toBeInstanceOf(BadRequestException);
       expect(prisma.users.update).not.toHaveBeenCalled();
     });
+
+    it('does not allow disabling the final active Super Admin', async () => {
+      prisma.users.findUnique.mockResolvedValue({
+        id: 7,
+        name: 'Owner',
+        email: 'owner@example.com',
+        role: 'super_admin',
+        account_locked: false,
+        admin_permissions: null,
+      });
+      prisma.users.count.mockResolvedValue(0);
+
+      await expect(
+        service.updateAdministrator(7, { active: false }, 1),
+      ).rejects.toBeInstanceOf(BadRequestException);
+      expect(prisma.users.update).not.toHaveBeenCalled();
+    });
+
+    it('revokes active sessions when permissions change', async () => {
+      prisma.users.findUnique.mockResolvedValue({
+        id: 8,
+        name: 'Operations',
+        email: 'ops@example.com',
+        role: 'admin',
+        account_locked: false,
+        admin_permissions: ['orders.view'],
+      });
+      prisma.users.update.mockResolvedValue({
+        id: 8,
+        admin_permissions: ['orders.view', 'orders.manage'],
+      });
+
+      await service.updateAdministrator(
+        8,
+        { permissions: ['orders.view', 'orders.manage'] },
+        1,
+      );
+
+      expect(prisma.users.update.mock.calls[0][0].data.token_version).toEqual({
+        increment: 1,
+      });
+      expect(prisma.user_sessions.updateMany).toHaveBeenCalledWith({
+        where: { user_id: 8, is_active: true },
+        data: { is_active: false },
+      });
+      expect(prisma.admin_activity_log.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            action: 'update_administrator_permissions',
+          }),
+        }),
+      );
+    });
   });
 
   describe('deleteAdministrator', () => {
@@ -173,11 +242,29 @@ describe('UsersService', () => {
     });
 
     it('deletes another administrator account', async () => {
-      prisma.users.findUnique.mockResolvedValue({ id: 7, role: 'admin' });
+      prisma.users.findUnique.mockResolvedValue({
+        id: 7,
+        email: 'admin@example.com',
+        role: 'admin',
+      });
 
       await service.deleteAdministrator(7, 1);
 
       expect(prisma.users.delete).toHaveBeenCalledWith({ where: { id: 7 } });
+    });
+
+    it('keeps at least one active Super Admin', async () => {
+      prisma.users.findUnique.mockResolvedValue({
+        id: 7,
+        email: 'owner@example.com',
+        role: 'super_admin',
+      });
+      prisma.users.count.mockResolvedValue(0);
+
+      await expect(service.deleteAdministrator(7, 1)).rejects.toBeInstanceOf(
+        BadRequestException,
+      );
+      expect(prisma.users.delete).not.toHaveBeenCalled();
     });
   });
 });

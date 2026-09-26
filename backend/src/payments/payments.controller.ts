@@ -23,8 +23,14 @@ import {
   PaymentWebhookDto,
   PaymentFilterDto,
 } from './dto';
-import { CurrentUser, Roles, Public } from '../common/decorators';
+import {
+  AdminPermissions,
+  CurrentUser,
+  Roles,
+  Public,
+} from '../common/decorators';
 import { UserRole } from '../common/enums';
+import { AdminPermission } from '../common/permissions';
 import { Request } from 'express';
 
 @ApiTags('Payments')
@@ -47,6 +53,7 @@ export class PaymentsController {
 
   @ApiBearerAuth('bearer')
   @Get(':id')
+  @AdminPermissions(AdminPermission.PAYMENTS_VIEW)
   @ApiOperation({ summary: 'Get payment status by payment ID' })
   async getPayment(
     @Param('id', ParseIntPipe) id: number,
@@ -88,12 +95,14 @@ export class AdminPaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
   @Get()
+  @AdminPermissions(AdminPermission.PAYMENTS_VIEW)
   @ApiOperation({ summary: 'List all payments with filters (Admin)' })
   async findAll(@Query() query: PaymentFilterDto) {
     return this.paymentsService.findAllAdmin(query);
   }
 
   @Post('manual')
+  @AdminPermissions(AdminPermission.PAYMENTS_CONFIRM_MANUAL)
   @ApiOperation({
     summary: 'Confirm an externally collected payment for an order (Admin)',
   })
@@ -105,6 +114,7 @@ export class AdminPaymentsController {
   }
 
   @Get(':id')
+  @AdminPermissions(AdminPermission.PAYMENTS_VIEW)
   @ApiOperation({ summary: 'Get payment transaction details (Admin)' })
   async findOne(@Param('id', ParseIntPipe) id: number) {
     return this.paymentsService.findOneAdmin(id);

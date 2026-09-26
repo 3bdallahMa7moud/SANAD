@@ -27,6 +27,7 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { adminApi, adminKeys, ApiError, type AdminPackage } from '@/lib/api';
+import { useAdminPermission } from '@/hooks/use-admin-permission';
 import { resolveMediaUrl } from '@/lib/media/resolve-media-url';
 import { formatDeliveryEstimate } from '@/lib/packages/presentation';
 
@@ -67,6 +68,7 @@ const defaults: Values = {
 
 export function PackagesManager() {
   const _copy = useCopy();
+  const canManage = useAdminPermission('packages.manage');
 
   const client = useQueryClient();
   const [page, setPage] = useState(1);
@@ -257,9 +259,11 @@ export function PackagesManager() {
           'Maintain service pricing, scope, delivery details, availability, and images.',
         )}
         action={
-          <Button onClick={() => setEditing(null)}>
-            {_copy('Add Package')}
-          </Button>
+          canManage ? (
+            <Button onClick={() => setEditing(null)}>
+              {_copy('Add Package')}
+            </Button>
+          ) : undefined
         }
       />
       <DataState
@@ -336,26 +340,30 @@ export function PackagesManager() {
                       {_copy(_copy.date(pkg.updated_at))}
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex gap-2">
-                        <Button
-                          aria-label={_copy(`Edit ${pkg.name_en}`)}
-                          onClick={() => setEditing(pkg)}
-                          size="icon"
-                          variant="outline"
-                        >
-                          <Pencil className="size-4" />
-                        </Button>
-                        <Button
-                          aria-label={_copy(
-                            `${pkg.is_active ? 'Deactivate' : 'Activate'} ${pkg.name_en}`,
-                          )}
-                          onClick={() => setConfirming(pkg)}
-                          size="icon"
-                          variant="outline"
-                        >
-                          <Power className="size-4" />
-                        </Button>
-                      </div>
+                      {canManage ? (
+                        <div className="flex gap-2">
+                          <Button
+                            aria-label={_copy(`Edit ${pkg.name_en}`)}
+                            onClick={() => setEditing(pkg)}
+                            size="icon"
+                            variant="outline"
+                          >
+                            <Pencil className="size-4" />
+                          </Button>
+                          <Button
+                            aria-label={_copy(
+                              `${pkg.is_active ? 'Deactivate' : 'Activate'} ${pkg.name_en}`,
+                            )}
+                            onClick={() => setConfirming(pkg)}
+                            size="icon"
+                            variant="outline"
+                          >
+                            <Power className="size-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
                     </td>
                   </tr>
                 );
@@ -370,7 +378,7 @@ export function PackagesManager() {
         onPage={setPage}
       />
       <Dialog
-        open={editing !== undefined}
+        open={canManage && editing !== undefined}
         onOpenChange={(open) => {
           if (!open) setEditing(undefined);
         }}

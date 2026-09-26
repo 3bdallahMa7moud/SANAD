@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { adminApi, adminKeys, type AdminCustomer } from '@/lib/api';
+import { useAdminPermission } from '@/hooks/use-admin-permission';
 import { whatsappHref } from '@/lib/orders/presentation';
 import {
   AdminPageHeader,
@@ -30,6 +31,7 @@ import {
 
 export function CustomersView() {
   const _copy = useCopy();
+  const canManage = useAdminPermission('customers.manage');
 
   const client = useQueryClient();
   const [page, setPage] = useState(1);
@@ -222,16 +224,20 @@ export function CustomersView() {
                     </a>
                   </Button>
                 ) : null}
-                <Button
-                  onClick={() => setConfirming(customer)}
-                  variant={customer.account_locked ? 'primary' : 'destructive'}
-                >
-                  {_copy(
-                    customer.account_locked
-                      ? 'Unlock Customer'
-                      : 'Lock Customer',
-                  )}
-                </Button>
+                {canManage ? (
+                  <Button
+                    onClick={() => setConfirming(customer)}
+                    variant={
+                      customer.account_locked ? 'primary' : 'destructive'
+                    }
+                  >
+                    {_copy(
+                      customer.account_locked
+                        ? 'Unlock Customer'
+                        : 'Lock Customer',
+                    )}
+                  </Button>
+                ) : null}
               </div>
             </>
           ) : null}

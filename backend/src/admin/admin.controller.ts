@@ -18,8 +18,9 @@ import {
   PurgeActivityLogsDto,
   DashboardFilterDto,
 } from './dto';
-import { Roles, CurrentUser } from '../common/decorators';
+import { AdminPermissions, Roles, CurrentUser } from '../common/decorators';
 import { UserRole } from '../common/enums';
+import { AdminPermission } from '../common/permissions';
 
 @ApiTags('Admin')
 @ApiBearerAuth('bearer')
@@ -29,24 +30,28 @@ export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
   @Get('dashboard')
+  @AdminPermissions(AdminPermission.DASHBOARD_VIEW)
   @ApiOperation({ summary: 'Get Admin Dashboard KPIs and real-time analytics' })
   async getDashboard(@Query() query: DashboardFilterDto) {
     return this.adminService.getDashboardStats(query);
   }
 
   @Get('customers')
+  @AdminPermissions(AdminPermission.CUSTOMERS_VIEW)
   @ApiOperation({ summary: 'List all registered customers with statistics' })
   async getCustomers(@Query() query: CustomerFilterDto) {
     return this.adminService.getCustomers(query);
   }
 
   @Get('customers/:id')
+  @AdminPermissions(AdminPermission.CUSTOMERS_VIEW)
   @ApiOperation({ summary: 'Get customer profile and order history' })
   async getCustomerDetails(@Param('id', ParseIntPipe) id: number) {
     return this.adminService.getCustomerDetails(id);
   }
 
   @Patch('customers/:id/status')
+  @AdminPermissions(AdminPermission.CUSTOMERS_MANAGE)
   @ApiOperation({ summary: 'Lock or unlock customer account' })
   async updateCustomerStatus(
     @Param('id', ParseIntPipe) id: number,
@@ -57,6 +62,7 @@ export class AdminController {
   }
 
   @Get('activity-logs')
+  @AdminPermissions(AdminPermission.ACTIVITY_LOGS_VIEW)
   @ApiOperation({
     summary: 'View audit activity logs of administrative actions',
   })

@@ -19,6 +19,7 @@ import {
   Tags,
   Users,
   Shield,
+  ShieldX,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -33,22 +34,87 @@ import {
 } from '@/components/ui/sheet';
 import { useAuth } from '@/hooks/use-auth';
 import { cn } from '@/lib/utils/cn';
+import {
+  hasAdminPermission,
+  type AdminPermission,
+} from '@/lib/admin/permissions';
+import type { User } from '@/types/domain';
 import { LanguageSwitcher } from '@/components/layouts/language-switcher';
 import { ThemeSwitcher } from '@/components/layouts/theme-switcher';
 
 const navigation = [
-  { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/admin/orders', label: 'Orders', icon: ClipboardList },
-  { href: '/admin/packages', label: 'Packages', icon: Boxes },
-  { href: '/admin/offers', label: 'Offers', icon: BadgePercent },
-  { href: '/admin/coupons', label: 'Coupons', icon: Tags },
-  { href: '/admin/customers', label: 'Customers', icon: Users },
-  { href: '/admin/payments', label: 'Payments', icon: CreditCard },
-  { href: '/admin/reviews', label: 'Reviews', icon: Star },
-  { href: '/admin/pages', label: 'Pages', icon: FileText },
-  { href: '/admin/media', label: 'Media', icon: ImageIcon },
-  { href: '/admin/settings', label: 'Settings', icon: Settings },
-  { href: '/admin/activity-logs', label: 'Activity Logs', icon: Activity },
+  {
+    href: '/admin',
+    label: 'Dashboard',
+    icon: LayoutDashboard,
+    permission: 'dashboard.view',
+  },
+  {
+    href: '/admin/orders',
+    label: 'Orders',
+    icon: ClipboardList,
+    permission: 'orders.view',
+  },
+  {
+    href: '/admin/packages',
+    label: 'Packages',
+    icon: Boxes,
+    permission: 'packages.view',
+  },
+  {
+    href: '/admin/offers',
+    label: 'Offers',
+    icon: BadgePercent,
+    permission: 'offers.view',
+  },
+  {
+    href: '/admin/coupons',
+    label: 'Coupons',
+    icon: Tags,
+    permission: 'coupons.view',
+  },
+  {
+    href: '/admin/customers',
+    label: 'Customers',
+    icon: Users,
+    permission: 'customers.view',
+  },
+  {
+    href: '/admin/payments',
+    label: 'Payments',
+    icon: CreditCard,
+    permission: 'payments.view',
+  },
+  {
+    href: '/admin/reviews',
+    label: 'Reviews',
+    icon: Star,
+    permission: 'reviews.view',
+  },
+  {
+    href: '/admin/pages',
+    label: 'Pages',
+    icon: FileText,
+    permission: 'pages.view',
+  },
+  {
+    href: '/admin/media',
+    label: 'Media',
+    icon: ImageIcon,
+    permission: 'media.view',
+  },
+  {
+    href: '/admin/settings',
+    label: 'Settings',
+    icon: Settings,
+    permission: 'settings.view',
+  },
+  {
+    href: '/admin/activity-logs',
+    label: 'Activity Logs',
+    icon: Activity,
+    permission: 'activity_logs.view',
+  },
   {
     href: '/admin/administrators',
     label: 'Administrators',
@@ -59,12 +125,12 @@ const navigation = [
 
 function Navigation({
   pathname,
-  superAdmin = false,
+  user,
   compact = false,
   onNavigate,
 }: {
   pathname: string;
-  superAdmin?: boolean;
+  user: User | null;
   compact?: boolean;
   onNavigate?: () => void;
 }) {
@@ -73,8 +139,12 @@ function Navigation({
   return (
     <nav aria-label={_copy('Admin navigation')} className="mt-7 grid gap-1">
       {navigation
-        .filter(
-          (item) => !('superOnly' in item) || !item.superOnly || superAdmin,
+        .filter((item) =>
+          'superOnly' in item && item.superOnly
+            ? user?.role === 'super_admin'
+            : 'permission' in item && item.permission
+              ? hasAdminPermission(user, item.permission as AdminPermission)
+              : true,
         )
         .map(({ href, label, icon: Icon }) => {
           const active =
@@ -127,6 +197,22 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth();
   const [desktopNavigationOpen, setDesktopNavigationOpen] = useState(true);
   const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false);
+  const currentNavigationItem = navigation.find((item) =>
+    item.href === '/admin'
+      ? pathname === item.href
+      : pathname.startsWith(item.href),
+  );
+  const canOpenCurrentPage = currentNavigationItem
+    ? 'superOnly' in currentNavigationItem && currentNavigationItem.superOnly
+      ? user?.role === 'super_admin'
+      : 'permission' in currentNavigationItem &&
+          currentNavigationItem.permission
+        ? hasAdminPermission(
+            user,
+            currentNavigationItem.permission as AdminPermission,
+          )
+        : true
+    : true;
   const doLogout = () =>
     void logout().finally(() => router.replace('/admin/sign-in'));
   return (
@@ -181,7 +267,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         <Navigation
           compact={!desktopNavigationOpen}
           pathname={pathname}
-          superAdmin={user?.role === 'super_admin'}
+          user={user}
         />
       </aside>
       <div className="min-w-0">
@@ -216,7 +302,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
               <Navigation
                 onNavigate={() => setMobileNavigationOpen(false)}
                 pathname={pathname}
-                superAdmin={user?.role === 'super_admin'}
+                user={user}
               />
             </SheetContent>
           </Sheet>
@@ -245,7 +331,27 @@ export function AdminShell({ children }: { children: ReactNode }) {
             <LogOut className="size-4" />
           </Button>
         </header>
-        <main className="p-4 sm:p-6 lg:p-8">{_copy(children)}</main>
+        <main className="p-4 sm:p-6 lg:p-8">
+          {canOpenCurrentPage ? (
+            _copy(children)
+          ) : (
+            <section className="mx-auto max-w-xl border border-border bg-surface p-8 text-center shadow-sm">
+              <ShieldX
+                className="mx-auto size-10 text-error"
+                aria-hidden="true"
+              />
+              <h2 className="type-h3 mt-5 text-primary">
+                {_copy('Access denied', 'غير مسموح بالوصول')}
+              </h2>
+              <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                {_copy(
+                  'Your administrator account does not have permission to open this section.',
+                  'حساب الإدارة الخاص بك لا يمتلك صلاحية فتح هذا القسم.',
+                )}
+              </p>
+            </section>
+          )}
+        </main>
       </div>
     </div>
   );

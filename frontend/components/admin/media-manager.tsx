@@ -12,6 +12,7 @@ import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { adminApi, adminKeys, type SiteMedia } from '@/lib/api';
+import { useAdminPermission } from '@/hooks/use-admin-permission';
 
 import { AdminPageHeader, ConfirmDialog, DataState } from './admin-ui';
 const schema = z.object({
@@ -27,6 +28,7 @@ const schema = z.object({
 type Values = z.infer<typeof schema>;
 export function MediaManager() {
   const _copy = useCopy();
+  const canManage = useAdminPermission('media.manage');
 
   const client = useQueryClient();
   const [file, setFile] = useState<File | null>(null);
@@ -87,55 +89,60 @@ export function MediaManager() {
           'Upload and maintain site imagery, filenames, types, alt text, and publication state.',
         )}
       />
-      <form
-        className="mb-7 grid gap-3 border border-border bg-surface p-5 sm:grid-cols-2 lg:grid-cols-4 sm:items-end"
-        onSubmit={handleSubmit((v) => upload.mutate(v))}
-      >
-        <label className="grid gap-1 text-sm font-semibold">
-          {_copy('Image')}
-          <Input
-            accept="image/jpeg,image/png,image/webp"
-            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            type="file"
-          />
-        </label>
-        <label className="grid gap-1 text-sm font-semibold">
-          {_copy('Media Key')}
-          <Input {...register('mediaKey')} invalid={Boolean(errors.mediaKey)} />
-        </label>
-        <label className="grid gap-1 text-sm font-semibold">
-          {_copy('English Alt Text')}
-          <Input
-            {...register('altTextEn')}
-            invalid={Boolean(errors.altTextEn)}
-          />
-        </label>
-        <label className="grid gap-1 text-sm font-semibold">
-          {_copy('Arabic Alt Text')}
-          <Input
-            dir="rtl"
-            {...register('altTextAr')}
-            invalid={Boolean(errors.altTextAr)}
-          />
-        </label>
-        <div className="flex justify-end sm:col-span-2 lg:col-span-4">
-          <Button disabled={!file} loading={upload.isPending} type="submit">
-            {_copy(upload.isPending ? 'Uploading...' : 'Upload')}
-          </Button>
-        </div>
-        {upload.error ? (
-          <Alert
-            className="sm:col-span-2 lg:col-span-4"
-            title={_copy('Upload failed')}
-            description={_copy(
-              'userMessage' in upload.error
-                ? upload.error.userMessage
-                : 'Please choose a valid image.',
-            )}
-            variant="error"
-          />
-        ) : null}
-      </form>
+      {canManage ? (
+        <form
+          className="mb-7 grid gap-3 border border-border bg-surface p-5 sm:grid-cols-2 lg:grid-cols-4 sm:items-end"
+          onSubmit={handleSubmit((v) => upload.mutate(v))}
+        >
+          <label className="grid gap-1 text-sm font-semibold">
+            {_copy('Image')}
+            <Input
+              accept="image/jpeg,image/png,image/webp"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              type="file"
+            />
+          </label>
+          <label className="grid gap-1 text-sm font-semibold">
+            {_copy('Media Key')}
+            <Input
+              {...register('mediaKey')}
+              invalid={Boolean(errors.mediaKey)}
+            />
+          </label>
+          <label className="grid gap-1 text-sm font-semibold">
+            {_copy('English Alt Text')}
+            <Input
+              {...register('altTextEn')}
+              invalid={Boolean(errors.altTextEn)}
+            />
+          </label>
+          <label className="grid gap-1 text-sm font-semibold">
+            {_copy('Arabic Alt Text')}
+            <Input
+              dir="rtl"
+              {...register('altTextAr')}
+              invalid={Boolean(errors.altTextAr)}
+            />
+          </label>
+          <div className="flex justify-end sm:col-span-2 lg:col-span-4">
+            <Button disabled={!file} loading={upload.isPending} type="submit">
+              {_copy(upload.isPending ? 'Uploading...' : 'Upload')}
+            </Button>
+          </div>
+          {upload.error ? (
+            <Alert
+              className="sm:col-span-2 lg:col-span-4"
+              title={_copy('Upload failed')}
+              description={_copy(
+                'userMessage' in upload.error
+                  ? upload.error.userMessage
+                  : 'Please choose a valid image.',
+              )}
+              variant="error"
+            />
+          ) : null}
+        </form>
+      ) : null}
       <DataState
         loading={query.isPending}
         error={_copy(query.error?.userMessage)}
@@ -167,19 +174,22 @@ export function MediaManager() {
                       {_copy(_copy.date(item.created_at))}
                     </p>
                   </div>
-                  <Button
-                    aria-label={_copy('Delete media')}
-                    onClick={() => setDeleting(item)}
-                    size="icon"
-                    variant="ghost"
-                  >
-                    <Trash2 className="size-4" />
-                  </Button>
+                  {canManage ? (
+                    <Button
+                      aria-label={_copy('Delete media')}
+                      onClick={() => setDeleting(item)}
+                      size="icon"
+                      variant="ghost"
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  ) : null}
                 </div>
                 <label className="mt-4 grid gap-1 text-xs font-semibold text-muted-foreground">
                   {_copy('English Alt Text')}
                   <Input
                     defaultValue={item.alt_text_en ?? ''}
+                    disabled={!canManage}
                     onBlur={(e) => {
                       if (e.target.value !== (item.alt_text_en ?? ''))
                         update.mutate({ id: item.id, altEn: e.target.value });
@@ -191,6 +201,7 @@ export function MediaManager() {
                   <Input
                     dir="rtl"
                     defaultValue={item.alt_text_ar ?? ''}
+                    disabled={!canManage}
                     onBlur={(e) => {
                       if (e.target.value !== (item.alt_text_ar ?? ''))
                         update.mutate({ id: item.id, altAr: e.target.value });

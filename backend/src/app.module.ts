@@ -29,7 +29,11 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { LoggerModule } from './common/logger';
 import { CorrelationIdMiddleware } from './common/context';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
-import { RateLimitGuard, RolesGuard } from './common/guards';
+import {
+  AdminPermissionsGuard,
+  RateLimitGuard,
+  RolesGuard,
+} from './common/guards';
 
 @Module({
   imports: [
@@ -68,6 +72,7 @@ import { RateLimitGuard, RolesGuard } from './common/guards';
     { provide: APP_GUARD, useClass: RateLimitGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
+    { provide: APP_GUARD, useClass: AdminPermissionsGuard },
   ],
 })
 export class AppModule implements NestModule {

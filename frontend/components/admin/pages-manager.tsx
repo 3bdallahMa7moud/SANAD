@@ -21,6 +21,7 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { adminApi, adminKeys, type CmsPage } from '@/lib/api';
+import { useAdminPermission } from '@/hooks/use-admin-permission';
 
 import { AdminPageHeader, AdminTable, DataState } from './admin-ui';
 const schema = z.object({
@@ -51,6 +52,7 @@ const empty: Values = {
 };
 export function PagesManager() {
   const _copy = useCopy();
+  const canManage = useAdminPermission('pages.manage');
 
   const client = useQueryClient();
   const [editing, setEditing] = useState<CmsPage | null | undefined>(undefined);
@@ -111,7 +113,11 @@ export function PagesManager() {
           'Edit the English content and publication state of SANAD’s CMS pages.',
         )}
         action={
-          <Button onClick={() => setEditing(null)}>{_copy('Add Page')}</Button>
+          canManage ? (
+            <Button onClick={() => setEditing(null)}>
+              {_copy('Add Page')}
+            </Button>
+          ) : undefined
         }
       />
       <DataState
@@ -152,14 +158,18 @@ export function PagesManager() {
                     {_copy(_copy.date(p.updated_at))}
                   </td>
                   <td className="px-4 py-4">
-                    <Button
-                      aria-label={_copy('Edit page')}
-                      onClick={() => setEditing(p)}
-                      size="icon"
-                      variant="outline"
-                    >
-                      <Pencil className="size-4" />
-                    </Button>
+                    {canManage ? (
+                      <Button
+                        aria-label={_copy('Edit page')}
+                        onClick={() => setEditing(p)}
+                        size="icon"
+                        variant="outline"
+                      >
+                        <Pencil className="size-4" />
+                      </Button>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -168,7 +178,7 @@ export function PagesManager() {
         </AdminTable>
       </DataState>
       <Dialog
-        open={editing !== undefined}
+        open={canManage && editing !== undefined}
         onOpenChange={(open) => {
           if (!open) setEditing(undefined);
         }}

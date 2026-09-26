@@ -11,6 +11,7 @@ import { StatusBadge } from '@/components/ui/status-badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { adminApi, adminKeys } from '@/lib/api';
+import { useAdminPermission } from '@/hooks/use-admin-permission';
 import { statusIntent, whatsappHref } from '@/lib/orders/presentation';
 import { AdminPageHeader, ConfirmDialog, DataState } from './admin-ui';
 
@@ -63,6 +64,8 @@ const requirementLabels = [
 ] as const;
 export function OrderDetailView({ id }: { id: number }) {
   const _copy = useCopy();
+  const canManageOrders = useAdminPermission('orders.manage');
+  const canConfirmManualPayment = useAdminPermission('payments.confirm_manual');
 
   const queryClient = useQueryClient();
   const [nextStatus, setNextStatus] = useState('');
@@ -109,23 +112,27 @@ export function OrderDetailView({ id }: { id: number }) {
         Number(payment.amount) > 0,
     ),
   );
-  const canConfirmPayment = Boolean(
-    order &&
-    ['pending', 'pending_payment'].includes(order.status) &&
-    !hasCollectedPayment,
-  );
-  const canCompleteOrder = Boolean(
-    order &&
-    hasCollectedPayment &&
-    [
-      'paid',
-      'awaiting_information',
-      'received',
-      'in_progress',
-      'under_review',
-      'ready',
-    ].includes(order.status),
-  );
+  const canConfirmPayment =
+    canConfirmManualPayment &&
+    Boolean(
+      order &&
+      ['pending', 'pending_payment'].includes(order.status) &&
+      !hasCollectedPayment,
+    );
+  const canCompleteOrder =
+    canManageOrders &&
+    Boolean(
+      order &&
+      hasCollectedPayment &&
+      [
+        'paid',
+        'awaiting_information',
+        'received',
+        'in_progress',
+        'under_review',
+        'ready',
+      ].includes(order.status),
+    );
   const requirementEntries = requirementLabels.flatMap(
     ([key, label, labelAr]) => {
       const value = order?.requirements?.[key];
@@ -186,7 +193,13 @@ export function OrderDetailView({ id }: { id: number }) {
         error={_copy(query.error?.userMessage)}
       >
         {order ? (
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
+          <div
+            className={
+              canManageOrders
+                ? 'grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]'
+                : 'grid gap-6'
+            }
+          >
             <div className="grid gap-6">
               <section className="border border-border bg-surface p-6">
                 <div className="flex flex-wrap justify-between gap-4">
@@ -531,69 +544,76 @@ export function OrderDetailView({ id }: { id: number }) {
                 </section>
               ) : null}
             </div>
-            <aside className="h-fit border border-border bg-surface p-6">
-              {canCompleteOrder ? (
-                <div className="mb-6 border-b border-border pb-6">
-                  <h2 className="type-h4 text-primary">
-                    {_copy('Complete and deliver order', 'إتمام وتسليم الطلب')}
-                  </h2>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    {_copy(
-                      'Mark the paid order completed and enable the customer review immediately.',
-                      'اعتمد الطلب المدفوع كمكتمل وافتح التقييم للعميل فورًا.',
-                    )}
-                  </p>
-                  <Button
-                    className="mt-4 w-full"
-                    onClick={() => {
-                      setNextStatus('completed');
-                      setConfirming(true);
-                    }}
+            {canManageOrders ? (
+              <aside className="h-fit border border-border bg-surface p-6">
+                {canCompleteOrder ? (
+                  <div className="mb-6 border-b border-border pb-6">
+                    <h2 className="type-h4 text-primary">
+                      {_copy(
+                        'Complete and deliver order',
+                        'إتمام وتسليم الطلب',
+                      )}
+                    </h2>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      {_copy(
+                        'Mark the paid order completed and enable the customer review immediately.',
+                        'اعتمد الطلب المدفوع كمكتمل وافتح التقييم للعميل فورًا.',
+                      )}
+                    </p>
+                    <Button
+                      className="mt-4 w-full"
+                      onClick={() => {
+                        setNextStatus('completed');
+                        setConfirming(true);
+                      }}
+                    >
+                      {_copy('Complete and deliver', 'إتمام وتسليم')}
+                    </Button>
+                  </div>
+                ) : null}
+                <h2 className="type-h4 text-primary">
+                  {_copy('Update Status')}
+                </h2>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {_copy('Only valid next states are available.')}
+                </p>
+                <label className="mt-5 grid gap-2 text-sm font-semibold">
+                  {_copy('Next status')}
+                  <select
+                    className="min-h-11 rounded-md border border-[var(--control-border)] bg-surface px-3"
+                    onChange={(event) => setNextStatus(event.target.value)}
+                    value={nextStatus}
                   >
-                    {_copy('Complete and deliver', 'إتمام وتسليم')}
-                  </Button>
-                </div>
-              ) : null}
-              <h2 className="type-h4 text-primary">{_copy('Update Status')}</h2>
-              <p className="mt-2 text-sm text-muted-foreground">
-                {_copy('Only valid next states are available.')}
-              </p>
-              <label className="mt-5 grid gap-2 text-sm font-semibold">
-                {_copy('Next status')}
-                <select
-                  className="min-h-11 rounded-md border border-[var(--control-border)] bg-surface px-3"
-                  onChange={(event) => setNextStatus(event.target.value)}
-                  value={nextStatus}
+                    <option value="">{_copy('Select status')}</option>
+                    {(transitions[order.status] ?? []).map((status) => (
+                      <option key={status} value={status}>
+                        {_copy(_copy.status(status))}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                {mutation.error ? (
+                  <Alert
+                    className="mt-4"
+                    title={_copy('Update failed')}
+                    description={_copy(mutation.error.userMessage)}
+                    variant="error"
+                  />
+                ) : null}
+                <Button
+                  className="mt-5 w-full"
+                  disabled={!nextStatus}
+                  onClick={() => setConfirming(true)}
                 >
-                  <option value="">{_copy('Select status')}</option>
-                  {(transitions[order.status] ?? []).map((status) => (
-                    <option key={status} value={status}>
-                      {_copy(_copy.status(status))}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              {mutation.error ? (
-                <Alert
-                  className="mt-4"
-                  title={_copy('Update failed')}
-                  description={_copy(mutation.error.userMessage)}
-                  variant="error"
-                />
-              ) : null}
-              <Button
-                className="mt-5 w-full"
-                disabled={!nextStatus}
-                onClick={() => setConfirming(true)}
-              >
-                {_copy('Update Order')}
-              </Button>
-            </aside>
+                  {_copy('Update Order')}
+                </Button>
+              </aside>
+            ) : null}
           </div>
         ) : null}
       </DataState>
       <ConfirmDialog
-        open={confirming}
+        open={canManageOrders && confirming}
         onOpenChange={setConfirming}
         title={_copy('Update order status?')}
         description={_copy(
@@ -605,7 +625,7 @@ export function OrderDetailView({ id }: { id: number }) {
         destructive={['cancelled', 'refunded'].includes(nextStatus)}
       />
       <ConfirmDialog
-        open={confirmingPayment}
+        open={canConfirmManualPayment && confirmingPayment}
         onOpenChange={setConfirmingPayment}
         title={_copy('Confirm collected payment?')}
         description={_copy(

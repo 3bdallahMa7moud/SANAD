@@ -17,6 +17,7 @@ import type {
   GoogleAuthResult,
 } from '@/types/domain';
 import { USER_ROLES } from '@/types/domain';
+import { normalizeAdminPermissions } from '@/lib/admin/permissions';
 
 import { ApiError } from '../errors';
 import { api, type ApiRequestOptions } from '../request';
@@ -34,6 +35,7 @@ const userPayloadSchema = z.object({
   // back to the least-privileged role: frontend role checks are UX guards and
   // must fail closed, while the backend guard stays the real authority.
   role: z.enum(USER_ROLES).catch('customer'),
+  admin_permissions: z.unknown().optional(),
   email_verified: z.boolean().nullish(),
   first_name: z.string().nullish(),
   last_name: z.string().nullish(),
@@ -114,6 +116,7 @@ function toUser(payload: UserPayload): User {
     email: payload.email,
     phone: payload.phone ?? null,
     role: payload.role,
+    adminPermissions: normalizeAdminPermissions(payload.admin_permissions),
     emailVerified: payload.email_verified === true,
     firstName: payload.first_name ?? null,
     lastName: payload.last_name ?? null,

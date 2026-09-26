@@ -16,6 +16,7 @@ import { StatusBadge } from '@/components/ui/status-badge';
 import { reviewKeys, reviewsApi } from '@/lib/api';
 import type { PackageReview, ReviewStatus } from '@/types/domain';
 import { statusIntent } from '@/lib/orders/presentation';
+import { useAdminPermission } from '@/hooks/use-admin-permission';
 import {
   AdminPageHeader,
   AdminTable,
@@ -25,6 +26,7 @@ import {
 } from './admin-ui';
 export function ReviewsView() {
   const _copy = useCopy();
+  const canManage = useAdminPermission('reviews.manage');
 
   const client = useQueryClient();
   const [page, setPage] = useState(1);
@@ -184,44 +186,56 @@ export function ReviewsView() {
                     </StatusBadge>
                   </td>
                   <td className="px-4 py-4">
-                    <Button
-                      disabled={r.status !== 'published' || featuring.isPending}
-                      onClick={() =>
-                        featuring.mutate({
-                          id: r.id,
-                          featured: !r.isHomeFeatured,
-                        })
-                      }
-                      size="sm"
-                      variant={r.isHomeFeatured ? 'outline' : 'primary'}
-                    >
-                      {r.isHomeFeatured
-                        ? _copy('Remove from home', 'إزالة من الرئيسية')
-                        : _copy('Show on home', 'عرض في الرئيسية')}
-                    </Button>
+                    {canManage ? (
+                      <Button
+                        disabled={
+                          r.status !== 'published' || featuring.isPending
+                        }
+                        onClick={() =>
+                          featuring.mutate({
+                            id: r.id,
+                            featured: !r.isHomeFeatured,
+                          })
+                        }
+                        size="sm"
+                        variant={r.isHomeFeatured ? 'outline' : 'primary'}
+                      >
+                        {r.isHomeFeatured
+                          ? _copy('Remove from home', 'إزالة من الرئيسية')
+                          : _copy('Show on home', 'عرض في الرئيسية')}
+                      </Button>
+                    ) : (
+                      <span className="text-muted-foreground">
+                        {r.isHomeFeatured ? _copy('Selected', 'مختار') : '—'}
+                      </span>
+                    )}
                   </td>
                   <td className="px-4 py-4">
-                    <div className="flex gap-2">
-                      <Button
-                        disabled={r.status === 'published'}
-                        onClick={() =>
-                          setAction({ review: r, status: 'published' })
-                        }
-                        size="sm"
-                      >
-                        {_copy('Publish')}
-                      </Button>
-                      <Button
-                        disabled={r.status === 'hidden'}
-                        onClick={() =>
-                          setAction({ review: r, status: 'hidden' })
-                        }
-                        size="sm"
-                        variant="outline"
-                      >
-                        {_copy('Hide')}
-                      </Button>
-                    </div>
+                    {canManage ? (
+                      <div className="flex gap-2">
+                        <Button
+                          disabled={r.status === 'published'}
+                          onClick={() =>
+                            setAction({ review: r, status: 'published' })
+                          }
+                          size="sm"
+                        >
+                          {_copy('Publish')}
+                        </Button>
+                        <Button
+                          disabled={r.status === 'hidden'}
+                          onClick={() =>
+                            setAction({ review: r, status: 'hidden' })
+                          }
+                          size="sm"
+                          variant="outline"
+                        >
+                          {_copy('Hide')}
+                        </Button>
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
                   </td>
                 </tr>
               ))}

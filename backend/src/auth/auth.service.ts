@@ -67,6 +67,7 @@ const PUBLIC_USER_FIELDS = [
   'email',
   'phone',
   'role',
+  'admin_permissions',
   'email_verified',
   'first_name',
   'last_name',

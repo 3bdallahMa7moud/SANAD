@@ -14,7 +14,8 @@ import {
   MotionStaggerItem,
   MotionStaggerList,
 } from '@/components/motion/motion-reveal';
-const sanadFirst50Hero = '/images/home/sanad-first50-hero.webp';
+const sanadCareerServicesHero =
+  '/images/home/sanad-career-services-hero-v4.webp';
 
 export async function HeroSection() {
   const _copy = await getCopy();
@@ -41,7 +42,7 @@ export async function HeroSection() {
         className="absolute top-0 right-0 hidden h-full w-[42%] border-s border-border/60 bg-surface/45 lg:block"
       />
 
-      <div className="layout-container relative grid items-center gap-12 py-14 sm:gap-16 sm:py-18 md:py-20 lg:min-h-[42rem] lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)] lg:gap-8 lg:py-14 xl:min-h-[44rem] xl:gap-14">
+      <div className="layout-container relative grid items-center gap-12 py-14 sm:gap-16 sm:py-18 md:py-20 lg:min-h-[42rem] lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)] lg:gap-5 lg:py-14 xl:min-h-[44rem] xl:gap-8">
         <div className="max-w-2xl lg:py-8">
           <MotionReveal delay={0.05} direction="none">
             <p className="flex items-center gap-3 text-xs font-semibold tracking-[0.18em] text-secondary uppercase sm:text-sm">
@@ -116,7 +117,7 @@ export async function HeroSection() {
         </div>
 
         <MotionMediaReveal
-          className="relative mx-auto w-full max-w-[44rem] lg:mx-0 lg:justify-self-end"
+          className="relative mx-auto w-full max-w-[50rem] lg:mx-0 lg:translate-x-6 lg:justify-self-end xl:translate-x-10"
           delay={0.16}
         >
           <HeroOfferVisual imageAlt={t('imageAlt')} />
@@ -133,11 +134,11 @@ function HeroOfferVisual({ imageAlt }: { imageAlt: string }) {
     <div className="relative aspect-[16/9] overflow-hidden rounded-lg border border-border bg-surface shadow-lg">
       <Image
         alt={_copy(imageAlt)}
-        className="object-contain"
+        className="object-cover"
         fill
         preload
-        sizes="(max-width: 1023px) calc(100vw - 2rem), 42vw"
-        src={sanadFirst50Hero}
+        sizes="(max-width: 1023px) calc(100vw - 2rem), 50vw"
+        src={sanadCareerServicesHero}
       />
     </div>
   );

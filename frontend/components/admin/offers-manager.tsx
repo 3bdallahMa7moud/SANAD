@@ -20,6 +20,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { adminApi, adminKeys, type AdminOffer } from '@/lib/api';
+import { useAdminPermission } from '@/hooks/use-admin-permission';
 
 import {
   AdminPageHeader,
@@ -101,6 +102,7 @@ function localDate(value: string) {
 }
 export function OffersManager() {
   const _copy = useCopy();
+  const canManage = useAdminPermission('offers.manage');
 
   const client = useQueryClient();
   const [editing, setEditing] = useState<AdminOffer | null | undefined>(
@@ -241,7 +243,11 @@ export function OffersManager() {
           'Schedule package-specific percentage discounts with clear start and end dates.',
         )}
         action={
-          <Button onClick={() => setEditing(null)}>{_copy('Add Offer')}</Button>
+          canManage ? (
+            <Button onClick={() => setEditing(null)}>
+              {_copy('Add Offer')}
+            </Button>
+          ) : undefined
         }
       />
       <DataState
@@ -306,24 +312,28 @@ export function OffersManager() {
                     {_copy(offer.is_active ? 'Active' : 'Inactive')}
                   </td>
                   <td className="px-4 py-4">
-                    <div className="flex gap-2">
-                      <Button
-                        aria-label={_copy('Edit offer')}
-                        onClick={() => setEditing(offer)}
-                        size="icon"
-                        variant="outline"
-                      >
-                        <Pencil className="size-4" />
-                      </Button>
-                      <Button
-                        aria-label={_copy('Delete offer')}
-                        onClick={() => setDeleting(offer)}
-                        size="icon"
-                        variant="outline"
-                      >
-                        <Trash2 className="size-4" />
-                      </Button>
-                    </div>
+                    {canManage ? (
+                      <div className="flex gap-2">
+                        <Button
+                          aria-label={_copy('Edit offer')}
+                          onClick={() => setEditing(offer)}
+                          size="icon"
+                          variant="outline"
+                        >
+                          <Pencil className="size-4" />
+                        </Button>
+                        <Button
+                          aria-label={_copy('Delete offer')}
+                          onClick={() => setDeleting(offer)}
+                          size="icon"
+                          variant="outline"
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -332,7 +342,7 @@ export function OffersManager() {
         </AdminTable>
       </DataState>
       <Dialog
-        open={editing !== undefined}
+        open={canManage && editing !== undefined}
         onOpenChange={(open) => {
           if (!open) setEditing(undefined);
         }}

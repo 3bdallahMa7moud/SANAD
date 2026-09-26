@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/use-auth';
 import { isApiError } from '@/lib/api';
+import { firstAllowedAdminRoute } from '@/lib/admin/permissions';
 
 const schema = z.object({
   email: z.string().trim().email('Enter a valid email.'),
@@ -45,7 +46,7 @@ export function AdminSignInForm() {
             );
             return;
           }
-          router.replace('/admin');
+          router.replace(firstAllowedAdminRoute(result.user));
         } catch (requestError) {
           setError(
             isApiError(requestError) &&

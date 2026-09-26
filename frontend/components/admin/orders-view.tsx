@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { adminApi, adminKeys } from '@/lib/api';
+import { useAdminPermission } from '@/hooks/use-admin-permission';
 import { statusIntent } from '@/lib/orders/presentation';
 import {
   AdminPageHeader,
@@ -76,6 +77,7 @@ function canCompleteOrder(order: {
 
 export function OrdersView() {
   const _copy = useCopy();
+  const canManage = useAdminPermission('orders.manage');
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
@@ -189,7 +191,7 @@ export function OrdersView() {
           </select>
         </label>
       </div>
-      {selectedOrderIds.length > 0 ? (
+      {canManage && selectedOrderIds.length > 0 ? (
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border border-primary/20 bg-primary/5 p-4">
           <p className="text-sm font-semibold text-primary">
             {_copy(
@@ -238,16 +240,18 @@ export function OrdersView() {
             <thead className="bg-surface-muted text-xs uppercase text-secondary">
               <tr>
                 <th className="px-4 py-3">
-                  <input
-                    aria-label={_copy(
-                      'Select all completable orders',
-                      'تحديد كل الطلبات القابلة للإكمال',
-                    )}
-                    checked={allCompletableSelected}
-                    disabled={completableOrders.length === 0}
-                    onChange={toggleAllCompletable}
-                    type="checkbox"
-                  />
+                  {canManage ? (
+                    <input
+                      aria-label={_copy(
+                        'Select all completable orders',
+                        'تحديد كل الطلبات القابلة للإكمال',
+                      )}
+                      checked={allCompletableSelected}
+                      disabled={completableOrders.length === 0}
+                      onChange={toggleAllCompletable}
+                      type="checkbox"
+                    />
+                  ) : null}
                 </th>
                 <th className="px-4 py-3">{_copy('Order')}</th>
                 <th className="px-4 py-3">{_copy('Customer')}</th>
@@ -274,16 +278,18 @@ export function OrdersView() {
                 return (
                   <tr key={order.id}>
                     <td className="px-4 py-4">
-                      <input
-                        aria-label={_copy(
-                          `Select order ${order.order_number}`,
-                          `تحديد الطلب ${order.order_number}`,
-                        )}
-                        checked={selectedOrderIds.includes(order.id)}
-                        disabled={!completable}
-                        onChange={() => toggleOrder(order.id)}
-                        type="checkbox"
-                      />
+                      {canManage ? (
+                        <input
+                          aria-label={_copy(
+                            `Select order ${order.order_number}`,
+                            `تحديد الطلب ${order.order_number}`,
+                          )}
+                          checked={selectedOrderIds.includes(order.id)}
+                          disabled={!completable}
+                          onChange={() => toggleOrder(order.id)}
+                          type="checkbox"
+                        />
+                      ) : null}
                     </td>
                     <td className="px-4 py-4 font-semibold text-primary">
                       {_copy('#')}
@@ -348,7 +354,7 @@ export function OrdersView() {
         onPage={setPage}
       />
       <ConfirmDialog
-        open={confirmingBulk}
+        open={canManage && confirmingBulk}
         onOpenChange={setConfirmingBulk}
         title={_copy('Complete selected orders?', 'إكمال الطلبات المحددة؟')}
         description={_copy(

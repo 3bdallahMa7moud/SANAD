@@ -12,8 +12,14 @@ import {
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { CouponsService } from './coupons.service';
 import { ValidateCouponDto, CreateCouponDto, UpdateCouponDto } from './dto';
-import { Public, Roles, CurrentUser } from '../common/decorators';
+import {
+  AdminPermissions,
+  Public,
+  Roles,
+  CurrentUser,
+} from '../common/decorators';
 import { UserRole } from '../common/enums';
+import { AdminPermission } from '../common/permissions';
 import { PaginationDto } from '../common/utils';
 
 @ApiTags('Coupons')
@@ -44,24 +50,28 @@ export class AdminCouponsController {
   constructor(private readonly couponsService: CouponsService) {}
 
   @Get()
+  @AdminPermissions(AdminPermission.COUPONS_VIEW)
   @ApiOperation({ summary: 'List all coupons (Admin)' })
   async findAll(@Query() query: PaginationDto) {
     return this.couponsService.findAllAdmin(query);
   }
 
   @Get(':id')
+  @AdminPermissions(AdminPermission.COUPONS_VIEW)
   @ApiOperation({ summary: 'Get coupon details with usage stats (Admin)' })
   async findOne(@Param('id', ParseIntPipe) id: number) {
     return this.couponsService.findOneAdmin(id);
   }
 
   @Post()
+  @AdminPermissions(AdminPermission.COUPONS_MANAGE)
   @ApiOperation({ summary: 'Create a new coupon (Admin)' })
   async create(@Body() dto: CreateCouponDto) {
     return this.couponsService.create(dto);
   }
 
   @Patch(':id')
+  @AdminPermissions(AdminPermission.COUPONS_MANAGE)
   @ApiOperation({ summary: 'Update a coupon (Admin)' })
   async update(
     @Param('id', ParseIntPipe) id: number,
@@ -71,6 +81,7 @@ export class AdminCouponsController {
   }
 
   @Delete(':id')
+  @AdminPermissions(AdminPermission.COUPONS_MANAGE)
   @ApiOperation({ summary: 'Delete a coupon (Admin)' })
   async remove(@Param('id', ParseIntPipe) id: number) {
     return this.couponsService.remove(id);

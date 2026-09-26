@@ -19,8 +19,9 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FilesService } from './files.service';
 import { UploadFileDto, UploadDeliverableDto } from './dto';
-import { CurrentUser, Roles } from '../common/decorators';
+import { AdminPermissions, CurrentUser, Roles } from '../common/decorators';
 import { UserRole } from '../common/enums';
+import { AdminPermission } from '../common/permissions';
 import { MulterFile } from '../common/interfaces';
 import { DOCUMENT_UPLOAD_OPTIONS } from './file-validation';
 
@@ -62,6 +63,7 @@ export class FilesController {
   }
 
   @Get(':id/files')
+  @AdminPermissions(AdminPermission.ORDERS_VIEW)
   @ApiOperation({
     summary: 'List all files for an order with signed download URLs',
   })
@@ -85,6 +87,7 @@ export class FilesController {
   }
 
   @Get(':id/deliverables')
+  @AdminPermissions(AdminPermission.ORDERS_VIEW)
   @ApiOperation({ summary: 'Get signed download URLs for final deliverables' })
   async getDeliverables(
     @Param('id', ParseIntPipe) orderId: number,
@@ -104,6 +107,7 @@ export class AdminFilesController {
   constructor(private readonly filesService: FilesService) {}
 
   @Post(':id/deliverables')
+  @AdminPermissions(AdminPermission.ORDERS_MANAGE)
   @ApiOperation({ summary: 'Upload final deliverable file (Admin)' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({

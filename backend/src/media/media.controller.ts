@@ -25,8 +25,14 @@ import {
   UploadSiteMediaDto,
   UploadPackageImageDto,
 } from './dto';
-import { Public, Roles, CurrentUser } from '../common/decorators';
+import {
+  AdminPermissions,
+  Public,
+  Roles,
+  CurrentUser,
+} from '../common/decorators';
 import { UserRole } from '../common/enums';
+import { AdminPermission } from '../common/permissions';
 import { MulterFile } from '../common/interfaces';
 import { IMAGE_UPLOAD_OPTIONS } from '../files/file-validation';
 
@@ -51,12 +57,14 @@ export class AdminMediaController {
   constructor(private readonly mediaService: MediaService) {}
 
   @Get('media')
+  @AdminPermissions(AdminPermission.MEDIA_VIEW)
   @ApiOperation({ summary: 'List all site media assets (Admin)' })
   async getAllSiteMedia() {
     return this.mediaService.getAllAdmin();
   }
 
   @Post('media')
+  @AdminPermissions(AdminPermission.MEDIA_MANAGE)
   @ApiOperation({ summary: 'Upload site media asset (Admin)' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -80,6 +88,7 @@ export class AdminMediaController {
   }
 
   @Delete('media/:id')
+  @AdminPermissions(AdminPermission.MEDIA_MANAGE)
   @ApiOperation({ summary: 'Delete site media asset (Admin)' })
   async deleteSiteMedia(
     @Param('id', ParseIntPipe) id: number,
@@ -89,6 +98,7 @@ export class AdminMediaController {
   }
 
   @Patch('media/:id')
+  @AdminPermissions(AdminPermission.MEDIA_MANAGE)
   @ApiOperation({ summary: 'Update site media metadata (Admin)' })
   async updateSiteMedia(
     @Param('id', ParseIntPipe) id: number,
@@ -99,6 +109,7 @@ export class AdminMediaController {
   }
 
   @Post('packages/:id/images')
+  @AdminPermissions(AdminPermission.PACKAGES_MANAGE)
   @ApiOperation({ summary: 'Upload image for package (Admin)' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -122,6 +133,7 @@ export class AdminMediaController {
   }
 
   @Delete('packages/:packageId/images/:imageId')
+  @AdminPermissions(AdminPermission.PACKAGES_MANAGE)
   @ApiOperation({ summary: 'Delete package image (Admin)' })
   async deletePackageImage(
     @Param('packageId', ParseIntPipe) packageId: number,
@@ -132,6 +144,7 @@ export class AdminMediaController {
   }
 
   @Patch('packages/:packageId/images/:imageId')
+  @AdminPermissions(AdminPermission.PACKAGES_MANAGE)
   @ApiOperation({ summary: 'Update package image metadata (Admin)' })
   async updatePackageImage(
     @Param('packageId', ParseIntPipe) packageId: number,
