@@ -416,8 +416,7 @@ export default async function PackageDetailPage({
                               pricing.offerDiscountAmount,
                               pricing.currency,
                             ),
-                          )}{' '}
-                          ({_copy.number(pricing.offerDiscountPercentage)}%)
+                          )}
                         </p>
                       ) : null}
                     </>
@@ -446,8 +445,7 @@ export default async function PackageDetailPage({
                           </span>
                           <p className="mt-1.5 text-xs font-semibold text-accent">
                             {_copy('You save', 'وفّرت')}{' '}
-                            {_copy(_copy.money(fallbackDiscountAmount))} (
-                            {_copy.number(bestOffer.discountPercentage)}%)
+                            {_copy(_copy.money(fallbackDiscountAmount))}
                           </p>
                         </>
                       ) : null}

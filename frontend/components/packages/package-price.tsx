@@ -3,6 +3,7 @@ import { PackageOfferBanner } from '@/components/packages/package-offer-visual';
 import {
   getBestPackageOffer,
   getPackageCurrentPrice,
+  getPackageDiscountAmount,
   getPackageOriginalPrice,
 } from '@/lib/packages/presentation';
 import { cn } from '@/lib/utils/cn';
@@ -28,6 +29,7 @@ export function PackagePrice({
   const offer = getBestPackageOffer(packageItem);
   const currentPrice = getPackageCurrentPrice(packageItem);
   const originalPrice = getPackageOriginalPrice(packageItem);
+  const discountAmount = getPackageDiscountAmount(packageItem);
 
   return (
     <div
@@ -68,6 +70,11 @@ export function PackagePrice({
             {_copy(_copy.money(currentPrice))}
           </p>
           <SecondaryPrices amount={currentPrice} rates={rates} />
+          {offer && discountAmount > 0 ? (
+            <p className="mt-2 text-xs font-semibold text-success">
+              {_copy('You save', 'وفّرت')} {_copy(_copy.money(discountAmount))}
+            </p>
+          ) : null}
         </div>
 
         {offer ? (
