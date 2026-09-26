@@ -7,24 +7,47 @@ html {
 }
 
 .brand-logo {
+  --sanad-logo-base: #062c5e;
+  --sanad-logo-highlight: #0d477f;
+  --sanad-logo-shadow: #011a40;
+
   display: block;
   max-width: 100%;
   aspect-ratio: 1239 / 769;
-  background-color: var(--sanad-navy);
+  background-color: var(--sanad-logo-base);
+  background-image:
+    radial-gradient(
+      circle at 46% 38%,
+      color-mix(in srgb, var(--sanad-logo-highlight) 92%, white 8%) 0%,
+      transparent 48%
+    ),
+    linear-gradient(
+      145deg,
+      var(--sanad-logo-shadow) 0%,
+      var(--sanad-logo-highlight) 48%,
+      var(--sanad-logo-base) 72%,
+      var(--sanad-logo-shadow) 100%
+    );
   -webkit-mask: url('/brand/sanad-logo-navy.png') center / contain no-repeat;
   mask: url('/brand/sanad-logo-navy.png') center / contain no-repeat;
 }
 
 .brand-logo--beige {
-  background-color: #f4deb0;
+  --sanad-logo-base: #f4deb0;
+  --sanad-logo-highlight: #fff0cc;
+  --sanad-logo-shadow: #e6c58d;
 }
 
 .brand-logo--navy {
-  background-color: var(--sanad-navy);
+  --sanad-logo-base: #062c5e;
+  --sanad-logo-highlight: #0d477f;
+  --sanad-logo-shadow: #011a40;
 }
 
 html[data-theme='dark'] .brand-logo--adaptive {
-  background-color: #f4deb0;
+  --sanad-logo-base: #f4deb0;
+  --sanad-logo-highlight: #fff0cc;
+  --sanad-logo-shadow: #e6c58d;
 }
 
 .sanad-phone-input {
