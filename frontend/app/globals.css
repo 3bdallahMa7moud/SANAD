@@ -9,7 +9,7 @@ html {
 .brand-logo {
   display: block;
   max-width: 100%;
-  aspect-ratio: 1239 / 737;
+  aspect-ratio: 1239 / 769;
   background-color: var(--sanad-navy);
   -webkit-mask: url('/brand/sanad-logo-navy.png') center / contain no-repeat;
   mask: url('/brand/sanad-logo-navy.png') center / contain no-repeat;
