@@ -44,7 +44,7 @@ export async function HeroSection() {
         className="absolute top-0 right-0 hidden h-full w-[42%] border-s border-border/60 bg-surface/45 lg:block"
       />
 
-      <div className="layout-container relative grid items-center gap-12 py-14 sm:gap-16 sm:py-18 md:py-20 lg:min-h-[42rem] lg:grid-cols-[minmax(0,0.68fr)_minmax(0,1.32fr)] lg:gap-5 lg:py-14 xl:min-h-[44rem] xl:gap-8">
+      <div className="layout-container relative grid items-center gap-12 py-14 sm:gap-16 sm:py-18 md:py-20 lg:min-h-[42rem] lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-5 lg:py-14 xl:min-h-[44rem] xl:gap-8">
         <div className="max-w-2xl lg:py-8">
           <MotionReveal delay={0.05} direction="none">
             <p className="flex items-center gap-3 text-xs font-semibold tracking-[0.18em] text-secondary uppercase sm:text-sm">
@@ -54,7 +54,7 @@ export async function HeroSection() {
           </MotionReveal>
 
           <MotionHeading
-            className="mt-5 max-w-[15ch] font-display text-[clamp(2.625rem,5.2vw,4.5rem)] leading-[0.99] tracking-[-0.04em] text-primary sm:mt-6"
+            className="mt-5 max-w-[20ch] font-display text-[clamp(2.625rem,5.2vw,4.5rem)] leading-[0.99] tracking-[-0.04em] text-primary sm:mt-6"
             delay={0.11}
             id="hero-heading"
             level={1}
@@ -124,15 +124,15 @@ export async function HeroSection() {
           className="
             relative mx-auto w-full max-w-[62rem]
             lg:mx-0
-            lg:w-[calc(100%+4rem)]
+            lg:w-[calc(100%+6rem)]
             lg:max-w-[66rem]
             lg:justify-self-end
-            lg:translate-x-14
-            xl:w-[calc(100%+6rem)]
+            lg:translate-x-24
+            xl:w-[calc(100%+8rem)]
             xl:max-w-[72rem]
-            xl:translate-x-20
-            rtl:lg:-translate-x-14
-            rtl:xl:-translate-x-20
+            xl:translate-x-32
+            rtl:lg:-translate-x-24
+            rtl:xl:-translate-x-32
           "
           delay={0.16}
         >
