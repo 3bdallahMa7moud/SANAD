@@ -2,7 +2,6 @@ import { getLocalizedMetadata } from '@/lib/i18n/metadata';
 
 import { getCopy } from '@/lib/i18n/server-copy';
 import {
-  ArrowLeft,
   ArrowRight,
   Check,
   ChevronRight,
@@ -23,7 +22,6 @@ import { SecondaryPrices } from '@/components/packages/secondary-prices';
 import { getSecondaryExchangeRates } from '@/lib/packages/exchange-rates';
 import { PackageFeedbackUnavailable } from '@/components/packages/package-feedback-unavailable';
 import { StarRating } from '@/components/feedback/star-rating';
-import { getServiceCategory } from '@/lib/packages/categories';
 import { getScopeQuestions } from '@/lib/packages/scope-questions';
 import { whatsappHref } from '@/lib/orders/presentation';
 import { VerifiedReviewCard } from '@/components/feedback/verified-review-card';
@@ -32,7 +30,6 @@ import {
   getOrderDisplayPrice,
   PackageOrderCard,
 } from '@/components/packages/package-order-card';
-import { PackageRelatedCard } from '@/components/packages/package-related-card';
 import { PackageOfferFlag } from '@/components/packages/package-offer-visual';
 import {
   Accordion,
@@ -53,8 +50,10 @@ import { getPackageDetailContent } from '@/lib/packages/detail-content';
 import {
   getBestPackageOffer,
   getPackageCurrentPrice,
+  getPackageDiscountAmount,
   getPackageFeaturePairs,
   getPackageHref,
+  getPackageOriginalPrice,
   getPackageIdFromSlug,
   getPackagePrimaryImage,
   getPackageSlug,
@@ -69,7 +68,6 @@ interface PackageDetailPageProps {
 }
 
 const getPackage = cache((id: number) => packagesApi.getById(id));
-const getPackageCatalog = cache(() => packagesApi.list({ limit: 100 }));
 const getPricing = cache((packageId: number, offerId?: number) =>
   checkoutApi.preview({ packageId, offerId }),
 );
@@ -105,41 +103,20 @@ function toAbsoluteUrl(value: string): string | null {
 async function getOptionalPageData(packageItem: CareerPackage): Promise<{
   feedback: Awaited<ReturnType<typeof reviewsApi.listPublic>> | null;
   pricing: CheckoutPricing | null;
-  relatedPackages: CareerPackage[];
   contactNumber: string | null;
 }> {
   const bestOffer = getBestPackageOffer(packageItem);
-  const [pricingResult, catalogResult, feedbackResult, settingsResult] =
+  const [pricingResult, feedbackResult, settingsResult] =
     await Promise.allSettled([
       getPricing(packageItem.id, bestOffer?.id),
-      getPackageCatalog(),
       getFeedback(packageItem.id),
       settingsApi.getPublic(),
     ]);
-  const catalog =
-    catalogResult.status === 'fulfilled' ? catalogResult.value.items : [];
-  const relatedPackages = catalog
-    .filter((candidate) => candidate.id !== packageItem.id)
-    .sort((first, second) => {
-      const firstMatch =
-        getServiceCategory(first) === getServiceCategory(packageItem);
-      const secondMatch =
-        getServiceCategory(second) === getServiceCategory(packageItem);
-      if (firstMatch !== secondMatch) return firstMatch ? -1 : 1;
-      const firstDistance = Math.abs(first.sortOrder - packageItem.sortOrder);
-      const secondDistance = Math.abs(second.sortOrder - packageItem.sortOrder);
-
-      return (
-        firstDistance - secondDistance || first.sortOrder - second.sortOrder
-      );
-    })
-    .slice(0, 3);
 
   return {
     feedback:
       feedbackResult.status === 'fulfilled' ? feedbackResult.value : null,
     pricing: pricingResult.status === 'fulfilled' ? pricingResult.value : null,
-    relatedPackages,
     contactNumber:
       settingsResult.status === 'fulfilled'
         ? (settingsResult.value.whatsapp_number ?? null)
@@ -219,11 +196,10 @@ export default async function PackageDetailPage({
     redirect(getPackageHref(packageItem));
   }
 
-  const [{ feedback, pricing, relatedPackages, contactNumber }, rates] =
-    await Promise.all([
-      getOptionalPageData(packageItem),
-      getSecondaryExchangeRates(),
-    ]);
+  const [{ feedback, pricing, contactNumber }, rates] = await Promise.all([
+    getOptionalPageData(packageItem),
+    getSecondaryExchangeRates(),
+  ]);
   const feedbackItems = feedback?.items ?? [];
   const feedbackRating = feedback?.summary.averageRating ?? 0;
   const content = getPackageDetailContent(packageItem);
@@ -235,6 +211,9 @@ export default async function PackageDetailPage({
   );
   const bestOffer = getBestPackageOffer(packageItem);
   const displayPrice = getOrderDisplayPrice(packageItem, pricing, _copy.locale);
+  const fallbackCurrentPrice = getPackageCurrentPrice(packageItem);
+  const fallbackOriginalPrice = getPackageOriginalPrice(packageItem);
+  const fallbackDiscountAmount = getPackageDiscountAmount(packageItem);
   const hasRating =
     packageItem.ratingAverage !== null && packageItem.ratingCount > 0;
   const checkoutHref = `/checkout/${getPackageSlug(packageItem)}`;
@@ -392,7 +371,14 @@ export default async function PackageDetailPage({
                   {pricing ? (
                     <>
                       <span className="block text-xs font-semibold tracking-wider text-primary-foreground/65 uppercase">
-                        {_copy('Total price', 'السعر الإجمالي')}
+                        {_copy(
+                          pricing.offerDiscountAmount > 0
+                            ? 'Offer price'
+                            : 'Total price',
+                          pricing.offerDiscountAmount > 0
+                            ? 'السعر بعد الخصم'
+                            : 'السعر الإجمالي',
+                        )}
                       </span>
                       <div className="mt-1.5 flex flex-wrap items-baseline gap-3">
                         <span className="font-display text-3xl font-bold tracking-tight text-primary-foreground sm:text-4xl">
@@ -401,14 +387,19 @@ export default async function PackageDetailPage({
                           )}
                         </span>
                         {pricing.offerDiscountAmount > 0 ? (
-                          <span className="text-sm text-primary-foreground/55 line-through">
-                            {_copy(
-                              _copy.money(
-                                pricing.originalPrice,
-                                pricing.currency,
-                              ),
-                            )}
-                          </span>
+                          <div>
+                            <span className="block text-[0.68rem] font-semibold text-primary-foreground/55">
+                              {_copy('Original price', 'السعر قبل الخصم')}
+                            </span>
+                            <span className="block text-sm text-primary-foreground/55 line-through">
+                              {_copy(
+                                _copy.money(
+                                  pricing.originalPrice,
+                                  pricing.currency,
+                                ),
+                              )}
+                            </span>
+                          </div>
                         ) : null}
                       </div>
                       <SecondaryPrices
@@ -426,20 +417,42 @@ export default async function PackageDetailPage({
                               pricing.currency,
                             ),
                           )}{' '}
-                          ({pricing.offerDiscountPercentage}%)
+                          ({_copy.number(pricing.offerDiscountPercentage)}%)
                         </p>
                       ) : null}
                     </>
                   ) : (
                     <>
                       <span className="block text-xs font-semibold tracking-wider text-primary-foreground/65 uppercase">
-                        {_copy('Price', 'السعر')}
+                        {_copy(
+                          bestOffer && fallbackDiscountAmount > 0
+                            ? 'Offer price'
+                            : 'Price',
+                          bestOffer && fallbackDiscountAmount > 0
+                            ? 'السعر بعد الخصم'
+                            : 'السعر',
+                        )}
                       </span>
                       <span className="mt-1.5 block font-display text-3xl font-bold tracking-tight text-primary-foreground sm:text-4xl">
                         {displayPrice}
                       </span>
+                      {bestOffer && fallbackDiscountAmount > 0 ? (
+                        <>
+                          <span className="mt-2 block text-[0.68rem] font-semibold text-primary-foreground/55">
+                            {_copy('Original price', 'السعر قبل الخصم')}
+                          </span>
+                          <span className="block text-sm text-primary-foreground/55 line-through">
+                            {_copy(_copy.money(fallbackOriginalPrice))}
+                          </span>
+                          <p className="mt-1.5 text-xs font-semibold text-accent">
+                            {_copy('You save', 'وفّرت')}{' '}
+                            {_copy(_copy.money(fallbackDiscountAmount))} (
+                            {_copy.number(bestOffer.discountPercentage)}%)
+                          </p>
+                        </>
+                      ) : null}
                       <SecondaryPrices
-                        amount={getPackageCurrentPrice(packageItem)}
+                        amount={fallbackCurrentPrice}
                         rates={rates}
                         onDark
                       />
@@ -879,11 +892,6 @@ export default async function PackageDetailPage({
                 pricing={pricing}
                 rates={rates}
               />
-              <Button asChild variant="outline" className="mt-4 w-full">
-                <Link href="/packages#compare-packages">
-                  {_copy('Compare packages', 'مقارنة الباقات')}
-                </Link>
-              </Button>
             </aside>
           </div>
         </div>
@@ -929,41 +937,9 @@ export default async function PackageDetailPage({
         </div>
       </section>
 
-      {relatedPackages.length > 0 ? (
-        <section className="bg-background">
-          <div className="layout-container layout-section">
-            <div className="flex flex-col gap-5 border-b border-border pb-7 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="text-xs font-semibold tracking-[0.16em] text-secondary uppercase">
-                  {_copy('Compare your options')}
-                </p>
-                <h2 className="type-h2 mt-3 text-primary">
-                  {_copy('Similar career services')}
-                </h2>
-              </div>
-              <Button asChild variant="outline">
-                <Link href="/packages">
-                  {_copy('View All Services')}
-                  <ArrowRight aria-hidden="true" className="size-4" />
-                </Link>
-              </Button>
-            </div>
-            <div className="mt-8 grid gap-5 md:grid-cols-3">
-              {relatedPackages.map((relatedPackage) => (
-                <PackageRelatedCard
-                  key={relatedPackage.id}
-                  packageItem={relatedPackage}
-                  rates={rates}
-                />
-              ))}
-            </div>
-          </div>
-        </section>
-      ) : null}
-
       <section className="border-t border-border bg-surface-muted">
         <div className="layout-container py-12 sm:py-16">
-          <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+          <div className="grid gap-8 lg:grid-cols-1 lg:items-center">
             <div className="flex items-start gap-4">
               <span
                 aria-hidden="true"
@@ -982,12 +958,6 @@ export default async function PackageDetailPage({
                 </p>
               </div>
             </div>
-            <Button asChild variant="outline">
-              <Link href="/packages">
-                <ArrowLeft aria-hidden="true" className="size-4" />
-                {_copy('Compare All Services')}
-              </Link>
-            </Button>
           </div>
         </div>
       </section>

@@ -5,8 +5,6 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowDown, ArrowRight, MessageCircle } from 'lucide-react';
 import { ServicesCatalog } from '@/components/packages/services-catalog';
-import { getServiceCategory } from '@/lib/packages/categories';
-import { PackageComparison } from '@/components/packages/package-comparison';
 import { Button } from '@/components/ui/button';
 import { packagesApi } from '@/lib/api';
 import { getInitialPublicSettings } from '@/lib/api/public-settings-server';
@@ -19,8 +17,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return await getLocalizedMetadata({
     title: _copy('Career Services | SANAD', 'الخدمات المهنية | سند'),
     description: _copy(
-      'Compare CV writing, Cover Letters, LinkedIn optimization, and complete career packages by scope, price, and delivery.',
-      'قارن بين خدمات كتابة السيرة الذاتية وتحسين الملف الشخصي والدعم الوظيفي حسب النطاق والمدة والأسعار.',
+      'Explore CV writing, Cover Letters, LinkedIn optimization, and complete career packages with clear scope, pricing, and delivery.',
+      'استعرض خدمات كتابة السيرة الذاتية وخطابات التقديم وتحسين الملف الشخصي والباقات المهنية مع نطاق وسعر ومدة تسليم واضحة.',
     ),
     alternates: { canonical: '/packages' },
   });
@@ -36,14 +34,11 @@ export default async function PackagesPage() {
   ]);
   const rawPackages = catalog?.items ?? [];
   const packages = [...rawPackages].sort((a, b) => a.sortOrder - b.sortOrder);
-  const hasComparison =
-    packages.filter((item) => getServiceCategory(item) === 'bundles').length >=
-    2;
   const defaultWhatsappNumber =
     process.env.NEXT_PUBLIC_DEFAULT_WHATSAPP_NUMBER || '971500000000';
   const contact = whatsappHref(
     settingsResult?.whatsapp_number?.trim() || defaultWhatsappNumber,
-    'Hello, I would like help comparing SANAD services and confirming the scope before ordering.',
+    'Hello, I would like help choosing a SANAD service and confirming the scope before ordering.',
   );
   return (
     <>
@@ -68,7 +63,7 @@ export default async function PackagesPage() {
               </h1>
               <p className="mt-4 leading-7 text-primary-foreground/80">
                 {_copy(
-                  'Compare focused services and complete packages. See what you receive, the price and the delivery estimate before you choose.',
+                  'Explore focused services and complete packages. See what you receive, the price, and the delivery estimate before you choose.',
                 )}
               </p>
             </div>
@@ -82,20 +77,11 @@ export default async function PackagesPage() {
                   <ArrowDown aria-hidden="true" className="size-4" />
                 </a>
               </Button>
-              {hasComparison ? (
-                <Link
-                  className="inline-flex min-h-11 items-center px-3 font-semibold underline underline-offset-4"
-                  href="#compare-packages"
-                >
-                  {_copy('Compare packages')}
-                </Link>
-              ) : null}
             </div>
           </div>
         </div>
       </section>
       <ServicesCatalog packages={packages} rates={rates} />
-      <PackageComparison packages={packages} rates={rates} />
       <section className="bg-surface" aria-labelledby="next-steps-heading">
         <div className="layout-container layout-section">
           <h2 id="next-steps-heading" className="type-h3 text-primary">

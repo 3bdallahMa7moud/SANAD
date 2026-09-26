@@ -80,7 +80,7 @@ export default function FaqPage() {
             </h2>
             <p className="mx-auto mt-6 max-w-[38rem] text-base leading-7 text-foreground/75 sm:text-lg sm:leading-8">
               {_copy(
-                'Compare the available services and select the support that fits your current career-document needs.',
+                'Explore the available services and choose the support that fits your current career-document needs.',
               )}
             </p>
             <div className="mt-8 flex justify-center">

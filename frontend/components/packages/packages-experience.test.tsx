@@ -1,10 +1,10 @@
-import { cleanup, render, screen, within } from '@/test/render';
+import { cleanup, render, screen } from '@/test/render';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CareerPackage } from '@/types/domain';
 import { ServicesCatalog } from './services-catalog';
-import { PackageComparison } from './package-comparison';
 import { PackageGallery } from './package-gallery';
+import { PackagePrice } from './package-price';
 
 vi.mock('next/navigation', async () => {
   const { useSyncExternalStore } = await import('react');
@@ -111,19 +111,6 @@ describe('Package selection experience', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Showing 4 of 4');
   });
 
-  it('compares published scope without inventing inclusions', () => {
-    render(<PackageComparison packages={packages} />);
-    const table = screen.getByRole('table');
-    const row = within(table).getByRole('row', {
-      name: /LinkedIn Profile Optimization/,
-    });
-    expect(within(row).getByText('Not listed')).toBeInTheDocument();
-    expect(within(row).getByText('Included')).toBeInTheDocument();
-    expect(
-      screen.queryByRole('link', { name: 'Professional CV' }),
-    ).not.toBeInTheDocument();
-  });
-
   it('shows each service description alongside its key facts, price, offer and detail link', () => {
     render(
       <ServicesCatalog
@@ -166,6 +153,29 @@ describe('Package selection experience', () => {
     expect(screen.getByText(/AED\s*250/)).toBeVisible();
     expect(screen.getByText('Second-service offer')).toBeVisible();
     expect(screen.getByText('20%')).toBeVisible();
+  });
+
+  it('shows the original price, offer price, and saving amount on service cards', () => {
+    render(
+      <PackagePrice
+        packageItem={{
+          ...packages[0],
+          offers: [
+            {
+              id: 10,
+              name: '50% OFF',
+              description: null,
+              discountPercentage: 50,
+            },
+          ],
+        }}
+      />,
+    );
+
+    expect(screen.getByText('Offer price')).toBeVisible();
+    expect(screen.getByText('Original price')).toBeVisible();
+    expect(screen.getByText(/You save/)).toBeVisible();
+    expect(screen.getAllByText(/AED\s*125/)).toHaveLength(2);
   });
 
   it('loads the first service row eagerly and keeps later images lazy', () => {

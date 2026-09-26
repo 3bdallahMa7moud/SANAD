@@ -69,6 +69,7 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
   }
 
   const offer = getBestPackageOffer(packageItem);
+  const localizedPackageName = _copy(packageItem.name, packageItem.nameAr);
   const [pricing, rates] = await Promise.all([
     checkoutApi.preview({ packageId: packageItem.id, offerId: offer?.id }),
     getSecondaryExchangeRates(),
@@ -113,14 +114,19 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
             {_copy('Secure checkout')}
           </p>
           <h1 className="type-h1 mt-3 max-w-3xl text-primary">
-            {_copy('Complete your')}{' '}
-            {_copy(packageItem.name, packageItem.nameAr)} {_copy('order')}
+            {_copy(
+              `Complete your ${packageItem.name} order`,
+              `أكمل طلب ${localizedPackageName}`,
+            )}
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">
             {_copy(
               checkoutMode === 'manual'
                 ? 'Add the context we need, review the final total, then continue with the SANAD team on WhatsApp.'
                 : 'Add the context we need, review the final total, and continue to secure payment.',
+              checkoutMode === 'manual'
+                ? 'أضف التفاصيل المطلوبة، وراجع المبلغ النهائي، ثم تواصل مع فريق سند عبر واتساب.'
+                : 'أضف التفاصيل المطلوبة، وراجع المبلغ النهائي، ثم تابع إلى الدفع الآمن.',
             )}
           </p>
         </div>

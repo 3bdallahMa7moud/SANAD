@@ -161,7 +161,7 @@ export function ServicesCatalog({
           </div>
           <p className="max-w-md text-sm leading-6 text-muted-foreground lg:text-end">
             {_copy(
-              'Start with the outcome you need, then compare scope, delivery, and investment at a glance.',
+              "Start with the outcome you need, then review each service's scope, delivery, and investment at a glance.",
             )}
           </p>
         </div>

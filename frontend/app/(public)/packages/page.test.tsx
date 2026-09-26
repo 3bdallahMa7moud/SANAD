@@ -19,10 +19,6 @@ vi.mock('@/components/packages/services-catalog', () => ({
     <div>Available services: {packages.length}</div>
   ),
 }));
-vi.mock('@/components/packages/package-comparison', () => ({
-  PackageComparison: () => null,
-}));
-
 describe('Public catalog availability', () => {
   it('preserves an empty catalog instead of inventing purchasable packages', async () => {
     list.mockResolvedValueOnce({ items: [] });
