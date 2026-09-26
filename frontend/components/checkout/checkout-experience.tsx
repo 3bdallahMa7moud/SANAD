@@ -410,6 +410,8 @@ export function CheckoutExperience({
       } else if (payment.clientSecret) {
         setPendingOrderNumber(order.orderNumber);
         setPendingPayment(payment);
+      } else if (payment.paymentUrl) {
+        window.location.assign(payment.paymentUrl);
       } else {
         setError('The payment session could not be created. Please try again.');
       }

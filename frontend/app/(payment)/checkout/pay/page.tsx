@@ -1,9 +1,6 @@
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-
 import { PaymentPagePreview } from '@/components/checkout/payment-page-preview';
 import { getLocalizedMetadata } from '@/lib/i18n/metadata';
-import { getCheckoutMode } from '@/lib/env/public-env';
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -36,8 +33,6 @@ export default async function PaymentPreviewPage({
 }: {
   searchParams: SearchParams;
 }) {
-  if (getCheckoutMode() === 'manual') notFound();
-
   const query = await searchParams;
 
   return (
