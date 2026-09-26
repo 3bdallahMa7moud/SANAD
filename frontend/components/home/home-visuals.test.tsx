@@ -6,15 +6,25 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import englishMessages from '@/messages/en.json';
 import type { CareerPackage, PackageReview } from '@/types/domain';
 
+import { CareerStory } from './career-story';
 import { FeaturedPackageCard } from './featured-packages-content';
 import { HeroSection } from './hero-section';
 import { TestimonialsCarousel } from './testimonials-carousel';
 
 vi.mock('next/image', () => ({
-  default: ({ alt, src }: { alt: string; src: { src?: string } | string }) => (
+  default: ({
+    alt,
+    src,
+    unoptimized,
+  }: {
+    alt: string;
+    src: { src?: string } | string;
+    unoptimized?: boolean;
+  }) => (
     <span
       aria-label={alt}
       data-src={typeof src === 'string' ? src : src.src}
+      data-unoptimized={unoptimized || undefined}
       role="img"
     />
   ),
@@ -115,6 +125,19 @@ describe('home visual sections', () => {
       'data-src',
       '/images/home/sanad-career-services-hero-v4.webp',
     );
+  });
+
+  it('renders the original career story image directly', async () => {
+    const { container } = renderWithEnglish(await CareerStory());
+    const image = container.querySelector(
+      '[data-src="/images/home/career-story.webp?v=e4039fda"]',
+    );
+
+    expect(image).toHaveAttribute(
+      'data-src',
+      '/images/home/career-story.webp?v=e4039fda',
+    );
+    expect(image).toHaveAttribute('data-unoptimized', 'true');
   });
 
   it.each([

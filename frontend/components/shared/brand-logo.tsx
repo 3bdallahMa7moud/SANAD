@@ -41,21 +41,21 @@ export function BrandLogo({
         alt=""
         aria-hidden="true"
         className="brand-logo__image brand-logo__image--light"
-        height={769}
+        height={1960}
         loading={loading}
         src="/brand/sanad-logo-navy.png"
         unoptimized
-        width={1239}
+        width={2253}
       />
       <Image
         alt=""
         aria-hidden="true"
         className="brand-logo__image brand-logo__image--dark"
-        height={769}
+        height={1961}
         loading={loading}
         src="/brand/sanad-logo-dark.png"
         unoptimized
-        width={1239}
+        width={2227}
       />
     </span>
   );

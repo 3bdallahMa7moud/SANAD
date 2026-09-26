@@ -11,7 +11,7 @@ import {
   MotionStaggerItem,
   MotionStaggerList,
 } from '@/components/motion/motion-reveal';
-const careerStoryImage = '/images/home/career-story.webp';
+const careerStoryImage = '/images/home/career-story.webp?v=e4039fda';
 
 export async function CareerStory() {
   const _copy = await getCopy();
@@ -37,6 +37,7 @@ export async function CareerStory() {
               fill
               sizes="(max-width: 1023px) calc(100vw - 2rem), 50vw"
               src={careerStoryImage}
+              unoptimized
             />
             <span
               aria-hidden="true"
