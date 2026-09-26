@@ -279,7 +279,7 @@ describe('CheckoutExperience', () => {
         }),
       );
       expect(mocks.routerReplace).toHaveBeenCalledWith(
-        '/order-success/SANAD-2026-MANUAL',
+        '/checkout/pay?amount=400.00&orderId=SANAD-2026-MANUAL&txn=preview-19',
       );
     });
     expect(mocks.paymentCreate).not.toHaveBeenCalled();
