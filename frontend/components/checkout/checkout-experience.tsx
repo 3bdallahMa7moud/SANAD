@@ -388,9 +388,12 @@ export function CheckoutExperience({
         customerPhone: user?.phone?.trim() ?? '',
       });
       if (checkoutMode === 'manual') {
-        router.replace(
-          `/order-success/${encodeURIComponent(order.orderNumber)}`,
-        );
+        const previewQuery = new URLSearchParams({
+          amount: displayPricing.finalAmount.toFixed(2),
+          orderId: order.orderNumber,
+          txn: `preview-${order.id}`,
+        });
+        router.replace(`/checkout/pay?${previewQuery.toString()}`);
         return;
       }
 

@@ -199,16 +199,27 @@ export function PaymentPagePreview({
             </div>
 
             {showNotice ? (
-              <Alert
-                className="mt-5"
-                description={_copy(
-                  'This is a visual preview. No card data was sent and no payment was collected.',
-                  'هذه معاينة مرئية فقط. لم تُرسل بيانات البطاقة ولم يتم تحصيل أي مبلغ.',
-                )}
-                icon={<Info />}
-                title={_copy('Preview only', 'معاينة فقط')}
-                variant="warning"
-              />
+              <div className="mt-5 grid gap-4">
+                <Alert
+                  description={_copy(
+                    'This is a visual preview. No card data was sent and no payment was collected.',
+                    'هذه معاينة مرئية فقط. لم تُرسل بيانات البطاقة ولم يتم تحصيل أي مبلغ.',
+                  )}
+                  icon={<Info />}
+                  title={_copy('Preview only', 'معاينة فقط')}
+                  variant="warning"
+                />
+                <Button
+                  onClick={() =>
+                    router.replace(
+                      `/order-success/${encodeURIComponent(orderId)}`,
+                    )
+                  }
+                  variant="outline"
+                >
+                  {_copy('Continue to order details', 'متابعة تفاصيل الطلب')}
+                </Button>
+              </div>
             ) : null}
           </main>
 
