@@ -174,7 +174,8 @@ describe('Package selection experience', () => {
 
     expect(screen.getByText('Offer price')).toBeVisible();
     expect(screen.getByText('Original price')).toBeVisible();
-    expect(screen.getByText(/You save/)).toBeVisible();
+    expect(screen.getByText(/Save/)).toBeVisible();
+    expect(screen.queryByText(/You save/)).not.toBeInTheDocument();
     expect(screen.getAllByText(/AED\s*125/)).toHaveLength(2);
   });
 

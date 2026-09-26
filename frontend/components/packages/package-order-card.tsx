@@ -74,41 +74,46 @@ export function PackageOrderCard({
                 />
               )
             ) : null}
-            <p className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
-              {_copy('Total')}
+            <p className="mt-2 text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+              {_copy(
+                pricing.offerDiscountPercentage > 0 ? 'Offer price' : 'Total',
+                pricing.offerDiscountPercentage > 0
+                  ? 'السعر بعد الخصم'
+                  : 'الإجمالي',
+              )}
             </p>
-            <p className="mt-2 font-display text-4xl leading-none text-primary">
-              {_copy(_copy.money(pricing.finalAmount, pricing.currency))}
-            </p>
+            <div className="mt-1 flex flex-wrap items-end gap-x-4 gap-y-2">
+              <p className="font-display text-4xl leading-none text-primary">
+                {_copy(_copy.money(pricing.finalAmount, pricing.currency))}
+              </p>
+              {pricing.offerDiscountAmount > 0 ? (
+                <div className="pb-0.5">
+                  <span className="block text-xs font-semibold text-muted-foreground">
+                    {_copy('Original price', 'السعر قبل الخصم')}
+                  </span>
+                  <p className="mt-0.5 text-base text-muted-foreground line-through">
+                    {_copy(
+                      _copy.money(pricing.originalPrice, pricing.currency),
+                    )}
+                  </p>
+                </div>
+              ) : null}
+            </div>
             <SecondaryPrices
               amount={pricing.finalAmount}
               currency={pricing.currency}
               rates={rates}
             />
+            {pricing.offerDiscountAmount > 0 ? (
+              <p className="mt-2 text-xs font-semibold text-success">
+                {_copy('Save', 'توفير')}{' '}
+                {_copy(
+                  _copy.money(pricing.offerDiscountAmount, pricing.currency),
+                )}
+              </p>
+            ) : null}
 
             <dl className="mt-6 grid gap-3 border-y border-border py-5 text-sm">
-              <div className="flex items-center justify-between gap-4">
-                <dt className="text-muted-foreground">
-                  {_copy('Original price')}
-                </dt>
-                <dd className="font-semibold text-foreground">
-                  {_copy(_copy.money(pricing.originalPrice, pricing.currency))}
-                </dd>
-              </div>
-              {pricing.offerDiscountAmount > 0 ? (
-                <div className="flex items-center justify-between gap-4 text-success">
-                  <dt>{_copy('Offer saving')}</dt>
-                  <dd className="font-semibold">
-                    {_copy('−')}
-                    {_copy(
-                      _copy.money(
-                        pricing.offerDiscountAmount,
-                        pricing.currency,
-                      ),
-                    )}
-                  </dd>
-                </div>
-              ) : null}
               <div className="flex items-center justify-between gap-4">
                 <dt className="text-muted-foreground">{_copy('Subtotal')}</dt>
                 <dd className="font-semibold text-foreground">

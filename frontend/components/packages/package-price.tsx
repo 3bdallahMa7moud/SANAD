@@ -72,7 +72,7 @@ export function PackagePrice({
           <SecondaryPrices amount={currentPrice} rates={rates} />
           {offer && discountAmount > 0 ? (
             <p className="mt-2 text-xs font-semibold text-success">
-              {_copy('You save', 'وفّرت')} {_copy(_copy.money(discountAmount))}
+              {_copy('Save', 'توفير')} {_copy(_copy.money(discountAmount))}
             </p>
           ) : null}
         </div>
