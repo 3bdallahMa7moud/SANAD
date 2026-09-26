@@ -1,3 +1,5 @@
+export const PAYMENT_PROVIDER_TOKEN = 'PAYMENT_PROVIDER_TOKEN';
+
 export interface CreatePaymentParams {
   orderId: number;
   orderNumber: string;
@@ -12,7 +14,8 @@ export interface CreatePaymentParams {
 
 export interface PaymentIntentResult {
   transactionId: string;
-  paymentUrl: string;
+  paymentUrl?: string | null;
+  clientSecret?: string | null;
   provider: string;
   amount: number;
   currency: string;

@@ -1,4 +1,4 @@
-export type CheckoutPaymentMethod = 'card' | 'apple_pay';
+export type CheckoutPaymentMethod = 'card';
 
 export interface CreatePaymentInput {
   orderId: number;
@@ -10,6 +10,7 @@ export interface PaymentResult {
   paymentId: number;
   transactionId: string;
   paymentUrl: string | null;
+  clientSecret: string | null;
   amount: number;
   chargedAmount: number | null;
   currency: string;

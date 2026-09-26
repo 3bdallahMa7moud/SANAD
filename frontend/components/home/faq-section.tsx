@@ -41,9 +41,9 @@ const faqItems: readonly FaqItem[] = [
     questionEn: 'How will I receive my files?',
     questionAr: 'كيف سأستلم ملفاتي؟',
     answerEn:
-      'After your order and payment are confirmed, SANAD contacts you through the official WhatsApp number to collect the required information. Drafts, final files, revision updates, and service reports are delivered through the agreed WhatsApp conversation. The account dashboard is used for order tracking and does not currently store completed files.',
+      'After your order and payment are confirmed, SANAD contacts you through the official WhatsApp number to collect the required information. Drafts, final files, revision updates, and service updates are coordinated through the agreed WhatsApp conversation. The account dashboard is used for order tracking and does not currently store completed files.',
     answerAr:
-      'بعد تأكيد الطلب والدفع، يتواصل معك فريق سند عبر رقم واتساب الرسمي لجمع المعلومات المطلوبة. يتم تسليم المسودات والملفات النهائية والتعديلات وتقارير الخدمة من خلال محادثة واتساب المتفق عليها. تُستخدم لوحة الحساب لمتابعة حالة الطلب فقط، ولا تُخزّن فيها الملفات النهائية حاليًا.',
+      'بعد تأكيد الطلب والدفع، يتواصل معك فريق سند عبر رقم واتساب الرسمي لجمع المعلومات المطلوبة. يتم تنسيق المسودات والملفات النهائية والتعديلات وتحديثات الخدمة من خلال محادثة واتساب المتفق عليها. تُستخدم لوحة الحساب لمتابعة حالة الطلب فقط، ولا تُخزّن فيها الملفات النهائية حاليًا.',
   },
   {
     questionEn: 'Which language can I choose for the Professional CV?',
@@ -62,30 +62,20 @@ const faqItems: readonly FaqItem[] = [
       'لا. تُقدم الباقة الاحترافية بلغة واحدة يختارها العميل، وتشمل سيرة ذاتية احترافية، وخطاب تقديم مخصصًا لوظيفة مستهدفة باللغة نفسها، وتحسين ملف LinkedIn.',
   },
   {
-    questionEn: 'Does the Premium Bilingual Package include job applications?',
-    questionAr:
-      'هل تشمل الباقة الثنائية اللغة المميزة التقديم الفعلي على الوظائف؟',
+    questionEn: 'Does the Premium Full Package include job applications?',
+    questionAr: 'هل تشمل الباقة الكاملة المميزة التقديم الفعلي على الوظائف؟',
     answerEn:
-      'No. The Premium Bilingual Package includes Arabic and English CVs, Arabic and English Cover Letters, LinkedIn Profile Optimization, and the UAE Job Application Guide. Done-for-you job applications are available only through the separate Job Application Service.',
+      'No. The Premium Full Package includes Arabic and English CVs, Arabic and English Cover Letters, LinkedIn Profile Optimization, and the UAE Job Application Guide. Done-for-you job applications are available only through the separate Job Application Service.',
     answerAr:
-      'لا. تشمل الباقة الثنائية اللغة المميزة سيرة ذاتية بالعربية والإنجليزية، وخطاب تقديم بالعربية والإنجليزية، وتحسين ملف LinkedIn، ودليل التقديم على الوظائف في الإمارات. أما التقديم الفعلي على الوظائف بالنيابة عن العميل فهو خدمة مستقلة.',
+      'لا. تشمل الباقة الكاملة المميزة سيرة ذاتية بالعربية والإنجليزية، وخطاب تقديم بالعربية والإنجليزية، وتحسين ملف LinkedIn، ودليل التقديم على الوظائف في الإمارات. أما التقديم الفعلي على الوظائف بالنيابة عن العميل فهو خدمة مستقلة.',
   },
   {
     questionEn: 'How does the Job Application Service work?',
     questionAr: 'كيف تعمل خدمة التقديم على الوظائف؟',
     answerEn:
-      'SANAD searches for suitable opportunities matching your experience and target roles, then submits applications on your behalf. The service covers up to 60 suitable applications and runs for up to 3 calendar days, or until 60 suitable applications are submitted, whichever occurs first. If fewer suitable opportunities are available, SANAD will not submit irrelevant applications merely to reach the maximum number.',
+      'SANAD identifies suitable companies and job opportunities based on your experience, then sends your CV with a professional English application email to up to 60 suitable companies using your email account.',
     answerAr:
-      'تبحث سند عن فرص مناسبة تتوافق مع خبراتك والوظائف المستهدفة، ثم تقدم الطلبات بالنيابة عنك. تشمل الخدمة حتى 60 طلب توظيف مناسبًا، وتستمر لمدة تصل إلى 3 أيام تقويمية أو حتى إتمام 60 طلبًا مناسبًا، أيهما يحدث أولًا. وإذا لم تتوفر فرص مناسبة كافية، فلن تقدم سند على وظائف غير ملائمة لمجرد الوصول إلى الحد الأقصى.',
-  },
-  {
-    questionEn:
-      'What happens if an application platform requires verification?',
-    questionAr: 'ماذا يحدث إذا تطلبت منصة التقديم تحققًا؟',
-    answerEn:
-      'Most applications are completed using the information and email provided by the client. If a platform requires OTP verification, email verification, personal account access, or another candidate-only step, SANAD may ask the client to complete that step before the application can continue. SANAD avoids requesting account passwords unless access is genuinely necessary and separately agreed.',
-    answerAr:
-      'يتم تنفيذ معظم الطلبات باستخدام المعلومات والبريد الإلكتروني اللذين يقدمهما العميل. إذا تطلبت المنصة رمز OTP أو تأكيد البريد الإلكتروني أو الدخول إلى حساب شخصي أو خطوة لا يستطيع تنفيذها إلا المرشح، فقد تطلب سند من العميل إتمام هذه الخطوة قبل متابعة التقديم. وتتجنب سند طلب كلمات المرور إلا إذا كان الوصول ضروريًا وتم الاتفاق عليه بشكل منفصل.',
+      'تحدد سند الشركات والفرص الوظيفية المناسبة لخبرتك، ثم ترسل سيرتك الذاتية مع رسالة تقديم احترافية باللغة الإنجليزية مباشرة إلى ما يصل إلى 60 شركة مناسبة باستخدام حساب بريدك الإلكتروني.',
   },
   {
     questionEn: 'Does SANAD guarantee a job?',

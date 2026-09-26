@@ -9,7 +9,7 @@ vi.mock('next/navigation', () => ({
 }));
 
 describe('PaymentPagePreview', () => {
-  it('shows the order details and switches between card and Apple Pay', async () => {
+  it('shows the order details and bank card preview', async () => {
     const user = userEvent.setup();
 
     render(
@@ -24,13 +24,7 @@ describe('PaymentPagePreview', () => {
     expect(screen.getByText('txn_preview_123')).toBeVisible();
     expect(screen.getByTestId('card-preview')).toBeVisible();
 
-    await user.click(
-      screen.getByRole('button', { name: /Apple Pay.*Fast checkout/i }),
-    );
-
-    expect(screen.getByTestId('apple-pay-preview')).toBeVisible();
-
-    await user.click(screen.getByRole('button', { name: /Apple Pay ·/i }));
+    await user.click(screen.getByRole('button', { name: /Pay AED.*719/i }));
 
     expect(screen.getByText('Preview only')).toBeVisible();
     expect(

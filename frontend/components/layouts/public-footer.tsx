@@ -74,10 +74,10 @@ export async function PublicFooter({
           >
             <Link
               aria-label={_copy('SANAD home')}
-              className="w-fit rounded-md bg-surface p-1.5 shadow-xs"
+              className="w-fit rounded-md"
               href="/"
             >
-              <BrandLogo size="md" />
+              <BrandLogo size="md" tone="beige" />
             </Link>
             <p className="max-w-sm text-sm leading-7 text-primary-foreground/75">
               {_copy(t('footer.tagline'))}

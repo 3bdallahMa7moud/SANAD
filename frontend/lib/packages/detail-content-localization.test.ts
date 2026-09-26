@@ -11,6 +11,7 @@ const packageNames = [
   'Professional Package',
   'Professional CV',
   'LinkedIn Profile Optimization',
+  'UAE Job Application Guide',
   'Job Application Service',
   'A future package without custom content',
 ];
@@ -38,5 +39,39 @@ describe('package detail localization', () => {
         'ar',
       ),
     ).toBe('تراجع العمل المكتمل وتتأكد من تسليم النطاق المتفق عليه.');
+  });
+
+  it('describes Job Application Service email outreach without OTP steps', () => {
+    const content = getPackageDetailContent({
+      name: 'Job Application Service',
+    } as CareerPackage);
+    const faqCopy = content.faqs.flatMap((item) => [
+      item.question,
+      item.questionAr,
+      item.answer,
+      item.answerAr,
+    ]);
+
+    expect(faqCopy.join(' ')).toContain(
+      'send it with your CV directly to up to 60 suitable companies using your email account',
+    );
+    expect(faqCopy.join(' ')).not.toMatch(/OTP|one-time code/i);
+  });
+
+  it('describes the UAE guide format and keeps it separate from performed outreach', () => {
+    const content = getPackageDetailContent({
+      name: 'UAE Job Application Guide',
+    } as CareerPackage);
+
+    expect(content.importantNote).toContain('38-page PDF delivered in Arabic');
+    expect(content.importantNoteAr).toContain('38 صفحة');
+    expect(content.faqs).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          question: 'Does purchasing the guide include applications by SANAD?',
+          answer: expect.stringContaining('separate Job Application Service'),
+        }),
+      ]),
+    );
   });
 });

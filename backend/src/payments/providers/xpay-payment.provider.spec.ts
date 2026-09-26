@@ -35,12 +35,12 @@ describe('XPayPaymentProvider', () => {
     vi.unstubAllGlobals();
   });
 
-  it('creates an AED hosted checkout and validates the presentment track', async () => {
+  it('creates an AED Elements session and validates the presentment track', async () => {
     fetchMock.mockResolvedValue(
       new Response(
         JSON.stringify({
           id: 'cs_test_checkout123',
-          url: 'https://checkout.xpay.app/c/cs_test_checkout123',
+          clientSecret: 'cs_test_checkout123_secret_test',
           amountTotal: 9_850_000,
           currency: 'EGP',
           presentmentDetails: {
@@ -66,7 +66,8 @@ describe('XPayPaymentProvider', () => {
 
     expect(result).toEqual({
       transactionId: 'cs_test_checkout123',
-      paymentUrl: 'https://checkout.xpay.app/c/cs_test_checkout123',
+      paymentUrl: null,
+      clientSecret: 'cs_test_checkout123_secret_test',
       provider: 'xpay',
       amount: 719.1,
       currency: 'AED',
@@ -80,7 +81,7 @@ describe('XPayPaymentProvider', () => {
       'Idempotency-Key': expect.stringMatching(/^sanad_[a-f0-9]{64}$/),
     });
     expect(JSON.parse(String(options.body))).toMatchObject({
-      uiMode: 'hosted',
+      uiMode: 'custom',
       paymentMethodTypes: ['card'],
       lineItems: [
         {
@@ -97,7 +98,7 @@ describe('XPayPaymentProvider', () => {
       new Response(
         JSON.stringify({
           id: 'cs_test_checkout123',
-          url: 'https://checkout.xpay.app/c/cs_test_checkout123',
+          clientSecret: 'cs_test_checkout123_secret_test',
           amountTotal: 9_850_000,
           currency: 'EGP',
           presentmentDetails: {
@@ -128,7 +129,7 @@ describe('XPayPaymentProvider', () => {
         new Response(
           JSON.stringify({
             id: 'cs_test_checkout123',
-            url: 'https://checkout.xpay.app/c/cs_test_checkout123',
+            clientSecret: 'cs_test_checkout123_secret_test',
             amountTotal: 9_850_000,
             currency: 'EGP',
             presentmentDetails: { amountTotal: 71_910, currency: 'AED' },

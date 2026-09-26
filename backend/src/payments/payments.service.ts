@@ -4,15 +4,14 @@ import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
+  Inject,
   Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { MockPaymentProvider } from './providers/mock-payment.provider';
 import {
   ConfirmManualPaymentDto,
   CreatePaymentDto,
   PaymentFilterDto,
-  PaymentWebhookDto,
 } from './dto';
 import { createPaginatedResponse } from '../common/utils';
 import { ConfigService } from '@nestjs/config';
@@ -23,6 +22,10 @@ import {
   PAYMENT_BYPASS_TRANSACTION_PREFIX,
 } from './payment-bypass';
 import * as crypto from 'crypto';
+import {
+  PAYMENT_PROVIDER_TOKEN,
+  PaymentProvider,
+} from './interfaces/payment-provider.interface';
 
 @Injectable()
 export class PaymentsService {
@@ -30,7 +33,8 @@ export class PaymentsService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly paymentProvider: MockPaymentProvider,
+    @Inject(PAYMENT_PROVIDER_TOKEN)
+    private readonly paymentProvider: PaymentProvider,
     private readonly configService: ConfigService,
   ) {}
 
@@ -47,6 +51,13 @@ export class PaymentsService {
     const paymentBypassed =
       this.configService.get<string>('PAYMENT_PROVIDER') ===
       PAYMENT_BYPASS_PROVIDER;
+
+    if (dto.payment_method && dto.payment_method !== 'card') {
+      throw new BadRequestException({
+        message: 'Only bank card payments are supported',
+        code: 'CARD_PAYMENT_ONLY',
+      });
+    }
 
     if (dto.return_url) {
       const allowedOrigin = new URL(
@@ -222,6 +233,7 @@ export class PaymentsService {
             payment_id: pending.id,
             transaction_id: pending.transaction_id,
             payment_url: response?.paymentUrl,
+            client_secret: response?.clientSecret,
             amount: Number(pending.amount),
             currency: pending.currency,
             status: pending.status,
@@ -261,6 +273,7 @@ export class PaymentsService {
           payment_id: payment.id,
           transaction_id: intent.transactionId,
           payment_url: intent.paymentUrl,
+          client_secret: intent.clientSecret,
           amount: intent.amount,
           currency: intent.currency,
           status: 'pending',
@@ -483,12 +496,12 @@ export class PaymentsService {
 
   // Process a verified gateway callback idempotently.
   async handleWebhook(
-    payload: PaymentWebhookDto,
+    payload: unknown,
     signature: string,
     rawBody: Buffer,
   ) {
     this.logger.log(
-      `Processing payment webhook for transaction ${payload.transaction_id}`,
+      'Processing payment webhook callback',
     );
 
     const verified = await this.paymentProvider.verifyWebhook(
@@ -496,7 +509,8 @@ export class PaymentsService {
       signature,
       rawBody,
     );
-    const { transactionId, orderId, status, amount, currency } = verified;
+    const { transactionId, orderId, status, amount, currency, rawPayload } =
+      verified;
 
     const existingPayment = await this.prisma.payments.findUnique({
       where: { transaction_id: transactionId },
@@ -566,13 +580,7 @@ export class PaymentsService {
         data: {
           status: status === 'paid' ? 'paid' : 'failed',
           payment_date: new Date(),
-          payment_response: {
-            transaction_id: payload.transaction_id,
-            order_id: payload.order_id,
-            status: payload.status,
-            amount: payload.amount,
-            currency: payload.currency || 'AED',
-          },
+          payment_response: rawPayload,
         },
       });
 

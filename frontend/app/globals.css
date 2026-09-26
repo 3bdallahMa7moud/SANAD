@@ -6,6 +6,27 @@ html {
   scroll-padding-top: 6rem;
 }
 
+.brand-logo {
+  display: block;
+  max-width: 100%;
+  aspect-ratio: 1195 / 880;
+  background-color: var(--sanad-navy);
+  -webkit-mask: url('/brand/sanad-logo-navy.png') center / contain no-repeat;
+  mask: url('/brand/sanad-logo-navy.png') center / contain no-repeat;
+}
+
+.brand-logo--beige {
+  background-color: #f4deb0;
+}
+
+.brand-logo--navy {
+  background-color: var(--sanad-navy);
+}
+
+html[data-theme='dark'] .brand-logo--adaptive {
+  background-color: #f4deb0;
+}
+
 .sanad-phone-input {
   --PhoneInput-color--focus: var(--primary);
   --PhoneInputCountryFlag-height: 1.15rem;

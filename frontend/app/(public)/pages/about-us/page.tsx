@@ -66,7 +66,7 @@ const principles = [
     number: '03',
     title: 'Screening Awareness',
     description:
-      'Documents are built with ATS compliance in mind so your profile reaches a human reviewer rather than being filtered out.',
+      'ATS-friendly CVs designed to improve compatibility with applicant tracking systems and increase visibility to recruiters.',
   },
   {
     number: '04',
@@ -105,12 +105,13 @@ export default async function AboutUsPage() {
             {_copy('Company')}
           </p>
           <h1 className="type-h2 mt-5 max-w-[20ch]">
-            {_copy(cmsPage?.title_en ?? 'Career Documents, Refined')}
+            {_copy(cmsPage?.title_en ?? 'About Us', 'من نحن')}
           </h1>
           <p className="mt-6 max-w-[42rem] text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8">
             {_copy(
               cmsPage?.meta_description_en ??
-                'SANAD helps professionals present their experience with clarity across a CV, LinkedIn profile, and supporting career documents shaped for the UAE and Gulf job market.',
+                'SANAD is a career services brand helping professionals present their experience clearly, professionally, and effectively in the UAE job market.',
+              'سند علامة متخصصة في الخدمات المهنية، نساعد الباحثين عن عمل على عرض خبراتهم ومؤهلاتهم بصورة واضحة واحترافية تناسب سوق العمل في الإمارات.',
             )}
           </p>
         </div>
@@ -124,15 +125,52 @@ export default async function AboutUsPage() {
               <CmsRichText content={cmsPage.content_en} />
             ) : (
               <>
-                <h2 className="type-h4 text-primary">{_copy('What we do')}</h2>
+                <h2 className="type-h4 text-primary">
+                  {_copy('About Us', 'من نحن')}
+                </h2>
                 <p>
                   {_copy(
-                    'We write and optimise professional CVs, LinkedIn profiles, cover letters, and related career documents. Each piece of work is handled by a writer with direct experience in Gulf-market hiring standards and ATS screening requirements.',
+                    'SANAD is a career services brand focused on helping professionals present their experience clearly, professionally, and effectively in the UAE job market.',
+                    'سند هي علامة متخصصة في الخدمات المهنية، نساعد الباحثين عن عمل على عرض خبراتهم ومؤهلاتهم بصورة واضحة واحترافية تناسب سوق العمل في الإمارات.',
                   )}
                 </p>
                 <p>
                   {_copy(
-                    'The process is straightforward: choose a service, share your career context through the official WhatsApp channel, and receive the agreed deliverables within the timeline listed for your package.',
+                    'We provide practical career solutions that support different stages of the job-search process — from creating professional CVs and optimising LinkedIn profiles to preparing job application materials and supporting clients with targeted job outreach.',
+                    'نقدم حلولًا عملية تدعم العميل في مراحل مختلفة من رحلة البحث عن وظيفة، بداية من إعداد السيرة الذاتية وتحسين حساب لينكدإن، وصولًا إلى تجهيز أدوات التقديم والمساعدة في الوصول إلى الشركات والفرص المناسبة.',
+                  )}
+                </p>
+                <p>
+                  {_copy(
+                    'Our approach is simple: understand the client’s background, present their experience in the strongest relevant way, and provide clear, professional services designed around the realities of today’s recruitment process.',
+                    'نعتمد على أسلوب بسيط وواضح: نفهم خبرة العميل ومساره المهني، ثم نعرضها بأفضل صورة مناسبة، ونقدم خدمات عملية تساعده على التعامل مع عملية البحث والتقديم بشكل أكثر احترافية وتنظيمًا.',
+                  )}
+                </p>
+                <h2 className="type-h4 pt-4 text-primary">
+                  {_copy('What We Do', 'ماذا نقدم؟')}
+                </h2>
+                <p>
+                  {_copy(
+                    'SANAD provides professional career services designed to help job seekers improve how they present themselves and approach the job market.',
+                    'تقدم سند مجموعة من الخدمات المهنية التي تساعد الباحث عن عمل على تحسين طريقة تقديم نفسه والتعامل مع سوق الوظائف بشكل أكثر احترافية.',
+                  )}
+                </p>
+                <p>
+                  {_copy(
+                    'Our services include professional CV writing in Arabic and English, LinkedIn profile optimisation, cover letters within selected packages, and a practical UAE Job Application Guide that explains how to search, apply, follow up, and use major recruitment platforms effectively.',
+                    'تشمل خدماتنا إعداد السير الذاتية الاحترافية باللغتين العربية والإنجليزية، وتحسين حسابات لينكدإن، وإعداد خطابات التقديم ضمن الباقات المختارة، بالإضافة إلى دليل التقديم على الوظائف في الإمارات الذي يشرح طرق البحث والتقديم والمتابعة واستخدام أهم منصات التوظيف.',
+                  )}
+                </p>
+                <p>
+                  {_copy(
+                    'We also provide a Job Application Service, where we review the client’s CV, identify suitable companies and opportunities based on their experience, prepare a professional application email, and send their CV to up to 60 suitable companies using the client’s email account.',
+                    'كما نقدم خدمة التقديم على الوظائف، حيث نراجع السيرة الذاتية للعميل، ونبحث عن الشركات والفرص المناسبة لخبراته، ونجهز رسالة تقديم احترافية، ثم نرسل سيرته الذاتية إلى ما يصل إلى 60 شركة مناسبة باستخدام بريده الإلكتروني.',
+                  )}
+                </p>
+                <p>
+                  {_copy(
+                    'Our goal is to make the job-search process more organised, professional, and easier for the client to manage.',
+                    'هدفنا هو جعل رحلة البحث عن وظيفة أكثر تنظيمًا واحترافية وأسهل على العميل.',
                   )}
                 </p>
               </>

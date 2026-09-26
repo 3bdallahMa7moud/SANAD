@@ -27,7 +27,8 @@ Required public build variables are documented in [`.env.production.example`](./
 - `NEXT_PUBLIC_API_BASE_URL`
 - `NEXT_PUBLIC_SITE_URL`
 - `NEXT_PUBLIC_MEDIA_BASE_URL`
-- `NEXT_PUBLIC_CHECKOUT_MODE` (`manual` hides the online payment route; `gateway` restores it)
+- `NEXT_PUBLIC_CHECKOUT_MODE` (`gateway` enables the XPay bank-card checkout)
+- `NEXT_PUBLIC_XPAY_PUBLISHABLE_KEY` (the XPay `pk_test_*`/`pk_live_*` key used by Elements)
 
 Every public URL must use HTTPS outside localhost. The API URL must include `/api/v1`.
 

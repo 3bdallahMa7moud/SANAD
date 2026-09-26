@@ -15,6 +15,7 @@ let cachedEnvironment:
       checkoutMode: 'manual' | 'gateway';
       mediaBaseUrl: string;
       siteUrl: string;
+      xpayPublishableKey?: string;
     }
   | undefined;
 
@@ -27,6 +28,7 @@ function getPublicEnvironment() {
       NEXT_PUBLIC_CHECKOUT_MODE: process.env.NEXT_PUBLIC_CHECKOUT_MODE,
       NEXT_PUBLIC_MEDIA_BASE_URL: process.env.NEXT_PUBLIC_MEDIA_BASE_URL,
       NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+      NEXT_PUBLIC_XPAY_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_XPAY_PUBLISHABLE_KEY,
     },
     { requireAll: true },
   );
@@ -36,6 +38,7 @@ function getPublicEnvironment() {
     checkoutMode: parsed.checkoutMode!,
     mediaBaseUrl: parsed.mediaBaseUrl!,
     siteUrl: parsed.siteUrl!,
+    xpayPublishableKey: parsed.xpayPublishableKey,
   };
 
   return cachedEnvironment;
@@ -63,4 +66,8 @@ export function getMediaBaseUrl(): string {
 
 export function getCheckoutMode(): 'manual' | 'gateway' {
   return getPublicEnvironment().checkoutMode;
+}
+
+export function getXPayPublishableKey(): string | undefined {
+  return getPublicEnvironment().xpayPublishableKey;
 }

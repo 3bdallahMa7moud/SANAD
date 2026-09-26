@@ -7,8 +7,9 @@
   and provide restart and readiness checks.
 - Production validation rejects insecure secrets, HTTP frontend/CORS origins,
   enabled Swagger, incomplete R2 storage, missing email delivery, and the mock
-  payment provider. `PAYMENT_PROVIDER=manual` enables reconciled external
-  payments without exposing card or Apple Pay checkout to customers.
+  payment provider. `PAYMENT_PROVIDER=xpay` enables hosted bank-card checkout;
+  `PAYMENT_PROVIDER=manual` remains available only for reconciled external
+  payments arranged through WhatsApp.
 
 ## Before every deployment
 

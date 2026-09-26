@@ -3,6 +3,7 @@ import type { CareerPackage } from '@/types/domain';
 import {
   formatDeliveryEstimate,
   getPackageCurrentPrice,
+  getPackageDiscountAmount,
   getPackageFeaturePairs,
 } from './presentation';
 
@@ -39,6 +40,10 @@ describe('limited package pricing', () => {
     expect(getPackageCurrentPrice(packageWithLimitedOffer(originalPrice))).toBe(
       expectedPrice,
     );
+  });
+
+  it('calculates the saving amount from the original and offer prices', () => {
+    expect(getPackageDiscountAmount(packageWithLimitedOffer(250))).toBe(125);
   });
 });
 

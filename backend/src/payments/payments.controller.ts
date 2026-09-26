@@ -20,7 +20,6 @@ import { PaymentsService } from './payments.service';
 import {
   ConfirmManualPaymentDto,
   CreatePaymentDto,
-  PaymentWebhookDto,
   PaymentFilterDto,
 } from './dto';
 import {
@@ -75,7 +74,7 @@ export class PaymentsController {
     description: 'HMAC-SHA256 signature of the raw request body',
   })
   async handleWebhook(
-    @Body() payload: PaymentWebhookDto,
+    @Body() payload: unknown,
     @Headers('x-signature') signature: string,
     @Req() request: RawBodyRequest<Request>,
   ) {

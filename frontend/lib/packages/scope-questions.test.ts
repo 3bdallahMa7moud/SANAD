@@ -28,6 +28,7 @@ describe('service scope questions', () => {
     'Full Package',
     'Premium Full Package',
     'LinkedIn Profile Optimization',
+    'UAE Job Application Guide',
     'Job Application Service',
   ])('provides bilingual questions and answers for %s', (name) => {
     const items = getScopeQuestions(packageNamed(name));

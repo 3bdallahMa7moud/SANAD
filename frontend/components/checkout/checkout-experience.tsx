@@ -5,12 +5,10 @@ import { formatDeliveryEstimate } from '@/lib/packages/presentation';
 import {
   CheckCircle2,
   CreditCard,
-  ExternalLink,
   LockKeyhole,
   MessageCircle,
   Phone,
   ShieldCheck,
-  Smartphone,
 } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState, type FormEvent } from 'react';
@@ -23,6 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/hooks/use-auth';
+import { XPayElementsForm } from '@/components/checkout/xpay-elements-form';
 import {
   checkoutApi,
   isApiError,
@@ -136,12 +135,6 @@ const PAYMENT_METHODS: Array<{
     label: 'Card',
     detail: 'Visa or Mastercard',
     icon: CreditCard,
-  },
-  {
-    value: 'apple_pay',
-    label: 'Apple Pay',
-    detail: 'Fast checkout',
-    icon: Smartphone,
   },
 ];
 
@@ -264,6 +257,9 @@ export function CheckoutExperience({
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pendingPayment, setPendingPayment] = useState<PaymentResult | null>(
+    null,
+  );
+  const [pendingOrderNumber, setPendingOrderNumber] = useState<string | null>(
     null,
   );
   const serviceKind = getServiceKind(packageItem);
@@ -411,7 +407,8 @@ export function CheckoutExperience({
         router.replace(
           `/order-success/${encodeURIComponent(order.orderNumber)}`,
         );
-      } else if (payment.paymentUrl) {
+      } else if (payment.clientSecret) {
+        setPendingOrderNumber(order.orderNumber);
         setPendingPayment(payment);
       } else {
         setError('The payment session could not be created. Please try again.');
@@ -469,25 +466,20 @@ export function CheckoutExperience({
 
   if (pendingPayment) {
     return (
-      <section className="mx-auto max-w-2xl rounded-xl border border-border bg-surface p-7 shadow-sm sm:p-10">
-        <span className="grid size-12 place-items-center rounded-full bg-accent/15 text-secondary">
-          <CreditCard aria-hidden="true" className="size-6" />
-        </span>
-        <h2 className="type-h3 mt-6 text-primary">
-          {_copy('Continue to secure payment')}
-        </h2>
-        <p className="mt-3 text-sm leading-6 text-muted-foreground">
-          {_copy(
-            'Your order is saved. Complete payment with our secure provider, then return here to continue to WhatsApp.',
-          )}
-        </p>
-        <Button asChild className="mt-7" size="lg">
-          <a href={pendingPayment.paymentUrl ?? '#'}>
-            {_copy('Open secure payment')}
-            <ExternalLink aria-hidden="true" className="size-4" />
-          </a>
-        </Button>
-      </section>
+      <XPayElementsForm
+        clientSecret={pendingPayment.clientSecret!}
+        customer={{
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+        }}
+        locale={document.documentElement.lang === 'ar' ? 'ar' : 'en'}
+        onComplete={() =>
+          router.replace(
+            `/order-success/${encodeURIComponent(pendingOrderNumber ?? '')}`,
+          )
+        }
+      />
     );
   }
 

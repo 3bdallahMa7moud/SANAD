@@ -29,7 +29,6 @@ const packageCatalog = [
       'Job Application — 100 AED',
     ],
     deliveryDays: 10,
-    maxRevisions: 3,
     imagePath: '/images/packages/golden-signature-package.webp',
     altText:
       'Premium coordinated collection of professional career documents on an executive desk',
@@ -54,7 +53,6 @@ const packageCatalog = [
       'LinkedIn Profile Optimization — 150 AED',
     ],
     deliveryDays: 7,
-    maxRevisions: 2,
     imagePath: '/images/packages/career-excellence-package.webp',
     altText:
       'Coordinated CV, cover letter, and professional profile planning set in a modern office',
@@ -77,7 +75,6 @@ const packageCatalog = [
       'Cover Letter (English or Arabic) — 100 AED',
     ],
     deliveryDays: 5,
-    maxRevisions: 1,
     imagePath: '/images/packages/professional-distinction-package.webp',
     altText:
       'Matching professional CV and cover letter presented side by side on an executive desk',
@@ -101,7 +98,6 @@ const packageCatalog = [
       'Clear experience and achievement positioning',
     ],
     deliveryDays: 5,
-    maxRevisions: 2,
     imagePath: '/images/packages/professional-cv.webp',
     altText:
       'Single professional CV being carefully reviewed on a navy executive desk pad',
@@ -125,7 +121,6 @@ const packageCatalog = [
       'Practical profile improvement guidance',
     ],
     deliveryDays: 4,
-    maxRevisions: 1,
     imagePath: '/images/packages/linkedin-profile-optimization.webp',
     altText:
       'Generic professional networking profile dashboard in a contemporary corporate workspace',
@@ -134,25 +129,70 @@ const packageCatalog = [
     nameAr: 'خدمة التقديم على الوظائف',
     nameEn: 'Job Application Service',
     descriptionAr:
-      'دعم مهني منظم لتجهيز مستندات التقديم ومتابعة خطوات التقديم على الفرص المناسبة.',
+      'تراجع سند سيرتك الذاتية، وتحدد الشركات والفرص الوظيفية المناسبة لخبرتك ومؤهلاتك، ثم تُعد رسالة تقديم احترافية باللغة الإنجليزية وترسل سيرتك الذاتية مباشرة إلى ما يصل إلى 60 شركة مناسبة باستخدام حساب بريدك الإلكتروني.',
     descriptionEn:
-      'Professional job-application support for organizing opportunities, tailoring documents, and preparing a clear submission workflow.',
+      'SANAD reviews your CV, identifies suitable companies and relevant job opportunities, prepares a professional English application email, and sends your CV directly to up to 60 suitable companies using your email account.',
     price: 249,
     featuresAr: [
-      'تنظيم فرص التقديم المستهدفة',
-      'تجهيز مستندات التقديم',
-      'قائمة تحقق ومسار تقديم واضح',
+      'مراجعة السيرة والملف المهني — نراجع سيرتك الذاتية لفهم خبرتك وتحديد الوظائف المستهدفة المناسبة',
+      'البحث عن الفرص المناسبة — نبحث عن الشركات والوظائف المناسبة عبر مصادر التوظيف الرئيسية وصفحات التوظيف الرسمية للشركات',
+      'حتى 60 شركة مناسبة — نحدد ما يصل إلى 60 شركة مناسبة وفقًا لخلفيتك المهنية والفرص المتاحة',
+      'رسالة تقديم احترافية — نُعد رسالة بريد إلكتروني احترافية باللغة الإنجليزية للتقديم على الوظائف',
+      'التواصل والتقديم — نرسل سيرتك الذاتية ورسالة التقديم مباشرة إلى الشركات المختارة باستخدام حساب بريدك الإلكتروني',
     ],
     featuresEn: [
-      'Target opportunity organization',
-      'Job application document support',
-      'Submission checklist and workflow',
+      'CV & Profile Review — We review your CV to understand your experience and suitable target roles',
+      'Relevant Opportunity Research — We research suitable companies and vacancies through major recruitment sources and official company career websites',
+      'Up to 60 Suitable Companies — We identify up to 60 suitable companies based on your professional background and available opportunities',
+      'Professional Application Email — We prepare a professional English email for job applications',
+      'Application Outreach — We send your CV and application email directly to selected companies using your email account',
     ],
     deliveryDays: 3,
-    maxRevisions: 1,
     imagePath: '/images/packages/job-application-service.webp',
     altText:
       'Organized professional job application workflow with documents, checklist, and progress dashboard',
+  },
+  {
+    legacyNames: ['Job Application File'],
+    nameAr: 'دليل التقديم على الوظائف في الإمارات',
+    nameEn: 'UAE Job Application Guide',
+    descriptionAr:
+      'دليل عملي متكامل يساعدك على البحث والتقديم على الوظائف في الإمارات بطريقة منظمة، من اختيار منصات التوظيف المناسبة وحتى متابعة طلباتك بعد التقديم.',
+    descriptionEn:
+      'A comprehensive practical guide that helps you search and apply for jobs in the UAE in a structured way, from choosing suitable recruitment platforms and sources to following up on your applications.',
+    price: 39,
+    featuresAr: [
+      'شرح عملي لأهم منصات التوظيف في الإمارات وكيفية استخدامها',
+      'حوالي 15 قناة ومصدر للتوظيف بين منصات، وشركات، ووكالات توظيف، وبوابات حكومية',
+      'شرح تفصيلي لـ LinkedIn وBayt وGulfTalent وNaukrigulf وIndeed UAE',
+      'طريقة التقديم المباشر عبر مواقع الشركات والبريد الإلكتروني',
+      'دليل لأهم وكالات التوظيف والبوابات الحكومية',
+      'كلمات وأساليب بحث تساعدك على الوصول إلى وظائف مناسبة لتخصصك',
+      'كيفية معرفة ما إذا كانت الوظيفة مناسبة لك قبل التقديم',
+      'طريقة المتابعة الصحيحة بعد إرسال الطلب',
+      'علامات تحذيرية لتجنب عروض التوظيف الوهمية',
+      'خطة أسبوعية عملية لتنظيم عملية البحث والتقديم',
+      'نماذج جاهزة لبريد التقديم وبريد المتابعة',
+      'جدول لتتبع طلبات التوظيف وروابط وصول سريع للمنصات',
+    ],
+    featuresEn: [
+      'Practical guidance to the leading UAE job platforms and how to use them',
+      'Around 15 recruitment channels and sources across platforms, companies, agencies, and government portals',
+      'Detailed guidance for LinkedIn, Bayt, GulfTalent, Naukrigulf, and Indeed UAE',
+      'Direct application methods through company career websites and email',
+      'A guide to leading recruitment agencies and government employment portals',
+      'Search terms and methods for finding roles relevant to your specialization',
+      'How to assess whether a vacancy is suitable before applying',
+      'The right way to follow up after submitting an application',
+      'Job scam red flags for avoiding fraudulent employment offers',
+      'A practical weekly plan for organizing your job search and applications',
+      'Ready-to-use Application Email and Follow-up Email templates',
+      'An application tracking table and quick-access links to recruitment platforms',
+    ],
+    deliveryDays: 1,
+    imagePath: '/images/packages/job-application-service.webp',
+    altText:
+      'UAE job application guide with platform research, email templates, and an application tracker',
   },
 ];
 
@@ -210,7 +250,6 @@ async function main() {
       is_active: true,
       sort_order: index + 1,
       delivery_days: item.deliveryDays,
-      max_revisions: item.maxRevisions,
     };
 
     const saved = existing

@@ -7,7 +7,6 @@ import {
   Info,
   LockKeyhole,
   ShieldCheck,
-  Smartphone,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -18,7 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useCopy } from '@/lib/i18n/use-copy';
 
-type PreviewPaymentMethod = 'card' | 'apple_pay';
+type PreviewPaymentMethod = 'card';
 
 interface PaymentPagePreviewProps {
   amount: number;
@@ -75,15 +74,15 @@ export function PaymentPagePreview({
 
             <div className="mt-8">
               <p className="text-xs font-semibold tracking-[0.16em] text-secondary uppercase">
-                {_copy('Choose how to pay', 'اختر طريقة الدفع')}
+                {_copy('Pay securely by bank card', 'ادفع بأمان بالبطاقة البنكية')}
               </p>
               <h1 className="type-h3 mt-2 text-primary">
                 {_copy('Complete your payment', 'أكمل عملية الدفع')}
               </h1>
               <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
                 {_copy(
-                  'This screen previews the hosted checkout that will open after PayTabs is connected.',
-                  'هذه معاينة لصفحة الدفع المستضافة التي ستفتح بعد ربط PayTabs.',
+                  'This screen previews the hosted checkout that will open after XPay is connected.',
+                  'هذه معاينة لصفحة الدفع المستضافة التي ستفتح بعد ربط XPay.',
                 )}
               </p>
             </div>
@@ -115,31 +114,9 @@ export function PaymentPagePreview({
                 ) : null}
               </button>
 
-              <button
-                aria-pressed={paymentMethod === 'apple_pay'}
-                className={`relative flex min-h-20 items-center gap-3 rounded-xl border p-4 text-start transition-colors ${paymentMethod === 'apple_pay' ? 'border-primary bg-primary/5 text-primary' : 'border-border text-muted-foreground hover:border-primary/40'}`}
-                onClick={() => selectMethod('apple_pay')}
-                type="button"
-              >
-                <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-surface-muted">
-                  <Smartphone aria-hidden="true" className="size-5" />
-                </span>
-                <span>
-                  <span className="block text-sm font-semibold">Apple Pay</span>
-                  <span className="mt-1 block text-xs">
-                    {_copy('Fast checkout', 'دفع سريع')}
-                  </span>
-                </span>
-                {paymentMethod === 'apple_pay' ? (
-                  <span className="absolute top-2 end-2 grid size-5 place-items-center rounded-full bg-primary text-primary-foreground">
-                    <Check aria-hidden="true" className="size-3" />
-                  </span>
-                ) : null}
-              </button>
             </div>
 
-            {paymentMethod === 'card' ? (
-              <div className="mt-8 grid gap-5" data-testid="card-preview">
+            <div className="mt-8 grid gap-5" data-testid="card-preview">
                 <div>
                   <label
                     className="type-label text-foreground"
@@ -219,33 +196,7 @@ export function PaymentPagePreview({
                   <LockKeyhole aria-hidden="true" className="size-4" />
                   {_copy('Pay', 'ادفع')} {_copy(_copy.money(amount, 'AED'))}
                 </Button>
-              </div>
-            ) : (
-              <div
-                className="mt-8 rounded-xl border border-border bg-surface-muted p-6 text-center sm:p-8"
-                data-testid="apple-pay-preview"
-              >
-                <span className="mx-auto grid size-12 place-items-center rounded-full bg-primary text-primary-foreground">
-                  <Smartphone aria-hidden="true" className="size-6" />
-                </span>
-                <h2 className="mt-4 text-lg font-semibold text-primary">
-                  Apple Pay
-                </h2>
-                <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted-foreground">
-                  {_copy(
-                    'Confirm securely with Face ID, Touch ID, or your device passcode.',
-                    'أكّد الدفع بأمان باستخدام Face ID أو Touch ID أو رمز دخول جهازك.',
-                  )}
-                </p>
-                <button
-                  className="mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-md bg-black px-5 text-base font-semibold text-white transition-opacity hover:opacity-90 dark:bg-white dark:text-black"
-                  onClick={() => setShowNotice(true)}
-                  type="button"
-                >
-                  Apple Pay · {_copy(_copy.money(amount, 'AED'))}
-                </button>
-              </div>
-            )}
+            </div>
 
             {showNotice ? (
               <Alert
@@ -306,8 +257,8 @@ export function PaymentPagePreview({
                   </p>
                   <p className="mt-1 text-xs leading-5 text-primary-foreground/70">
                     {_copy(
-                      'The live version will be processed on the PCI-compliant PayTabs checkout.',
-                      'ستتم معالجة النسخة الفعلية عبر صفحة PayTabs المتوافقة مع معايير PCI.',
+                  'The live version will be processed on the PCI-compliant XPay checkout.',
+                  'ستتم معالجة النسخة الفعلية عبر صفحة XPay المتوافقة مع معايير PCI.',
                     )}
                   </p>
                 </div>

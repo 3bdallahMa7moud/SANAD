@@ -56,6 +56,11 @@ export default () => ({
     provider: process.env.PAYMENT_PROVIDER || 'mock',
     secretKey: process.env.PAYMENT_SECRET_KEY,
     webhookSecret: process.env.PAYMENT_WEBHOOK_SECRET,
+    xpay: {
+      secretKey: process.env.XPAY_SECRET_KEY,
+      webhookSecret: process.env.XPAY_WEBHOOK_SECRET,
+      apiBaseUrl: process.env.XPAY_API_BASE_URL,
+    },
   },
   throttle: {
     ttl: parseInt(process.env.THROTTLE_TTL || '60', 10),

@@ -98,22 +98,48 @@ const questions: Record<string, ScopeQuestion[]> = {
         'تستلم نصًا جاهزًا للاستخدام وإرشادات عملية. ولا يشمل التنفيذ المباشر أو الدخول إلى الحساب إلا عند الاتفاق عليه بشكل منفصل مع سند.',
     },
   ],
+  'uae job application guide': [
+    {
+      en: 'Which language, format, and page count are included?',
+      ar: 'ما لغة الدليل وصيغته وعدد صفحاته؟',
+      answerEn:
+        'The guide is delivered in Arabic as a 38-page PDF through the agreed WhatsApp conversation.',
+      answerAr:
+        'يُسلّم الدليل باللغة العربية في ملف PDF من 38 صفحة عبر محادثة واتساب المتفق عليها.',
+    },
+    {
+      en: 'Does the guide include applications or outreach performed by SANAD?',
+      ar: 'هل يشمل الدليل تنفيذ التقديم أو التواصل مع الشركات بواسطة سند؟',
+      answerEn:
+        'No. The guide supports your independent job search. SANAD-performed outreach is a separate service and is not included with the guide.',
+      answerAr:
+        'لا. يدعم الدليل بحثك وتقديمك المستقل. أما التواصل مع الشركات وتنفيذ التقديم بواسطة سند فهو خدمة منفصلة وغير مشمولة في الدليل.',
+    },
+  ],
   'job application service': [
     {
       en: 'What information is needed before suitable applications can begin?',
       ar: 'ما المعلومات المطلوبة قبل بدء التقديم على الفرص المناسبة؟',
       answerEn:
-        'Provide your current CV, target roles, preferred industries and locations, work authorization, notice period, salary expectations, and access to any verification steps you control.',
+        'Provide your current CV, target roles, preferred industries and UAE locations, relevant work preferences, and the email account SANAD will use for outreach.',
       answerAr:
-        'قدّم سيرتك الحالية والوظائف والقطاعات والمواقع المستهدفة وحالة تصريح العمل وفترة الإشعار والتوقعات المالية، مع الاستعداد لإكمال خطوات التحقق التي تخصك.',
+        'قدّم سيرتك الذاتية الحالية والوظائف والقطاعات والمواقع المستهدفة داخل الإمارات والتفضيلات المهنية ذات الصلة وحساب البريد الإلكتروني الذي ستستخدمه سند في التواصل.',
     },
     {
-      en: 'How are suitable opportunities and submitted applications reported?',
-      ar: 'كيف يتم توثيق الفرص المناسبة والطلبات المقدمة؟',
+      en: 'Does SANAD submit through recruitment platforms?',
+      ar: 'هل تقدم سند الطلبات عبر منصات التوظيف؟',
       answerEn:
-        'SANAD shares updates and the application report through WhatsApp during the agreed period of up to 3 calendar days. The service focuses on suitable opportunities and does not guarantee interviews or employment.',
+        'No. Recruitment platforms and official company career websites are used to research suitable companies and opportunities. SANAD sends the CV and professional English application email directly to selected companies using the client’s email account.',
       answerAr:
-        'ترسل سند التحديثات وتقرير التقديم عبر واتساب خلال المدة المتفق عليها التي تصل إلى 3 أيام تقويمية. وتركز الخدمة على الفرص المناسبة ولا تضمن مقابلات أو توظيفًا.',
+        'لا. تُستخدم منصات التوظيف وصفحات التوظيف الرسمية للشركات للبحث عن الشركات والفرص المناسبة. وترسل سند السيرة الذاتية ورسالة التقديم الاحترافية باللغة الإنجليزية مباشرة إلى الشركات المختارة باستخدام حساب بريد العميل.',
+    },
+    {
+      en: 'What is delivered with this service?',
+      ar: 'ما المخرج الذي تقدمه هذه الخدمة؟',
+      answerEn:
+        'The deliverable is the application outreach performed by SANAD to up to 60 suitable companies. No separate file, report, or downloadable document is included.',
+      answerAr:
+        'مخرج الخدمة هو التواصل والتقديم الذي تنفذه سند إلى ما يصل إلى 60 شركة مناسبة. ولا تشمل الخدمة ملفًا أو تقريرًا أو مستندًا منفصلًا قابلًا للتنزيل.',
     },
   ],
 };
@@ -122,6 +148,7 @@ const questions: Record<string, ScopeQuestion[]> = {
 // the previous package names.
 questions['professional distinction package'] =
   questions['professional package'];
+questions['job application file'] = questions['uae job application guide'];
 questions['career excellence package'] = questions['full package'];
 questions['golden signature package'] = questions['premium full package'];
 

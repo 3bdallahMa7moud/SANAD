@@ -1,5 +1,4 @@
 import { useCopy } from '@/lib/i18n/use-copy';
-import Image from 'next/image';
 
 import { cn } from '@/lib/utils/cn';
 
@@ -14,29 +13,27 @@ export interface BrandLogoProps {
   className?: string;
   loading?: 'eager' | 'lazy';
   size?: keyof typeof logoSizes;
+  tone?: 'adaptive' | 'beige' | 'navy';
 }
 
 export function BrandLogo({
   alt = 'SANAD',
   className,
-  loading,
   size = 'md',
+  tone = 'adaptive',
 }: BrandLogoProps) {
   const _copy = useCopy();
 
   return (
-    <Image
-      alt={_copy(alt)}
+    <span
+      aria-label={_copy(alt)}
       className={cn(
         logoSizes[size],
-        'max-w-full rounded-lg object-contain',
+        'brand-logo',
+        `brand-logo--${tone}`,
         className,
       )}
-      height={880}
-      loading={loading}
-      src="/brand/sanad-logo.webp"
-      unoptimized
-      width={1195}
+      role="img"
     />
   );
 }

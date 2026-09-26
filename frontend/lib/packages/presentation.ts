@@ -99,6 +99,13 @@ export function getPackageOriginalPrice(packageItem: CareerPackage): number {
   return getBestPackageOffer(packageItem)?.originalPrice ?? packageItem.price;
 }
 
+export function getPackageDiscountAmount(packageItem: CareerPackage): number {
+  return Math.max(
+    0,
+    getPackageOriginalPrice(packageItem) - getPackageCurrentPrice(packageItem),
+  );
+}
+
 // Use the published name and description, so admin edits stay consistent
 // between the catalog, comparison and detail pages.
 export function getPackageShortTitle(packageItem: CareerPackage): string {

@@ -111,10 +111,6 @@ if [ "$INSTALL_DEPENDENCIES" = "1" ]; then
   (cd "$FRONTEND_DIR" && npm ci --include=dev)
 fi
 
-# The API service runs as $API_USER. npm ci is run as root by this deployment
-# script, so hand the backend runtime dependencies back to the service user.
-chown -R "$API_USER:$API_GROUP" "$BACKEND_DIR/node_modules"
-
 echo "Building backend..."
 (
   cd "$BACKEND_DIR"
@@ -122,7 +118,12 @@ echo "Building backend..."
   npm run build
   NODE_ENV=production npm run preflight
 )
-chown -R "$API_USER:$API_GROUP" "$BACKEND_DIR/dist"
+# Prisma generate and npm ci can rewrite runtime files as root. Transfer both
+# dependencies and build output only after generation/build have completed so
+# the API service can read the generated Prisma client.
+chown -R "$API_USER:$API_GROUP" \
+  "$BACKEND_DIR/node_modules" \
+  "$BACKEND_DIR/dist"
 echo "Building frontend..."
 (cd "$FRONTEND_DIR" && npm run build)
 if [ ! -f "$FRONTEND_DIR/.next/standalone/server.js" ]; then

@@ -11,6 +11,7 @@ const publicEnvironment = validatePublicEnvironment(
     NEXT_PUBLIC_GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
     NEXT_PUBLIC_MEDIA_BASE_URL: process.env.NEXT_PUBLIC_MEDIA_BASE_URL,
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+    NEXT_PUBLIC_XPAY_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_XPAY_PUBLISHABLE_KEY,
   },
   { requireAll: process.env.NODE_ENV === 'production' },
 );
@@ -51,6 +52,7 @@ const connectSources = [
   apiOrigin,
   sentryOrigin,
   'https://accounts.google.com',
+  'https://checkout.xpay.app',
 ]
   .filter(Boolean)
   .join(' ');
@@ -62,13 +64,13 @@ const isSecureDeployment = publicEnvironment.siteUrl?.startsWith('https://');
 
 const contentSecurityPolicy = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline' https://accounts.google.com${isProduction ? '' : " 'unsafe-eval'"}`,
+  `script-src 'self' 'unsafe-inline' https://accounts.google.com https://checkout.xpay.app${isProduction ? '' : " 'unsafe-eval'"}`,
   "style-src 'self' 'unsafe-inline'",
   "font-src 'self' data:",
   `img-src ${mediaSources}`,
   `media-src ${mediaSources}`,
   `connect-src ${connectSources}${isProduction ? '' : ' ws: wss:'}`,
-  "frame-src 'self' https://accounts.google.com",
+  "frame-src 'self' https://accounts.google.com https://checkout.xpay.app",
   "worker-src 'self' blob:",
   "object-src 'none'",
   "base-uri 'self'",

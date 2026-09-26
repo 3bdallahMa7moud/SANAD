@@ -482,7 +482,7 @@ export function DashboardView() {
                 icon={<CreditCard />}
                 title={_copy('Manual payment confirmation is active')}
                 description={_copy(
-                  'Customers submit requests and arrange payment on WhatsApp. Open an awaiting-payment order only after the funds appear in your payment account, then use “Confirm payment received”. Revenue and purchasing-customer cards update from that recorded amount.',
+                  'Customers pay by bank card through XPay, then continue on WhatsApp to share requirements. Use “Confirm payment received” only for exceptional external payments arranged through WhatsApp. Revenue and purchasing-customer cards update from recorded payments.',
                 )}
                 variant="info"
               />

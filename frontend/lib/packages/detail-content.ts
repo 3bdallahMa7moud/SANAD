@@ -266,62 +266,138 @@ const PACKAGE_CONTENT: Record<string, PackageSpecificContent> = {
       },
     ],
   },
-  'job application service': {
+  'uae job application guide': {
     bestFor:
-      'Professionals who want structured support applying to suitable opportunities that match their agreed profile and goals.',
+      'Professionals who want a structured, practical reference for independently searching and applying for jobs in the UAE.',
     bestForAr:
-      'للمهنيين الذين يريدون دعمًا منظمًا للتقديم على فرص مناسبة تتوافق مع ملفهم المهني وأهدافهم المتفق عليها.',
+      'للمهنيين الذين يريدون مرجعًا عمليًا ومنظمًا للبحث والتقديم على الوظائف في الإمارات بأنفسهم.',
     preparation: [
-      'Your current CV and the target roles, industries, and locations you prefer',
-      'Your work authorization, notice period, salary expectations, and other relevant preferences',
-      'A reachable WhatsApp number and access to the email or verification steps you control',
-      'Any job boards, companies, or opportunities you want SANAD to prioritise or avoid',
+      'The UAE roles, industries, and locations you want to target',
+      'Your current CV and a clear summary of your professional background',
+      'An email address you can use for applications and follow-ups',
+      'Time each week to follow the guide’s search and follow-up plan',
     ],
     process: [
       {
-        title: 'Profile and preferences review',
+        title: 'Choose the right search channels',
         description:
-          'We confirm your target profile and the details needed to identify suitable opportunities.',
+          'Use the guide to select suitable job platforms, company career pages, recruitment agencies, and government portals.',
       },
       {
-        title: 'Suitable application support',
+        title: 'Apply with a clear method',
         description:
-          'SANAD focuses on suitable opportunities and does not submit random applications simply to reach a number.',
+          'Evaluate each vacancy, use the ready-made application email, and apply through the appropriate channel.',
       },
       {
-        title: 'Updates and report',
+        title: 'Track and follow up',
         description:
-          'You receive updates and a report of the suitable opportunities and applications handled during the agreed period.',
+          'Record every application, use the follow-up email template, and organise your weekly search routine.',
       },
     ],
     importantNote:
-      'This service supports applications to suitable opportunities for up to 3 calendar days. It does not guarantee an interview, an offer, or employment, and you may need to complete OTP or email verification steps yourself.',
+      'The guide is an educational 38-page PDF delivered in Arabic. It supports your independent job search and does not include applications or outreach performed by SANAD. Platform features and vacancy availability may change.',
     importantNoteAr:
-      'تدعم هذه الخدمة التقديم على الفرص المناسبة لمدة تصل إلى 3 أيام تقويمية. ولا تضمن مقابلة أو عرض عمل أو توظيفًا، وقد تحتاج إلى إكمال خطوات رمز التحقق لمرة واحدة أو التحقق عبر البريد بنفسك.',
+      'الدليل ملف PDF تعليمي باللغة العربية من 38 صفحة. يساعدك على تنفيذ البحث والتقديم بنفسك، ولا يشمل تقديم الطلبات أو التواصل مع الشركات بواسطة سند. وقد تتغير خصائص المنصات وتوافر الوظائف بمرور الوقت.',
+    faqs: [
+      {
+        question: 'What language and format is the guide delivered in?',
+        questionAr: 'ما لغة الدليل وصيغة التسليم؟',
+        answer:
+          'The guide is delivered through the agreed WhatsApp conversation as a 38-page PDF written in Arabic.',
+        answerAr:
+          'يُسلّم الدليل عبر محادثة واتساب المتفق عليها في ملف PDF باللغة العربية من 38 صفحة.',
+      },
+      {
+        question: 'Which job-search sources does the guide cover?',
+        questionAr: 'ما مصادر البحث عن الوظائف التي يغطيها الدليل؟',
+        answer:
+          'It covers around 15 channels and sources, including LinkedIn, Bayt, GulfTalent, Naukrigulf, Indeed UAE, company career pages, recruitment agencies, and government portals.',
+        answerAr:
+          'يغطي الدليل حوالي 15 قناة ومصدرًا، تشمل LinkedIn وBayt وGulfTalent وNaukrigulf وIndeed UAE وصفحات التوظيف في الشركات ووكالات التوظيف والبوابات الحكومية.',
+      },
+      {
+        question:
+          'Does the guide include templates and an application tracker?',
+        questionAr: 'هل يتضمن الدليل نماذج جاهزة وجدولًا لتتبع الطلبات؟',
+        answer:
+          'Yes. It includes ready-to-use Application Email and Follow-up Email templates, an application tracking table, and quick-access links to recruitment platforms.',
+        answerAr:
+          'نعم. يتضمن نماذج جاهزة لبريد التقديم وبريد المتابعة، وجدولًا لتتبع طلبات التوظيف، وروابط وصول سريع إلى منصات التوظيف.',
+      },
+      {
+        question: 'Does purchasing the guide include applications by SANAD?',
+        questionAr: 'هل يشمل شراء الدليل تنفيذ التقديم بواسطة سند؟',
+        answer:
+          'No. The guide helps you organise and complete your own job search. Outreach performed by SANAD is available only through the separate Job Application Service.',
+        answerAr:
+          'لا. يساعدك الدليل على تنظيم البحث والتقديم بنفسك. أما تنفيذ التواصل والتقديم بواسطة سند فيتوفر فقط من خلال خدمة التقديم على الوظائف المنفصلة.',
+      },
+    ],
+  },
+  'job application service': {
+    bestFor:
+      'Professionals who want SANAD to identify suitable UAE companies and send their CV directly to those companies by email on their behalf.',
+    bestForAr:
+      'للمهنيين الذين يريدون من سند تحديد الشركات المناسبة في الإمارات وإرسال سيرتهم الذاتية مباشرة إليها عبر البريد الإلكتروني بالنيابة عنهم.',
+    preparation: [
+      'Your current CV and a summary of your experience and qualifications',
+      'The target roles, industries, and UAE locations you prefer',
+      'The email account SANAD will use for outreach and the agreed secure access arrangement',
+      'Any companies or opportunities you want SANAD to prioritise or avoid',
+    ],
+    process: [
+      {
+        title: 'CV and target review',
+        description:
+          'SANAD reviews your CV, experience, qualifications, and suitable target roles.',
+      },
+      {
+        title: 'Relevant company research',
+        description:
+          'We research suitable companies and opportunities through recruitment sources and official company career websites.',
+      },
+      {
+        title: 'Direct email outreach',
+        description:
+          'We prepare a professional English application email and send your CV directly to up to 60 suitable companies using your email account.',
+      },
+    ],
+    importantNote:
+      'The service deliverable is the application outreach performed by SANAD; you do not receive a separate file, report, or downloadable document. Recruitment platforms are used to research suitable companies and opportunities, not to submit applications directly. Interviews, responses, job offers, and employment are not guaranteed.',
+    importantNoteAr:
+      'مخرج هذه الخدمة هو التواصل والتقديم الذي تنفذه سند، ولا يستلم العميل ملفًا أو تقريرًا أو مستندًا منفصلًا قابلًا للتنزيل. تُستخدم منصات التوظيف للبحث عن الشركات والفرص المناسبة، وليس لتقديم الطلبات مباشرة عبرها. ولا تضمن الخدمة مقابلات أو ردودًا أو عروض عمل أو توظيفًا.',
     faqs: [
       {
         question: 'How long does the Job Application Service run?',
         questionAr: 'كم تستغرق خدمة التقديم على الوظائف؟',
         answer:
-          'The service runs for up to 3 calendar days after SANAD receives the information and confirmations needed to begin. The timeline pauses while required information or verification is pending.',
+          'The service runs for up to 3 calendar days after SANAD receives the CV, target preferences, and agreed access to the email account used for outreach.',
         answerAr:
-          'تستمر الخدمة لمدة تصل إلى 3 أيام تقويمية بعد أن تتلقى سند المعلومات والتأكيدات اللازمة للبدء. ويتوقف احتساب المدة عند انتظار معلومات أو تحقق مطلوب.',
+          'تستمر الخدمة لمدة تصل إلى 3 أيام تقويمية بعد استلام سند السيرة الذاتية والتفضيلات المستهدفة وترتيب الوصول المتفق عليه إلى حساب البريد المستخدم في التواصل.',
       },
       {
-        question: 'Will SANAD apply to every vacancy it finds?',
-        questionAr: 'هل ستتقدم سند إلى كل وظيفة تجدها؟',
+        question: 'Does SANAD submit applications through job platforms?',
+        questionAr: 'هل تقدم سند الطلبات مباشرة عبر منصات التوظيف؟',
         answer:
-          'No. SANAD focuses on suitable opportunities that match your agreed profile and preferences, rather than submitting random applications. The service does not guarantee a job, interview, or response from an employer.',
+          'No. LinkedIn, Bayt, Indeed, Naukrigulf, official company career websites, and other relevant sources are used to identify suitable companies and opportunities. The outreach itself is sent directly by email using your email account.',
         answerAr:
-          'لا. تركز سند على الفرص المناسبة لملفك وتفضيلاتك المتفق عليها بدلًا من إرسال طلبات عشوائية. ولا تضمن الخدمة وظيفة أو مقابلة أو ردًا من صاحب العمل.',
+          'لا. تُستخدم LinkedIn وBayt وIndeed وNaukrigulf وصفحات التوظيف الرسمية للشركات وغيرها من المصادر المناسبة لتحديد الشركات والفرص الملائمة. أما التواصل والتقديم فيُرسل مباشرة عبر البريد الإلكتروني باستخدام حسابك.',
       },
       {
-        question: 'Why might I need to complete an OTP or email verification?',
-        questionAr: 'لماذا قد أحتاج إلى إكمال رمز تحقق أو تأكيد عبر البريد؟',
+        question: 'How does SANAD handle the application outreach?',
+        questionAr: 'كيف تنفذ سند التواصل والتقديم إلى الشركات؟',
         answer:
-          'Some job platforms require the candidate to verify a one-time code, email link, or account prompt. SANAD will contact you through WhatsApp when your action is needed.',
+          'SANAD selects companies based on your CV, experience, qualifications, and suitable available opportunities. We prepare a professional English application email and send it with your CV directly to up to 60 suitable companies using your email account. Applications are not sent randomly.',
         answerAr:
-          'تطلب بعض منصات التوظيف من المرشح تأكيد رمز لمرة واحدة أو رابط بريد إلكتروني أو تنبيه حساب. تتواصل سند معك عبر واتساب عندما تكون هناك خطوة مطلوبة منك.',
+          'تختار سند الشركات وفق سيرتك الذاتية وخبرتك ومؤهلاتك والفرص المناسبة المتاحة. نُعد رسالة تقديم احترافية باللغة الإنجليزية ونرسلها مع سيرتك الذاتية مباشرة إلى ما يصل إلى 60 شركة مناسبة باستخدام حساب بريدك الإلكتروني، ولا تُرسل الطلبات عشوائيًا.',
+      },
+      {
+        question: 'Will I receive a separate file or application report?',
+        questionAr: 'هل سأستلم ملفًا منفصلًا أو تقريرًا للتقديم؟',
+        answer:
+          'No. The service itself is the outreach performed by SANAD on your behalf. It does not include a separate file, report, or downloadable deliverable.',
+        answerAr:
+          'لا. الخدمة نفسها هي التواصل والتقديم الذي تنفذه سند بالنيابة عنك، ولا تشمل ملفًا أو تقريرًا أو مخرجًا منفصلًا قابلًا للتنزيل.',
       },
     ],
   },
@@ -334,6 +410,8 @@ PACKAGE_CONTENT['golden signature package'] =
 PACKAGE_CONTENT['career excellence package'] = PACKAGE_CONTENT['full package'];
 PACKAGE_CONTENT['professional distinction package'] =
   PACKAGE_CONTENT['professional package'];
+PACKAGE_CONTENT['job application file'] =
+  PACKAGE_CONTENT['uae job application guide'];
 
 function getCommonFaqs(): PackageFaqItem[] {
   return [
@@ -349,9 +427,9 @@ function getCommonFaqs(): PackageFaqItem[] {
       question: 'Does this service guarantee interviews or employment?',
       questionAr: 'هل تضمن هذه الخدمة الحصول على مقابلات أو وظيفة؟',
       answer:
-        'No. The service improves the clarity and presentation of your professional materials, but hiring decisions remain with employers and cannot be guaranteed.',
+        'No. SANAD delivers the published service scope, but interviews, responses, job offers, and employment decisions remain entirely with employers and cannot be guaranteed.',
       answerAr:
-        'لا. تحسن الخدمة وضوح وعرض مستنداتك المهنية، لكن قرارات التوظيف تبقى لدى أصحاب العمل ولا يمكن ضمانها.',
+        'لا. تنفذ سند نطاق الخدمة المنشور، لكن المقابلات والردود وعروض العمل وقرارات التوظيف تبقى بالكامل لدى أصحاب العمل ولا يمكن ضمانها.',
     },
   ];
 }

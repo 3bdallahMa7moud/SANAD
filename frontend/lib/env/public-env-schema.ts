@@ -4,6 +4,7 @@ export interface PublicEnvironment {
   googleClientId?: string;
   mediaBaseUrl?: string;
   siteUrl?: string;
+  xpayPublishableKey?: string;
 }
 
 interface RawPublicEnvironment {
@@ -12,6 +13,7 @@ interface RawPublicEnvironment {
   NEXT_PUBLIC_GOOGLE_CLIENT_ID?: string;
   NEXT_PUBLIC_MEDIA_BASE_URL?: string;
   NEXT_PUBLIC_SITE_URL?: string;
+  NEXT_PUBLIC_XPAY_PUBLISHABLE_KEY?: string;
 }
 
 const environmentKeys = [
@@ -93,5 +95,8 @@ export function validatePublicEnvironment(
           raw.NEXT_PUBLIC_MEDIA_BASE_URL.trim(),
         )
       : undefined,
+    ...(raw.NEXT_PUBLIC_XPAY_PUBLISHABLE_KEY?.trim()
+      ? { xpayPublishableKey: raw.NEXT_PUBLIC_XPAY_PUBLISHABLE_KEY.trim() }
+      : {}),
   };
 }

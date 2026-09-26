@@ -173,7 +173,7 @@ describe('CheckoutExperience', () => {
     expect(screen.queryByText('Apple Pay')).not.toBeInTheDocument();
   });
 
-  it('keeps the preserved card and Apple Pay controls in gateway mode', () => {
+  it('keeps the bank card control in gateway mode', () => {
     mocks.auth = authState({
       user,
       status: 'authenticated',
@@ -190,7 +190,7 @@ describe('CheckoutExperience', () => {
     );
 
     expect(screen.getByText('Visa or Mastercard')).toBeVisible();
-    expect(screen.getByText('Apple Pay')).toBeVisible();
+    expect(screen.queryByText('Apple Pay')).not.toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: /Continue to payment/ }),
     ).toBeVisible();

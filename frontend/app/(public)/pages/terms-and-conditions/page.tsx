@@ -78,10 +78,10 @@ const sections = [
     titleEn: 'WhatsApp Communication and Delivery',
     titleAr: 'التواصل والتسليم عبر واتساب',
     contentEn: [
-      'After the order and payment are confirmed, SANAD uses the official WhatsApp conversation to collect the required information and coordinate the service. Drafts, final files, revisions, and service reports are delivered through WhatsApp. The customer dashboard currently provides order tracking only.',
+      'After the order and payment are confirmed, SANAD uses the official WhatsApp conversation to collect the required information and coordinate the service. Drafts, final files, revisions, and service updates are coordinated through WhatsApp. The customer dashboard currently provides order tracking only.',
     ],
     contentAr: [
-      'بعد تأكيد الطلب والدفع، تستخدم سند محادثة واتساب الرسمية لجمع المعلومات المطلوبة وتنسيق تنفيذ الخدمة. يتم تسليم المسودات والملفات النهائية والتعديلات وتقارير الخدمة عبر واتساب. وتوفر لوحة حساب العميل حاليًا متابعة حالة الطلب فقط.',
+      'بعد تأكيد الطلب والدفع، تستخدم سند محادثة واتساب الرسمية لجمع المعلومات المطلوبة وتنسيق تنفيذ الخدمة. يتم تنسيق المسودات والملفات النهائية والتعديلات وتحديثات الخدمة عبر واتساب. وتوفر لوحة حساب العميل حاليًا متابعة حالة الطلب فقط.',
     ],
   },
   {
@@ -89,10 +89,10 @@ const sections = [
     titleEn: 'Delivery Timelines',
     titleAr: 'مواعيد التسليم',
     contentEn: [
-      'The delivery or service period begins after payment is confirmed and SANAD receives all information, documents, approvals, and verification steps required to begin. The timeline pauses while SANAD is waiting for information, documents, approval, OTP verification, email verification, or another required action from the customer.',
+      'The delivery or service period begins after payment is confirmed and SANAD receives all information, documents, approvals, and access arrangements required to begin. The timeline pauses while SANAD is waiting for information, documents, approval, access, or another required action from the customer.',
     ],
     contentAr: [
-      'تبدأ مدة التسليم أو تنفيذ الخدمة بعد تأكيد الدفع واستلام سند لجميع المعلومات والمستندات والموافقات وخطوات التحقق المطلوبة للبدء. وتتوقف المدة مؤقتًا أثناء انتظار معلومات أو مستندات أو موافقة أو رمز OTP أو تأكيد بريد إلكتروني أو أي إجراء مطلوب من العميل.',
+      'تبدأ مدة التسليم أو تنفيذ الخدمة بعد تأكيد الدفع واستلام سند لجميع المعلومات والمستندات والموافقات وترتيبات الوصول المطلوبة للبدء. وتتوقف المدة مؤقتًا أثناء انتظار معلومات أو مستندات أو موافقة أو وصول أو أي إجراء مطلوب من العميل.',
     ],
   },
   {
@@ -113,16 +113,14 @@ const sections = [
     titleEn: 'Job Application Service',
     titleAr: 'خدمة التقديم على الوظائف',
     contentEn: [
-      'By purchasing the Job Application Service, the customer authorizes SANAD to use the supplied CV and relevant information to search for reasonably suitable opportunities and submit applications on the customer’s behalf. The service covers up to 60 suitable applications and ends when either 60 suitable applications have been submitted or 3 calendar days have passed, whichever occurs first.',
-      'Applications may be submitted through relevant UAE job platforms, recruitment websites, employer career portals, and other appropriate channels. LinkedIn, Bayt, Indeed UAE, Naukrigulf, and GulfTalent are examples and do not represent an exclusive platform list.',
-      'The customer is responsible for the accuracy of all supplied information and may need to complete OTP, email verification, account access, or another candidate-only step. SANAD is not responsible for platform outages, expired vacancies, employer decisions, delayed employer responses, or the availability of suitable opportunities. Irrelevant applications will not be submitted merely to reach the maximum number.',
-      'The application report is delivered through WhatsApp and records the company, job title, job URL, date applied, application status, platform or source, and relevant notes. It does not provide live employer tracking.',
+      'By purchasing the Job Application Service, the customer authorizes SANAD to review the supplied CV and relevant information, identify suitable companies and available opportunities, prepare a professional English application email, and send the customer’s CV directly to up to 60 suitable companies using the customer’s email account. The service period is up to 3 calendar days.',
+      'LinkedIn, Bayt, Indeed, Naukrigulf, official company career websites, and other relevant recruitment sources may be used to research suitable companies and opportunities. SANAD does not submit applications directly through those platforms as part of this service; the application outreach is sent directly by email.',
+      'Companies are selected according to the customer’s CV, experience, qualifications, preferences, and suitable available opportunities. Outreach is not sent randomly. The service deliverable is the outreach performed by SANAD and does not include a separate file, report, or downloadable document. SANAD does not guarantee interviews, responses, job offers, or employment.',
     ],
     contentAr: [
-      'بشراء خدمة التقديم على الوظائف، يفوض العميل سند باستخدام السيرة الذاتية والمعلومات ذات الصلة للبحث عن فرص مناسبة بصورة معقولة وتقديم الطلبات بالنيابة عنه. تشمل الخدمة حتى 60 طلب توظيف مناسبًا، وتنتهي عند إتمام 60 طلبًا مناسبًا أو مرور 3 أيام تقويمية، أيهما يحدث أولًا.',
-      'يجوز تنفيذ الطلبات من خلال منصات التوظيف الإماراتية المناسبة، ومواقع التوظيف، وبوابات الشركات، وقنوات التقديم الملائمة الأخرى. وتُعد LinkedIn وBayt وIndeed UAE وNaukrigulf وGulfTalent أمثلة وليست قائمة حصرية.',
-      'يتحمل العميل مسؤولية دقة المعلومات التي يقدمها، وقد يحتاج إلى إتمام رمز OTP أو تأكيد البريد الإلكتروني أو الدخول إلى حسابه أو أي خطوة شخصية أخرى. لا تتحمل سند مسؤولية أعطال المنصات أو انتهاء صلاحية الوظائف أو قرارات أصحاب العمل أو تأخر الردود أو عدم توفر عدد كافٍ من الفرص المناسبة. ولن يتم إرسال طلبات غير ملائمة لمجرد الوصول إلى الحد الأقصى.',
-      'يُسلّم تقرير التقديم عبر واتساب ويتضمن الشركة والمسمى الوظيفي ورابط الوظيفة وتاريخ التقديم وحالة الطلب والمنصة أو المصدر والملاحظات ذات الصلة. ولا يمثل التقرير نظام متابعة مباشرًا مع جهة التوظيف.',
+      'بشراء خدمة التقديم على الوظائف، يفوض العميل سند بمراجعة السيرة الذاتية والمعلومات ذات الصلة، وتحديد الشركات والفرص المتاحة المناسبة، وإعداد رسالة تقديم احترافية باللغة الإنجليزية، وإرسال سيرة العميل الذاتية مباشرة إلى ما يصل إلى 60 شركة مناسبة باستخدام حساب بريده الإلكتروني. وتصل مدة تنفيذ الخدمة إلى 3 أيام تقويمية.',
+      'قد تُستخدم LinkedIn وBayt وIndeed وNaukrigulf وصفحات التوظيف الرسمية للشركات وغيرها من مصادر التوظيف المناسبة للبحث عن الشركات والفرص الملائمة. ولا تقدم سند الطلبات مباشرة عبر هذه المنصات ضمن هذه الخدمة؛ بل يُرسل التواصل والتقديم مباشرة عبر البريد الإلكتروني.',
+      'تُختار الشركات وفق سيرة العميل الذاتية وخبرته ومؤهلاته وتفضيلاته والفرص المناسبة المتاحة، ولا يُرسل التواصل عشوائيًا. مخرج الخدمة هو التواصل والتقديم الذي تنفذه سند، ولا يشمل ملفًا أو تقريرًا أو مستندًا منفصلًا قابلًا للتنزيل. ولا تضمن سند مقابلات أو ردودًا أو عروض عمل أو توظيفًا.',
     ],
   },
   {
@@ -132,12 +130,12 @@ const sections = [
     contentEn: [
       'A full refund may be requested before SANAD begins work. Work begins when SANAD starts reviewing customer materials, writing or editing documents, preparing LinkedIn content, searching for job opportunities, or submitting applications.',
       'After work begins, a change of mind alone does not entitle the customer to a refund. Any included revision rights remain available within the original agreed scope. If SANAD cannot provide an agreed service, the amount relating to the undelivered service will be refunded. Duplicate or accidental duplicate payments will also be refunded.',
-      'Customer delays pause the delivery timeline while SANAD awaits required information, documents, approvals, or verification. For the Job Application Service, the absence of interviews, job offers, or employment does not create a refund entitlement after work has started.',
+      'Customer delays pause the delivery timeline while SANAD awaits required information, documents, approvals, access arrangements, or another required action. For the Job Application Service, the absence of interviews, responses, job offers, or employment does not create a refund entitlement after work has started.',
     ],
     contentAr: [
       'يمكن طلب استرداد كامل للمبلغ قبل أن تبدأ سند العمل. يبدأ العمل عندما تبدأ سند في مراجعة مستندات العميل، أو كتابة المستندات أو تعديلها، أو إعداد محتوى LinkedIn، أو البحث عن فرص وظيفية، أو تقديم طلبات التوظيف.',
       'بعد بدء العمل، لا يمنح تغيير رأي العميل وحده حقًا في استرداد المبلغ. وتظل التعديلات المشمولة متاحة داخل النطاق المتفق عليه أصلًا. إذا تعذر على سند تقديم خدمة متفق عليها، يُسترد المبلغ الخاص بالجزء الذي لم يتم تنفيذه. كما تُسترد الدفعات المكررة أو التي تم دفعها بالخطأ مرتين.',
-      'تؤدي تأخيرات العميل إلى إيقاف مدة التسليم مؤقتًا أثناء انتظار المعلومات أو المستندات أو الموافقات أو خطوات التحقق المطلوبة. وبالنسبة لخدمة التقديم على الوظائف، لا يؤدي عدم الحصول على مقابلات أو عروض وظيفية أو وظيفة إلى استحقاق استرداد المبلغ بعد بدء العمل.',
+      'تؤدي تأخيرات العميل إلى إيقاف مدة التسليم مؤقتًا أثناء انتظار المعلومات أو المستندات أو الموافقات أو ترتيبات الوصول أو أي إجراء مطلوب. وبالنسبة لخدمة التقديم على الوظائف، لا يؤدي عدم الحصول على مقابلات أو ردود أو عروض وظيفية أو وظيفة إلى استحقاق استرداد المبلغ بعد بدء العمل.',
     ],
   },
   {
@@ -204,8 +202,8 @@ export default async function TermsAndConditionsPage() {
           </p>
           <p className="mt-4 text-sm text-muted-foreground">
             {_copy(
-              'Last updated September 24, 2026',
-              'آخر تحديث: 24 سبتمبر 2026',
+              'Last updated September 26, 2026',
+              'آخر تحديث: 26 سبتمبر 2026',
             )}
           </p>
         </div>

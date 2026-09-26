@@ -13,11 +13,9 @@ import {
 } from '../interfaces/payment-provider.interface';
 
 const WEBHOOK_TOLERANCE_SECONDS = 300;
-const CHECKOUT_HOST = 'checkout.xpay.app';
-
 interface XPayCheckoutSession {
   id?: unknown;
-  url?: unknown;
+  clientSecret?: unknown;
   amountTotal?: unknown;
   currency?: unknown;
   presentmentDetails?: {
@@ -52,15 +50,19 @@ export class XPayPaymentProvider implements PaymentProvider {
   private readonly frontendUrl: string;
 
   constructor(configService: ConfigService) {
-    this.secretKey = configService.getOrThrow<string>('XPAY_SECRET_KEY');
-    this.webhookSecret = configService.getOrThrow<string>(
-      'XPAY_WEBHOOK_SECRET',
-    );
+    this.secretKey =
+      configService.get<string>('payment.xpay.secretKey') ||
+      configService.getOrThrow<string>('XPAY_SECRET_KEY');
+    this.webhookSecret =
+      configService.get<string>('payment.xpay.webhookSecret') ||
+      configService.getOrThrow<string>('XPAY_WEBHOOK_SECRET');
     this.apiBaseUrl = (
-      configService.get<string>('XPAY_API_BASE_URL') || 'https://api.xpay.app'
+      configService.get<string>('payment.xpay.apiBaseUrl') ||
+      configService.get<string>('XPAY_API_BASE_URL') ||
+      'https://api.xpay.app'
     ).replace(/\/+$/, '');
     this.frontendUrl = (
-      configService.get<string>('FRONTEND_URL') || 'http://localhost:3001'
+      configService.get<string>('FRONTEND_URL') || 'http://localhost:3000'
     ).replace(/\/+$/, '');
   }
 
@@ -75,17 +77,17 @@ export class XPayPaymentProvider implements PaymentProvider {
       });
     }
 
-    const returnUrl =
-      params.returnUrl || `${this.frontendUrl}/my-orders/${params.orderId}`;
     const requestBody = {
       mode: 'payment',
-      uiMode: 'hosted',
-      submitType: 'PAY',
+      uiMode: 'custom',
       afterCompletion: {
         type: 'redirect',
-        redirect: { url: returnUrl },
+        redirect: {
+          url:
+            params.returnUrl ||
+            `${this.frontendUrl}/order-success/${encodeURIComponent(params.orderNumber)}`,
+        },
       },
-      cancelUrl: `${this.frontendUrl}/my-orders/${params.orderId}`,
       lineItems: [
         {
           priceData: {
@@ -96,11 +98,6 @@ export class XPayPaymentProvider implements PaymentProvider {
           quantity: 1,
         },
       ],
-      customerDetails: {
-        name: params.customerName,
-        email: params.customerEmail,
-        ...(params.customerPhone ? { phone: params.customerPhone } : {}),
-      },
       paymentMethodTypes: ['card'],
       metadata: {
         orderId: String(params.orderId),
@@ -146,8 +143,10 @@ export class XPayPaymentProvider implements PaymentProvider {
 
     const transactionId =
       typeof session.id === 'string' ? session.id.trim() : '';
-    const paymentUrl =
-      typeof session.url === 'string' ? session.url.trim() : '';
+    const clientSecret =
+      typeof session.clientSecret === 'string'
+        ? session.clientSecret.trim()
+        : '';
     // XPay currently settles in EGP. For an AED-priced order the top-level
     // amount/currency are the processing track, while presentmentDetails is
     // the exact customer-facing AED track that must match SANAD's order.
@@ -155,7 +154,7 @@ export class XPayPaymentProvider implements PaymentProvider {
 
     if (
       !transactionId.startsWith('cs_') ||
-      !this.isTrustedCheckoutUrl(paymentUrl) ||
+      !clientSecret ||
       customerFacing.amountInMinorUnits !== amountInMinorUnits ||
       customerFacing.currency !== params.currency.toUpperCase()
     ) {
@@ -167,7 +166,8 @@ export class XPayPaymentProvider implements PaymentProvider {
 
     return {
       transactionId,
-      paymentUrl,
+      paymentUrl: null,
+      clientSecret,
       provider: 'xpay',
       amount: customerFacing.amountInMinorUnits / 100,
       currency: customerFacing.currency,
@@ -265,15 +265,6 @@ export class XPayPaymentProvider implements PaymentProvider {
           ? track.currency.trim().toUpperCase()
           : '',
     };
-  }
-
-  private isTrustedCheckoutUrl(value: string): boolean {
-    try {
-      const url = new URL(value);
-      return url.protocol === 'https:' && url.hostname === CHECKOUT_HOST;
-    } catch {
-      return false;
-    }
   }
 
   private verifySignature(signatureHeader: string, rawBody: Buffer): void {

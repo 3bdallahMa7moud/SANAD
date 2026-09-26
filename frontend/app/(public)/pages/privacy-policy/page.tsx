@@ -67,10 +67,10 @@ const sections = [
     titleEn: 'How We Use Your Data',
     titleAr: 'كيف نستخدم معلوماتك',
     contentEn: [
-      'Information is used to manage orders, communicate through WhatsApp, prepare CVs and Cover Letters, optimize LinkedIn profiles, provide the UAE Job Application Guide, perform the Job Application Service when purchased, process payments, provide revisions, and deliver service reports.',
+      'Information is used to manage orders, communicate through WhatsApp, prepare CVs and Cover Letters, optimize LinkedIn profiles, provide the UAE Job Application Guide, perform the Job Application Service when purchased, process payments, provide revisions, and coordinate service updates.',
     ],
     contentAr: [
-      'تُستخدم المعلومات لإدارة الطلبات والتواصل عبر واتساب وإعداد السير الذاتية وخطابات التقديم وتحسين ملفات LinkedIn وتوفير دليل التقديم على الوظائف في الإمارات وتنفيذ خدمة التقديم على الوظائف عند شرائها ومعالجة المدفوعات وتقديم التعديلات وتسليم تقارير الخدمة.',
+      'تُستخدم المعلومات لإدارة الطلبات والتواصل عبر واتساب وإعداد السير الذاتية وخطابات التقديم وتحسين ملفات LinkedIn وتوفير دليل التقديم على الوظائف في الإمارات وتنفيذ خدمة التقديم على الوظائف عند شرائها ومعالجة المدفوعات وتقديم التعديلات وتنسيق تحديثات الخدمة.',
     ],
   },
   {
@@ -78,11 +78,13 @@ const sections = [
     titleEn: 'Job Application Service Data Sharing',
     titleAr: 'مشاركة بيانات خدمة التقديم على الوظائف',
     contentEn: [
-      'When the Job Application Service is purchased, SANAD may share the customer’s CV and relevant application information with employers, recruiters, recruitment websites, job platforms, and employer career portals solely to search for suitable opportunities and submit authorized applications.',
+      'When the Job Application Service is purchased, SANAD uses the customer’s email account to send the CV and the application information reasonably required directly to selected companies, employers, or recruiters.',
+      'Recruitment platforms, official company career websites, and other relevant sources may be used to research suitable opportunities and companies. SANAD does not submit applications directly through those platforms as part of this service.',
       'SANAD uses only the information reasonably required for the relevant application. The customer remains responsible for ensuring that the supplied information is complete and accurate.',
     ],
     contentAr: [
-      'عند شراء خدمة التقديم على الوظائف، يجوز لسند مشاركة السيرة الذاتية ومعلومات التقديم ذات الصلة مع أصحاب العمل ومسؤولي التوظيف ومواقع ومنصات التوظيف وبوابات الشركات، وذلك فقط للبحث عن فرص مناسبة وتقديم الطلبات التي فوض العميل سند بتنفيذها.',
+      'عند شراء خدمة التقديم على الوظائف، تستخدم سند حساب البريد الإلكتروني الخاص بالعميل لإرسال سيرته الذاتية ومعلومات التقديم اللازمة بصورة معقولة مباشرة إلى الشركات أو أصحاب العمل أو مسؤولي التوظيف المختارين.',
+      'قد تُستخدم منصات التوظيف وصفحات التوظيف الرسمية للشركات وغيرها من المصادر المناسبة للبحث عن الفرص والشركات الملائمة. ولا تقدم سند الطلبات مباشرة عبر تلك المنصات ضمن هذه الخدمة.',
       'تستخدم سند المعلومات اللازمة بصورة معقولة لكل طلب، ويظل العميل مسؤولًا عن اكتمال ودقة المعلومات المقدمة.',
     ],
   },
@@ -187,8 +189,8 @@ export default async function PrivacyPolicyPage() {
           </p>
           <p className="mt-4 text-sm text-muted-foreground">
             {_copy(
-              'Last updated September 24, 2026',
-              'آخر تحديث: 24 سبتمبر 2026',
+              'Last updated September 26, 2026',
+              'آخر تحديث: 26 سبتمبر 2026',
             )}
           </p>
         </div>

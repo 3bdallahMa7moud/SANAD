@@ -184,7 +184,7 @@ class EnvironmentVariables {
   GOOGLE_CLIENT_ID?: string;
 
   @IsString()
-  @IsIn(['mock', 'manual', 'bypass'])
+  @IsIn(['mock', 'manual', 'bypass', 'xpay'])
   PAYMENT_PROVIDER: string = 'mock';
 
   @IsString()
@@ -192,8 +192,21 @@ class EnvironmentVariables {
   PAYMENT_SECRET_KEY?: string;
 
   @IsString()
+  @IsOptional()
   @MinLength(32)
-  PAYMENT_WEBHOOK_SECRET!: string;
+  PAYMENT_WEBHOOK_SECRET?: string;
+
+  @IsString()
+  @IsOptional()
+  XPAY_SECRET_KEY?: string;
+
+  @IsString()
+  @IsOptional()
+  XPAY_WEBHOOK_SECRET?: string;
+
+  @IsString()
+  @IsOptional()
+  XPAY_API_BASE_URL?: string;
 
   @IsNumber()
   @IsOptional()
@@ -383,6 +396,17 @@ export function validate(config: Record<string, unknown>) {
       throw new Error(
         'Production cannot use PAYMENT_PROVIDER=mock. Use manual for admin-confirmed external payments, or configure a real payment provider.',
       );
+    }
+  }
+  if (
+    validatedConfig.NODE_ENV === 'production' &&
+    validatedConfig.PAYMENT_PROVIDER === 'xpay'
+  ) {
+    if (!validatedConfig.XPAY_SECRET_KEY?.trim()) {
+      throw new Error('PAYMENT_PROVIDER=xpay requires XPAY_SECRET_KEY.');
+    }
+    if (!validatedConfig.XPAY_WEBHOOK_SECRET?.trim()) {
+      throw new Error('PAYMENT_PROVIDER=xpay requires XPAY_WEBHOOK_SECRET.');
     }
   }
 
