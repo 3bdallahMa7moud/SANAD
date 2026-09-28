@@ -1,11 +1,13 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { CallHandler, ExecutionContext } from '@nestjs/common';
+import { SSE_METADATA } from '@nestjs/common/constants';
 import { firstValueFrom, of } from 'rxjs';
 import { TransformResponseInterceptor } from './transform-response.interceptor';
 
 describe('TransformResponseInterceptor', () => {
   let interceptor: TransformResponseInterceptor<unknown>;
-  const context = {} as ExecutionContext;
+  const handler = () => undefined;
+  const context = { getHandler: () => handler } as unknown as ExecutionContext;
 
   const run = (value: unknown) => {
     const next: CallHandler = { handle: () => of(value) };
@@ -101,5 +103,13 @@ describe('TransformResponseInterceptor', () => {
     await firstValueFrom(interceptor.intercept(context, { handle }));
 
     expect(handle).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not wrap server-sent event messages', async () => {
+    Reflect.defineMetadata(SSE_METADATA, true, handler);
+    const event = { type: 'notification', data: { orderId: 1 } };
+
+    await expect(run(event)).resolves.toBe(event);
+    Reflect.deleteMetadata(SSE_METADATA, handler);
   });
 });

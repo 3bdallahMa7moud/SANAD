@@ -678,7 +678,7 @@
   "What to prepare": "ما تحتاج إلى تجهيزه",
   "What we do": "ما نقدمه",
   "What would you like this service to help you achieve?": "ما الذي ترغب في تحقيقه من هذه الخدمة؟",
-  "What&apos;s Next?": "ما الخطوة التالية؟",
+  "What's Next?": "ما الخطوة التالية؟",
   "WhatsApp phone": "رقم واتساب",
   "WhatsApp unavailable": "واتساب غير متاح",
   "What’s Included": "ماذا تشمل الخدمة",
@@ -1332,5 +1332,16 @@
   "The process is straightforward: choose a service, share your career context through the official WhatsApp channel, and receive the agreed deliverables within the timeline listed for your package.": "الخطوات بسيطة: اختر الخدمة، وشارك تفاصيل مسيرتك المهنية عبر قناة واتساب الرسمية، واستلم المخرجات المتفق عليها خلال المدة المحددة في باقتك.",
   "Image unavailable": "الصورة غير متاحة",
   "Choose by what is included and the delivery estimate.": "اختر وفقًا لما تتضمنه الباقة ومدة التسليم المتوقعة.",
-  "Published deliverables and delivery estimates": "المخرجات المنشورة ومدد التسليم المتوقعة"
+  "Published deliverables and delivery estimates": "المخرجات المنشورة ومدد التسليم المتوقعة",
+  "Explore the available services and choose the support that fits your current career-document needs.": "استعرض الخدمات المتاحة واختر الدعم المناسب لاحتياجات مستنداتك المهنية الحالية.",
+  "Explore focused services and complete packages. See what you receive, the price, and the delivery estimate before you choose.": "استعرض الخدمات المتخصصة والباقات المتكاملة، وتعرّف على ما ستحصل عليه والسعر ومدة التسليم المتوقعة قبل الاختيار.",
+  "Start with the outcome you need, then review each service's scope, delivery, and investment at a glance.": "ابدأ بالنتيجة التي تحتاج إليها، ثم راجع نطاق كل خدمة ومدة تسليمها وتكلفتها بنظرة سريعة.",
+  "Secure card payment": "دفع آمن بالبطاقة",
+  "Complete your payment": "أكمل عملية الدفع",
+  "Your card details are handled securely by XPay.": "تُعالج بيانات بطاقتك بأمان عبر XPay.",
+  "Confirming payment...": "جارٍ تأكيد الدفع...",
+  "Pay securely": "ادفع بأمان",
+  "Online card payment is not configured yet.": "الدفع الإلكتروني بالبطاقة غير مُعدّ بعد.",
+  "We could not load the secure card form.": "تعذّر تحميل نموذج البطاقة الآمن.",
+  "We could not confirm the payment. Please try again.": "تعذّر تأكيد الدفع. يرجى المحاولة مرة أخرى."
 }

@@ -8,4 +8,10 @@ export class NotificationQueryDto extends PaginationDto {
   @IsBoolean()
   @ToBoolean()
   unread_only?: boolean;
+
+  @ApiPropertyOptional({ description: 'Return administrative alerts only' })
+  @IsOptional()
+  @IsBoolean()
+  @ToBoolean()
+  admin_only?: boolean;
 }

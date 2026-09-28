@@ -5,6 +5,7 @@ import { AnnouncementBar } from '@/components/layouts/announcement-bar';
 import { PublicFooter } from '@/components/layouts/public-footer';
 import { PublicNavbar } from '@/components/layouts/public-navbar';
 import { ScrollToTopButton } from '@/components/shared/scroll-to-top-button';
+import { WhatsAppFloatingButton } from '@/components/shared/whatsapp-floating-button';
 import type { PublicSettings } from '@/lib/api';
 
 export interface PublicLayoutProps {
@@ -39,6 +40,7 @@ export function PublicLayout({
       </main>
       <PublicFooter initialSettings={initialSettings} />
       <ScrollToTopButton />
+      <WhatsAppFloatingButton />
     </div>
   );
 }

@@ -42,7 +42,6 @@ model users {
   password_reset_tokens     password_reset_tokens[]
   user_sessions             user_sessions[]
 
-  @@index([email], map: "idx_users_email")
   @@index([role], map: "idx_users_role")
   @@index([account_locked], map: "idx_users_account_locked")
   @@index([last_login], map: "idx_users_last_login")
@@ -130,7 +129,6 @@ model coupons {
   updated_at          DateTime?      @default(now()) @db.Timestamp(6)
   coupon_usage        coupon_usage[]
 
-  @@index([code], map: "idx_coupons_code")
   @@index([is_active], map: "idx_coupons_is_active")
   @@index([end_date], map: "idx_coupons_end_date")
   @@index([start_date], map: "idx_coupons_start_date")
@@ -188,8 +186,9 @@ model orders {
   payments                  payments[]
   package_review            package_reviews?
 
-  @@index([order_number], map: "idx_orders_order_number")
   @@index([user_id], map: "idx_orders_user_id")
+  @@index([user_id, created_at(sort: Desc)], map: "idx_orders_user_created_at")
+  @@index([status, created_at(sort: Desc)], map: "idx_orders_status_created_at")
   @@index([secondary_package_id], map: "idx_orders_secondary_package_id")
   @@index([status], map: "idx_orders_status")
   @@index([created_at], map: "idx_orders_created_at")
@@ -229,7 +228,7 @@ model payments {
   order            orders    @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([order_id], map: "idx_payments_order_id")
-  @@index([transaction_id], map: "idx_payments_transaction_id")
+  @@index([order_id, status], map: "idx_payments_order_status")
   @@index([status], map: "idx_payments_status")
 }
 
@@ -252,6 +251,7 @@ model notifications {
   @@index([is_read], map: "idx_notifications_is_read")
   @@index([created_at], map: "idx_notifications_created_at")
   @@index([order_id], map: "idx_notifications_order_id")
+  @@index([user_id, notification_type, is_read, created_at], map: "idx_notifications_admin_feed")
 }
 
 model site_media {
@@ -264,8 +264,6 @@ model site_media {
   is_active   Boolean?  @default(true)
   created_at  DateTime? @default(now()) @db.Timestamp(6)
   updated_at  DateTime? @default(now()) @db.Timestamp(6)
-
-  @@index([media_key], map: "idx_site_media_media_key")
 }
 
 model pages {
@@ -280,8 +278,6 @@ model pages {
   is_active           Boolean?  @default(true)
   created_at          DateTime? @default(now()) @db.Timestamp(6)
   updated_at          DateTime? @default(now()) @db.Timestamp(6)
-
-  @@index([slug], map: "idx_pages_slug")
 }
 
 model settings {
@@ -379,6 +375,7 @@ model email_queue {
   @@index([scheduled_at], map: "idx_email_queue_scheduled_at")
   @@index([recipient_email], map: "idx_email_queue_recipient_email")
   @@index([created_at], map: "idx_email_queue_created_at")
+  @@index([status, scheduled_at, priority], map: "idx_email_queue_dispatch")
 }
 
 model email_templates {
@@ -393,8 +390,6 @@ model email_templates {
   is_active     Boolean?  @default(true)
   created_at    DateTime? @default(now()) @db.Timestamp(6)
   updated_at    DateTime? @default(now()) @db.Timestamp(6)
-
-  @@index([template_name], map: "idx_email_templates_template_name")
 }
 
 model user_sessions {
@@ -410,7 +405,7 @@ model user_sessions {
   user          users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([user_id], map: "idx_user_sessions_user_id")
-  @@index([session_token], map: "idx_user_sessions_session_token")
+  @@index([user_id, is_active], map: "idx_user_sessions_user_active")
   @@index([expires_at], map: "idx_user_sessions_expires_at")
   @@index([is_active], map: "idx_user_sessions_is_active")
 }
@@ -437,7 +432,6 @@ model password_reset_tokens {
   created_at DateTime? @default(now()) @db.Timestamp(6)
   users      users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@index([token_hash], map: "idx_pwd_reset_token")
   @@index([user_id], map: "idx_pwd_reset_user_id")
 }
 
@@ -458,7 +452,6 @@ model email_verification_tokens {
   created_at DateTime? @default(now()) @db.Timestamp(6)
   users      users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@index([token_hash], map: "idx_email_verification_token")
   @@index([user_id], map: "idx_email_verification_user_id")
 }
 
@@ -473,5 +466,6 @@ model email_otp_challenges {
   created_at    DateTime? @default(now()) @db.Timestamp(6)
 
   @@index([email], map: "idx_email_otp_challenges_email")
+  @@index([email, consumed_at, created_at(sort: Desc)], map: "idx_email_otp_active_recent")
   @@index([expires_at], map: "idx_email_otp_challenges_expires_at")
 }

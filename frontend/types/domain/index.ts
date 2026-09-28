@@ -33,7 +33,9 @@ export type {
 export type { OrderPayment, OrderStatusHistory } from './order';
 export type {
   CheckoutPaymentMethod,
+  ConfirmDemoPaymentInput,
   CreatePaymentInput,
+  DemoPaymentConfirmation,
   PaymentResult,
 } from './payment';
 export type { Testimonial } from './testimonial';

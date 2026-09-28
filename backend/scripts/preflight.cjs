@@ -11,6 +11,7 @@ require('dotenv/config');
 require('reflect-metadata');
 
 const { existsSync } = require('node:fs');
+const { spawnSync } = require('node:child_process');
 const path = require('node:path');
 
 const validationPath = path.join(
@@ -36,6 +37,16 @@ try {
     ...(process.argv.includes('--production') && { NODE_ENV: 'production' }),
   });
   const nodeEnv = config.NODE_ENV;
+  const cwebpPath = process.env.CWEBP_PATH?.trim() || 'cwebp';
+  const cwebp = spawnSync(cwebpPath, ['-version'], {
+    encoding: 'utf8',
+    timeout: 5_000,
+  });
+  if (cwebp.error || cwebp.status !== 0) {
+    throw new Error(
+      `cwebp is required for image uploads but could not run (${cwebpPath})`,
+    );
+  }
   process.stdout.write(`Environment OK (NODE_ENV=${nodeEnv}).\n`);
 
   const notes = [];
@@ -65,7 +76,17 @@ try {
   }
   if (config.PAYMENT_PROVIDER === 'manual') {
     notes.push(
-      'PAYMENT_PROVIDER=manual - customer checkout is disabled; admins must reconcile and confirm external payments.',
+      'WARNING: PAYMENT_PROVIDER=manual is a legacy development-only mode and is rejected in production.',
+    );
+  }
+  if (config.PAYMENT_PROVIDER === 'disabled') {
+    notes.push(
+      'PAYMENT_PROVIDER=disabled - ordering and payment are paused until XPay is activated.',
+    );
+  }
+  if (config.PAYMENT_PROVIDER === 'demo') {
+    notes.push(
+      'WARNING: PAYMENT_PROVIDER=demo - authenticated accounts can confirm test orders, but collected revenue remains 0 AED. Switch to xpay for real payments.',
     );
   }
   for (const note of notes) {

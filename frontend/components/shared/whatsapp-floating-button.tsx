@@ -1,11 +1,12 @@
 'use client';
 import { useCopy } from '@/lib/i18n/use-copy';
 
-import { useQuery } from '@tanstack/react-query';
 import type { SVGProps } from 'react';
 
-import { settingsApi, settingsKeys } from '@/lib/api';
-import { whatsappHref } from '@/lib/orders/presentation';
+import {
+  CUSTOMER_SERVICE_WHATSAPP_NUMBER,
+  whatsappHref,
+} from '@/lib/orders/presentation';
 
 function WhatsAppIcon(props: SVGProps<SVGSVGElement>) {
   return (
@@ -23,29 +24,20 @@ function WhatsAppIcon(props: SVGProps<SVGSVGElement>) {
 }
 
 interface WhatsAppFloatingButtonProps {
-  defaultMessage?: string;
   className?: string;
 }
 
-const DEFAULT_WHATSAPP_NUMBER =
-  process.env.NEXT_PUBLIC_DEFAULT_WHATSAPP_NUMBER || '971500000000';
-
 export function WhatsAppFloatingButton({
-  defaultMessage = 'Hello, I would like to ask about SANAD career services.',
   className = '',
 }: WhatsAppFloatingButtonProps) {
   const _copy = useCopy();
-
-  const settings = useQuery({
-    queryKey: settingsKeys.public,
-    queryFn: ({ signal }) => settingsApi.getPublic({ signal }),
-    staleTime: 5 * 60 * 1000,
-  });
-  const phoneNumber =
-    settings.data?.whatsapp_number?.trim() || DEFAULT_WHATSAPP_NUMBER;
+  const message = _copy(
+    'Hello, I would like to ask about SANAD career services.',
+    'مرحبًا، أود الاستفسار عن خدمات سند المهنية.',
+  );
   const whatsappUrl =
-    whatsappHref(phoneNumber, defaultMessage) ??
-    `https://wa.me/${DEFAULT_WHATSAPP_NUMBER}?text=${encodeURIComponent(defaultMessage)}`;
+    whatsappHref(CUSTOMER_SERVICE_WHATSAPP_NUMBER, message) ??
+    `https://wa.me/${CUSTOMER_SERVICE_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 
   return (
     <div
@@ -53,16 +45,20 @@ export function WhatsAppFloatingButton({
       data-whatsapp-floating
     >
       <a
-        aria-label={_copy('Chat on WhatsApp')}
-        className="group flex min-h-14 min-w-14 items-center justify-center gap-2 overflow-hidden rounded-full bg-[#25D366] px-4 text-white shadow-lg transition-[transform,background-color,box-shadow] duration-200 hover:scale-105 hover:bg-[#20bd5a] hover:shadow-xl active:scale-95 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#25D366] focus-visible:ring-offset-2"
+        aria-label={_copy('Chat with us now', 'تواصل معنا الآن')}
+        className="group flex min-h-14 min-w-14 items-center justify-center overflow-hidden rounded-full bg-[#25D366] px-3.5 text-white shadow-lg transition-[transform,background-color,box-shadow] duration-200 hover:scale-105 hover:bg-[#20bd5a] hover:shadow-xl active:scale-95 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[#25D366] focus-visible:ring-offset-2 motion-reduce:transition-none"
+        dir="ltr"
         href={whatsappUrl}
         rel="noreferrer noopener"
         target="_blank"
       >
-        <WhatsAppIcon className="size-7 shrink-0" />
-        <span className="max-w-0 overflow-hidden whitespace-nowrap text-sm font-semibold opacity-0 transition-[max-width,opacity] duration-200 group-hover:max-w-40 group-hover:opacity-100 group-focus-visible:max-w-40 group-focus-visible:opacity-100">
-          {_copy('Contact us now', 'تواصل معنا الآن')}
+        <span
+          className="max-w-0 overflow-hidden whitespace-nowrap text-sm font-bold opacity-0 transition-[max-width,margin,opacity] duration-500 ease-out group-hover:mr-2 group-hover:max-w-44 group-hover:opacity-100 group-focus-visible:mr-2 group-focus-visible:max-w-44 group-focus-visible:opacity-100 motion-reduce:transition-none"
+          dir="auto"
+        >
+          {_copy('Chat with us now', 'تواصل معنا الآن')}
         </span>
+        <WhatsAppIcon aria-hidden="true" className="size-7 shrink-0" />
       </a>
     </div>
   );

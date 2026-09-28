@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { hash } from 'argon2';
+import * as crypto from 'crypto';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { GlobalExceptionFilter } from '../src/common/filters';
@@ -22,15 +23,18 @@ describe('SANAD real customer-to-public journey', () => {
   const otherEmail = `journey-other-${runId}@example.invalid`;
   const adminEmail = `journey-admin-${runId}@example.invalid`;
   const password = 'Journey1!Test';
+  const paymentWebhookSecret =
+    'journey-mock-webhook-secret-at-least-32-characters';
 
   beforeAll(async () => {
-    process.env.PAYMENT_PROVIDER = 'manual';
+    process.env.PAYMENT_PROVIDER = 'mock';
+    process.env.PAYMENT_WEBHOOK_SECRET = paymentWebhookSecret;
     const { AppModule } = await import('../src/app.module');
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
-    app = moduleRef.createNestApplication();
+    app = moduleRef.createNestApplication({ rawBody: true });
     app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(
       new ValidationPipe({
@@ -90,7 +94,8 @@ describe('SANAD real customer-to-public journey', () => {
         name_ar: 'باقة اختبار رحلة العميل',
         name_en: `Customer journey test package ${runId}`,
         description_ar: 'باقة مخصصة لاختبار رحلة العميل المتكاملة.',
-        description_en: 'A package created for the customer journey integration test.',
+        description_en:
+          'A package created for the customer journey integration test.',
         price: 199,
         is_active: true,
         sort_order: 0,
@@ -163,15 +168,16 @@ describe('SANAD real customer-to-public journey', () => {
     orderId = created.body.data.id;
     const orderNumber = created.body.data.order_number as string;
     const finalAmount = Number(created.body.data.final_amount);
-    expect(created.body.data.status).toBe('pending_payment');
+    expect(created.body.data.status).toBe('pending');
     expect(created.body.data.payments).toHaveLength(0);
 
-    const disabledOnlinePayment = await request(app.getHttpServer())
+    const paymentIntent = await request(app.getHttpServer())
       .post('/api/v1/payments/create')
       .set('Authorization', `Bearer ${customerToken}`)
       .send({ order_id: orderId, payment_method: 'card' })
-      .expect(400);
-    expect(disabledOnlinePayment.body.code).toBe('MANUAL_PAYMENT_ONLY');
+      .expect(201);
+    const transactionId = paymentIntent.body.data.transaction_id as string;
+    expect(transactionId).toMatch(/^txn_/);
 
     await request(app.getHttpServer())
       .patch(`/api/v1/admin/orders/${orderId}/status`)
@@ -189,21 +195,33 @@ describe('SANAD real customer-to-public journey', () => {
       })
       .expect(403);
 
-    const payment = await request(app.getHttpServer())
+    const disabledManualPayment = await request(app.getHttpServer())
       .post('/api/v1/admin/payments/manual')
       .set('Authorization', `Bearer ${adminToken}`)
       .send({
         order_id: orderId,
         amount: finalAmount,
         payment_method: 'payment_link',
-        transaction_reference: `JOURNEY-${runId}`,
       })
-      .expect(201);
-    expect(payment.body.data).toMatchObject({
+      .expect(400);
+    expect(disabledManualPayment.body.code).toBe('MANUAL_PAYMENT_DISABLED');
+
+    const webhookPayload = {
+      transaction_id: transactionId,
+      order_id: orderId,
       status: 'paid',
-      amount: String(finalAmount),
-      payment_method: 'payment_link',
-    });
+      amount: finalAmount,
+      currency: 'AED',
+    };
+    const webhookSignature = crypto
+      .createHmac('sha256', paymentWebhookSecret)
+      .update(JSON.stringify(webhookPayload))
+      .digest('hex');
+    await request(app.getHttpServer())
+      .post('/api/v1/payments/webhook')
+      .set('x-signature', webhookSignature)
+      .send(webhookPayload)
+      .expect(201);
 
     await request(app.getHttpServer())
       .get(`/api/v1/orders/${orderId}`)

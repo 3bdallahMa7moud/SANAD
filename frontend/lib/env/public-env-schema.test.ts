@@ -6,7 +6,7 @@ const validEnvironment = {
   NEXT_PUBLIC_API_BASE_URL: 'https://api.sanad.example/api/v1/',
   NEXT_PUBLIC_MEDIA_BASE_URL: 'https://media.sanad.example/',
   NEXT_PUBLIC_SITE_URL: 'https://sanad.example/',
-  NEXT_PUBLIC_CHECKOUT_MODE: 'manual',
+  NEXT_PUBLIC_CHECKOUT_MODE: 'disabled',
 };
 
 describe('validatePublicEnvironment', () => {
@@ -15,7 +15,7 @@ describe('validatePublicEnvironment', () => {
       validatePublicEnvironment(validEnvironment, { requireAll: true }),
     ).toEqual({
       apiBaseUrl: 'https://api.sanad.example/api/v1',
-      checkoutMode: 'manual',
+      checkoutMode: 'disabled',
       mediaBaseUrl: 'https://media.sanad.example',
       siteUrl: 'https://sanad.example',
     });
@@ -57,6 +57,15 @@ describe('validatePublicEnvironment', () => {
         { requireAll: true },
       ),
     ).toThrow(/CHECKOUT_MODE/);
+  });
+
+  it('accepts the authenticated-account demo checkout mode', () => {
+    expect(
+      validatePublicEnvironment(
+        { ...validEnvironment, NEXT_PUBLIC_CHECKOUT_MODE: 'demo' },
+        { requireAll: true },
+      ).checkoutMode,
+    ).toBe('demo');
   });
 
   it('accepts a Google web client ID and rejects malformed values', () => {

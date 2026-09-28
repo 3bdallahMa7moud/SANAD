@@ -41,6 +41,7 @@ import {
 import type { User } from '@/types/domain';
 import { LanguageSwitcher } from '@/components/layouts/language-switcher';
 import { ThemeSwitcher } from '@/components/layouts/theme-switcher';
+import { AdminNotificationCenter } from './admin-notification-center';
 
 const navigation = [
   {
@@ -239,14 +240,18 @@ export function AdminShell({ children }: { children: ReactNode }) {
           <Link
             aria-label={_copy('SANAD home')}
             className={cn(
-              'h-14 overflow-hidden rounded-md bg-[#f8f0e0] transition-[max-width,opacity] duration-200 ease-out',
+              'h-14 overflow-hidden rounded-md transition-[max-width,opacity] duration-200 ease-out',
               desktopNavigationOpen
                 ? 'max-w-48 flex-1 opacity-100'
                 : 'pointer-events-none max-w-0 opacity-0',
             )}
             href="/"
           >
-            <BrandLogo className="size-full object-cover" loading="eager" />
+            <BrandLogo
+              className="size-full object-cover"
+              loading="eager"
+              tone="beige"
+            />
           </Link>
           <Button
             aria-label={_copy(
@@ -320,6 +325,9 @@ export function AdminShell({ children }: { children: ReactNode }) {
               {_copy(user?.role.replace('_', ' '))}
             </p>
           </div>
+          {hasAdminPermission(user, 'orders.view') ? (
+            <AdminNotificationCenter />
+          ) : null}
           <LanguageSwitcher variant="text" />
           <ThemeSwitcher />
           <Button

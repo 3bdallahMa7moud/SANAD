@@ -1,5 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
-import sharp from 'sharp';
+import { imageSize } from 'image-size';
+import { Jimp, JimpMime } from 'jimp';
 import { describe, expect, it } from 'vitest';
 
 import { MulterFile } from '../common/interfaces';
@@ -20,28 +21,23 @@ describe('ImageOptimizationService', () => {
   const service = new ImageOptimizationService();
 
   it('converts and bounds uploaded images as metadata-free WebP', async () => {
-    const source = await sharp({
-      create: {
-        width: 3000,
-        height: 1500,
-        channels: 3,
-        background: '#0a2a4a',
-      },
-    })
-      .png()
-      .toBuffer();
+    const source = await new Jimp({
+      width: 2500,
+      height: 1250,
+      color: 0x0a2a4aff,
+    }).getBuffer(JimpMime.png);
 
     const result = await service.convertToWebp(imageFile(source));
-    const metadata = await sharp(result.buffer).metadata();
+    const metadata = imageSize(result.buffer);
 
     expect(result.extension).toBe('.webp');
     expect(result.mimetype).toBe('image/webp');
     expect(result.size).toBe(result.buffer.length);
-    expect(metadata.format).toBe('webp');
+    expect(metadata.type).toBe('webp');
     expect(metadata.width).toBe(2400);
     expect(metadata.height).toBe(1200);
-    expect(metadata.exif).toBeUndefined();
-  });
+    expect(result.buffer.includes(Buffer.from('EXIF'))).toBe(false);
+  }, 30_000);
 
   it('rejects corrupt image data that passed the initial signature check', async () => {
     await expect(

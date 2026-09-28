@@ -45,6 +45,12 @@ case "$RUNTIME_DIR" in
   *) echo "Refusing unsafe web runtime target: $RUNTIME_DIR" >&2; exit 1 ;;
 esac
 
+# Editors such as sudoedit may replace the environment file and reset its
+# group. Both systemd services run as the unprivileged SANAD group and must be
+# able to read the file after a restart.
+chown root:"$API_GROUP" "$ENV_FILE"
+chmod 0640 "$ENV_FILE"
+
 set -a
 . "$ENV_FILE"
 set +a

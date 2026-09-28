@@ -1,6 +1,6 @@
 export interface PublicEnvironment {
   apiBaseUrl?: string;
-  checkoutMode?: 'manual' | 'gateway';
+  checkoutMode?: 'manual' | 'disabled' | 'demo' | 'gateway';
   googleClientId?: string;
   mediaBaseUrl?: string;
   siteUrl?: string;
@@ -63,9 +63,12 @@ export function validatePublicEnvironment(
 
   const googleClientId = raw.NEXT_PUBLIC_GOOGLE_CLIENT_ID?.trim();
   const checkoutMode = raw.NEXT_PUBLIC_CHECKOUT_MODE?.trim();
-  if (checkoutMode && !['manual', 'gateway'].includes(checkoutMode)) {
+  if (
+    checkoutMode &&
+    !['manual', 'disabled', 'demo', 'gateway'].includes(checkoutMode)
+  ) {
     throw new Error(
-      'NEXT_PUBLIC_CHECKOUT_MODE must be either manual or gateway.',
+      'NEXT_PUBLIC_CHECKOUT_MODE must be manual, disabled, demo, or gateway.',
     );
   }
   if (
@@ -84,7 +87,8 @@ export function validatePublicEnvironment(
           raw.NEXT_PUBLIC_API_BASE_URL.trim(),
         )
       : undefined,
-    checkoutMode: checkoutMode as 'manual' | 'gateway' | undefined,
+    checkoutMode: checkoutMode as
+      'manual' | 'disabled' | 'demo' | 'gateway' | undefined,
     ...(googleClientId ? { googleClientId } : {}),
     siteUrl: raw.NEXT_PUBLIC_SITE_URL?.trim()
       ? parseUrl('NEXT_PUBLIC_SITE_URL', raw.NEXT_PUBLIC_SITE_URL.trim())

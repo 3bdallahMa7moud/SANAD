@@ -33,6 +33,11 @@ export type {
 } from './modules/admin';
 export { checkoutApi } from './modules/checkout';
 export { orderKeys, ordersApi } from './modules/orders';
+export { notificationKeys, notificationsApi } from './modules/notifications';
+export type {
+  AdminNotification,
+  AdminNotificationList,
+} from './modules/notifications';
 export { pagesApi } from './modules/pages';
 export type { PublicCmsPage } from './modules/pages';
 export { packagesApi } from './modules/packages';

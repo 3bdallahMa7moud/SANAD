@@ -1,3 +1,6 @@
+export const CUSTOMER_SERVICE_WHATSAPP_NUMBER = '201554968707';
+export const CUSTOMER_SERVICE_WHATSAPP_DISPLAY = '01554968707';
+
 function isArabicLocale(locale?: string): boolean {
   if (locale) return locale.startsWith('ar');
   if (typeof document !== 'undefined') {
@@ -96,7 +99,74 @@ export function whatsappHref(
   phone: string | null | undefined,
   message: string,
 ): string | null {
-  const digits = phone?.replace(/\D/g, '') ?? '';
+  const digits = normalizeWhatsAppPhone(phone);
   if (!digits) return null;
   return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
+}
+
+/**
+ * Returns the international digits-only format expected by wa.me links.
+ *
+ * New accounts store international numbers, but older Egyptian accounts may
+ * still contain an 11-digit local mobile number (01x...). Keep those existing
+ * customers contactable without rewriting their profile data.
+ */
+export function normalizeWhatsAppPhone(
+  phone: string | null | undefined,
+): string | null {
+  const rawPhone = phone?.trim() ?? '';
+  if (!rawPhone) return null;
+
+  let digits = rawPhone.replace(/\D/g, '');
+
+  if (digits.startsWith('00')) {
+    digits = digits.slice(2);
+  } else if (/^01[0125]\d{8}$/.test(digits)) {
+    digits = `20${digits.slice(1)}`;
+  }
+
+  return /^[1-9]\d{7,14}$/.test(digits) ? digits : null;
+}
+
+export function firstValidWhatsAppPhone(
+  ...phones: Array<string | null | undefined>
+): string | null {
+  for (const phone of phones) {
+    const normalized = normalizeWhatsAppPhone(phone);
+    if (normalized) return normalized;
+  }
+  return null;
+}
+
+interface PaymentPresentation {
+  amount: number | string;
+  status: string;
+  transaction_id?: string;
+  payment_response?: {
+    displayAmount?: number;
+    testMode?: boolean;
+  } | null;
+}
+
+export function isConfirmedDemoPayment(payment: PaymentPresentation): boolean {
+  return (
+    ['paid', 'success'].includes(payment.status) &&
+    payment.transaction_id?.startsWith('demo_') === true &&
+    payment.payment_response?.testMode === true
+  );
+}
+
+export function getPaymentDisplayAmount(
+  payment: PaymentPresentation,
+  fallbackAmount: number | string,
+): number {
+  if (isConfirmedDemoPayment(payment)) {
+    const displayAmount = Number(payment.payment_response?.displayAmount);
+    if (Number.isFinite(displayAmount) && displayAmount > 0) {
+      return displayAmount;
+    }
+    return Number(fallbackAmount);
+  }
+
+  return Number(payment.amount);
 }

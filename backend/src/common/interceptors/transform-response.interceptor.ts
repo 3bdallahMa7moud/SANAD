@@ -4,6 +4,7 @@ import {
   ExecutionContext,
   CallHandler,
 } from '@nestjs/common';
+import { SSE_METADATA } from '@nestjs/common/constants';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ApiResponse } from '../interfaces';
@@ -17,6 +18,9 @@ export class TransformResponseInterceptor<T> implements NestInterceptor<
     context: ExecutionContext,
     next: CallHandler,
   ): Observable<ApiResponse<T>> {
+    if (Reflect.getMetadata(SSE_METADATA, context.getHandler())) {
+      return next.handle() as Observable<ApiResponse<T>>;
+    }
     return next.handle().pipe(
       map((data) => {
         // If the data already has a 'success' property, pass through (e.g. paginated)
@@ -30,7 +34,8 @@ export class TransformResponseInterceptor<T> implements NestInterceptor<
           }
           return {
             success: true,
-            data: 'data' in data ? (data as Record<string, unknown>).data : null,
+            data:
+              'data' in data ? (data as Record<string, unknown>).data : null,
             message:
               'message' in data &&
               typeof (data as Record<string, unknown>).message === 'string'

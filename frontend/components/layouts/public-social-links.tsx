@@ -44,7 +44,7 @@ function InstagramIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
-function WhatsAppIcon(props: SVGProps<SVGSVGElement>) {
+export function WhatsAppIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
       fill="currentColor"

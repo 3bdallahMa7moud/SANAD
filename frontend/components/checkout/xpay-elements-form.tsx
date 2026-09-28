@@ -21,21 +21,19 @@ export function XPayElementsForm({
   onComplete,
 }: XPayElementsFormProps) {
   const _copy = useCopy();
+  const publishableKey = process.env.NEXT_PUBLIC_XPAY_PUBLISHABLE_KEY?.trim();
   const mountRef = useRef<HTMLDivElement>(null);
   const elementsRef = useRef<Elements | null>(null);
   const paymentElementRef = useRef<PaymentElement | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(() =>
+    publishableKey ? null : 'Online card payment is not configured yet.',
+  );
 
   useEffect(() => {
     let cancelled = false;
-    const publishableKey = process.env.NEXT_PUBLIC_XPAY_PUBLISHABLE_KEY?.trim();
-
-    if (!publishableKey) {
-      setError('Online card payment is not configured yet.');
-      return;
-    }
+    if (!publishableKey) return;
 
     void (async () => {
       try {
@@ -72,7 +70,7 @@ export function XPayElementsForm({
       paymentElementRef.current = null;
       elementsRef.current = null;
     };
-  }, [clientSecret, locale]);
+  }, [clientSecret, locale, publishableKey]);
 
   async function confirmPayment() {
     const elements = elementsRef.current;
@@ -85,7 +83,8 @@ export function XPayElementsForm({
         setError(validation.error.message);
         return;
       }
-      const publishableKey = process.env.NEXT_PUBLIC_XPAY_PUBLISHABLE_KEY?.trim();
+      const publishableKey =
+        process.env.NEXT_PUBLIC_XPAY_PUBLISHABLE_KEY?.trim();
       if (!publishableKey) throw new Error('Missing XPay publishable key');
       const xpay = await loadXPay(publishableKey);
       if (!xpay) throw new Error('XPay SDK unavailable');

@@ -28,6 +28,7 @@ describe('PostgreSQL schema integration', () => {
         '20260828050000_add_email_verification_tokens',
         '20260905150000_add_package_reviews',
         '20260909101500_add_manual_payment_methods',
+        '20260927090000_harden_integrity_and_query_indexes',
       ]),
     );
   });
@@ -128,5 +129,74 @@ describe('PostgreSQL schema integration', () => {
     `;
 
     expect(rows.length).toBeGreaterThan(0);
+  });
+
+  it('has compound indexes for the application hot paths', async () => {
+    const rows = await prisma.$queryRaw<Array<{ index_name: string }>>`
+      SELECT indexname AS index_name
+      FROM pg_indexes
+      WHERE schemaname = 'public'
+        AND indexname IN (
+          'idx_orders_user_created_at',
+          'idx_orders_status_created_at',
+          'idx_email_queue_dispatch',
+          'idx_user_sessions_user_active',
+          'idx_email_otp_active_recent',
+          'idx_payments_order_status'
+        )
+    `;
+
+    expect(new Set(rows.map((row) => row.index_name))).toEqual(
+      new Set([
+        'idx_orders_user_created_at',
+        'idx_orders_status_created_at',
+        'idx_email_queue_dispatch',
+        'idx_user_sessions_user_active',
+        'idx_email_otp_active_recent',
+        'idx_payments_order_status',
+      ]),
+    );
+  });
+
+  it('enforces nonnegative monetary and file-size values', async () => {
+    const rows = await prisma.$queryRaw<Array<{ constraint_name: string }>>`
+      SELECT conname AS constraint_name
+      FROM pg_constraint
+      WHERE conname IN (
+        'packages_price_nonnegative',
+        'offers_discount_percentage_range',
+        'coupons_discount_value_positive',
+        'orders_amounts_nonnegative',
+        'payments_amount_nonnegative',
+        'order_files_size_nonnegative'
+      )
+    `;
+
+    expect(new Set(rows.map((row) => row.constraint_name))).toEqual(
+      new Set([
+        'packages_price_nonnegative',
+        'offers_discount_percentage_range',
+        'coupons_discount_value_positive',
+        'orders_amounts_nonnegative',
+        'payments_amount_nonnegative',
+        'order_files_size_nonnegative',
+      ]),
+    );
+
+    await expect(
+      prisma.$executeRaw`
+        INSERT INTO packages (
+          name_ar,
+          name_en,
+          price,
+          delivery_days
+        ) VALUES (
+          'اختبار قيد السعر',
+          'Negative price constraint test',
+          -1,
+          1
+        )
+      `,
+    ).rejects.toThrow();
   });
 });

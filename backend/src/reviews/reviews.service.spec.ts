@@ -193,8 +193,13 @@ describe('ReviewsService', () => {
           status: ReviewStatus.PUBLISHED,
           is_home_featured: true,
         },
-        take: 3,
       }),
+    );
+    expect(prisma.package_reviews.findMany.mock.calls[0][0]).not.toHaveProperty(
+      'take',
+    );
+    expect(prisma.package_reviews.findMany.mock.calls[0][0]).not.toHaveProperty(
+      'skip',
     );
   });
 
@@ -249,17 +254,26 @@ describe('ReviewsService', () => {
     expect(prisma.package_reviews.update).not.toHaveBeenCalled();
   });
 
-  it('limits the home page selection to three reviews', async () => {
+  it('allows the administrator to feature more than three reviews', async () => {
     prisma.package_reviews.findUnique.mockResolvedValue({
-      id: 1,
+      id: 4,
       status: ReviewStatus.PUBLISHED,
       is_home_featured: false,
     });
     prisma.package_reviews.count.mockResolvedValue(3);
-    await expect(service.featureOnHome(1, 7, true)).rejects.toBeInstanceOf(
-      ConflictException,
-    );
-    expect(prisma.package_reviews.update).not.toHaveBeenCalled();
+    prisma.package_reviews.update.mockResolvedValue({
+      id: 4,
+      is_home_featured: true,
+    });
+
+    await expect(service.featureOnHome(4, 7, true)).resolves.toEqual({
+      id: 4,
+      is_home_featured: true,
+    });
+    expect(prisma.package_reviews.update).toHaveBeenCalledWith({
+      where: { id: 4 },
+      data: { is_home_featured: true, updated_at: expect.any(Date) },
+    });
   });
 
   it('records the admin choice without changing the customer review', async () => {

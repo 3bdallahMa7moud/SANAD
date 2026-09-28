@@ -3,6 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
   ForbiddenException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CheckoutService } from '../checkout/checkout.service';
@@ -21,6 +22,11 @@ import {
   createPaymentBypassTransactionId,
   PAYMENT_BYPASS_PROVIDER,
 } from '../payments/payment-bypass';
+import {
+  PAYMENT_DEMO_PROVIDER,
+  PAYMENT_DEMO_TRANSACTION_PREFIX,
+} from '../payments/payment-demo';
+import { NotificationsService } from '../notifications/notifications.service';
 
 const ALLOWED_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   [OrderStatus.PENDING]: [
@@ -100,6 +106,7 @@ export class OrdersService {
     private readonly prisma: PrismaService,
     private readonly checkoutService: CheckoutService,
     private readonly configService: ConfigService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   // Collision-resistant human-readable order number without count-based races.
@@ -128,15 +135,27 @@ export class OrdersService {
       });
     }
 
-    const customerName = dto.customer_name?.trim() || user.name;
-    const customerEmail = dto.customer_email?.trim() || user.email;
-    const customerPhone = dto.customer_phone?.trim() || user.phone || '';
     const paymentProvider =
       this.configService.get<string>('PAYMENT_PROVIDER') || 'mock';
-    const paymentBypassed = paymentProvider === PAYMENT_BYPASS_PROVIDER;
-    const paymentHandledManually = paymentProvider === 'manual';
+    if (paymentProvider === 'disabled' || paymentProvider === 'manual') {
+      throw new ServiceUnavailableException({
+        message:
+          'Online ordering is temporarily unavailable while card payments are being activated.',
+        code: 'CHECKOUT_DISABLED',
+      });
+    }
+    const paymentDemo = paymentProvider === PAYMENT_DEMO_PROVIDER;
 
-    const order = await this.prisma.$transaction(
+    const customerName = dto.customer_name?.trim() || user.name;
+    // Demo orders remain tied to the authenticated account. Never let a request
+    // substitute a different email for the payment and notification flow.
+    const customerEmail = paymentDemo
+      ? user.email
+      : dto.customer_email?.trim() || user.email;
+    const customerPhone = dto.customer_phone?.trim() || user.phone || '';
+    const paymentBypassed = paymentProvider === PAYMENT_BYPASS_PROVIDER;
+
+    const orderResult = await this.prisma.$transaction(
       async (tx) => {
         // Pricing and coupon reservation run inside the same transaction. A coupon
         // row lock prevents concurrent requests from exceeding its limits.
@@ -158,9 +177,7 @@ export class OrdersService {
         const orderNumber = this.generateOrderNumber();
         const initialStatus = paymentBypassed
           ? OrderStatus.PAID
-          : paymentHandledManually
-            ? OrderStatus.PENDING_PAYMENT
-            : OrderStatus.PENDING;
+          : OrderStatus.PENDING;
 
         const newOrder = await tx.orders.create({
           data: {
@@ -184,6 +201,9 @@ export class OrdersService {
             coupon_code: pricing.coupon_code,
             delivery_date: deliveryDate,
             notes: dto.notes,
+            admin_notes: paymentDemo
+              ? 'TEST PAYMENT — no funds will be collected'
+              : undefined,
             requirements: dto.requirements ? { ...dto.requirements } : {},
           },
         });
@@ -268,8 +288,8 @@ export class OrdersService {
             changed_by: user.id,
             note: paymentBypassed
               ? 'Order created with temporary payment bypass'
-              : paymentHandledManually
-                ? 'Order created; external payment arrangement pending'
+              : paymentDemo
+                ? 'Test order created; no funds collected'
                 : 'Order created by customer',
           },
         });
@@ -283,27 +303,44 @@ export class OrdersService {
               : 'تم استلام طلبك بنجاح',
             title_en: paymentBypassed
               ? 'Order Confirmed Successfully'
-              : paymentHandledManually
-                ? 'Order Request Received'
-                : 'Order Placed Successfully',
+              : 'Order Placed Successfully',
             message_ar: paymentBypassed
               ? `تم تأكيد طلبك رقم ${orderNumber} وسيبدأ فريق سند العمل عليه قريبًا.`
               : `تم استلام طلبك رقم ${orderNumber} بنجاح وهو بانتظار إتمام الدفع.`,
             message_en: paymentBypassed
               ? `Your order #${orderNumber} is confirmed and the SANAD team will begin work soon.`
-              : paymentHandledManually
-                ? `Your order #${orderNumber} has been received. Continue on WhatsApp to arrange payment and share your requirements.`
-                : `Your order #${orderNumber} has been received and is awaiting payment.`,
+              : `Your order #${orderNumber} has been received and is awaiting payment.`,
             notification_type: 'order_created',
           },
         });
 
-        return newOrder;
+        const adminRecipientIds =
+          await this.notificationsService.createAdminOrderNotification(tx, {
+            orderId: newOrder.id,
+            titleAr: 'طلب جديد',
+            titleEn: 'New order received',
+            messageAr: `أنشأ العميل ${customerName} الطلب ${orderNumber}.`,
+            messageEn: `${customerName} created order ${orderNumber}.`,
+            type: 'admin_order_created',
+          });
+
+        return { order: newOrder, adminRecipientIds };
       },
       { isolationLevel: 'Serializable', maxWait: 5_000, timeout: 15_000 },
     );
 
-    return this.findOneCustomer(order.id, userId);
+    this.notificationsService.publishAdminOrderEvent(
+      orderResult.adminRecipientIds,
+      {
+        kind: 'admin_order_created',
+        orderId: orderResult.order.id,
+        orderNumber: orderResult.order.order_number,
+        createdAt: new Date().toISOString(),
+        sound: 'soft',
+      },
+    );
+
+    return this.findOneCustomer(orderResult.order.id, userId);
   }
 
   // Customer lists their orders
@@ -688,14 +725,28 @@ export class OrdersService {
     }
 
     if (newStatus === OrderStatus.COMPLETED) {
-      const collectedPaymentCount = await this.prisma.payments.count({
+      const demoCompletionEnabled =
+        this.configService.get<string>('PAYMENT_PROVIDER') ===
+        PAYMENT_DEMO_PROVIDER;
+      const completionPaymentCount = await this.prisma.payments.count({
         where: {
           order_id: id,
           status: { in: ['paid', 'success'] },
-          amount: { gt: 0 },
+          ...(demoCompletionEnabled
+            ? {
+                OR: [
+                  { amount: { gt: 0 } },
+                  {
+                    transaction_id: {
+                      startsWith: PAYMENT_DEMO_TRANSACTION_PREFIX,
+                    },
+                  },
+                ],
+              }
+            : { amount: { gt: 0 } }),
         },
       });
-      if (collectedPaymentCount === 0) {
+      if (completionPaymentCount === 0) {
         throw new BadRequestException({
           message: 'A collected payment is required before completing an order',
           code: 'COLLECTED_PAYMENT_REQUIRED',
@@ -783,7 +834,13 @@ export class OrdersService {
             order_number: true,
             user_id: true,
             status: true,
-            payments: { select: { status: true, amount: true } },
+            payments: {
+              select: {
+                status: true,
+                amount: true,
+                transaction_id: true,
+              },
+            },
           },
         });
 
@@ -805,12 +862,19 @@ export class OrdersService {
           });
         }
 
+        const demoCompletionEnabled =
+          this.configService.get<string>('PAYMENT_PROVIDER') ===
+          PAYMENT_DEMO_PROVIDER;
         const unpaidOrder = orders.find(
           (order) =>
             !order.payments.some(
               (payment) =>
                 ['paid', 'success'].includes(payment.status) &&
-                Number(payment.amount) > 0,
+                (Number(payment.amount) > 0 ||
+                  (demoCompletionEnabled &&
+                    payment.transaction_id.startsWith(
+                      PAYMENT_DEMO_TRANSACTION_PREFIX,
+                    ))),
             ),
         );
         if (unpaidOrder) {

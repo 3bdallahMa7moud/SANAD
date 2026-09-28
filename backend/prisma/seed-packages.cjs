@@ -308,7 +308,7 @@ async function main() {
   const defaultSettings = [
     {
       setting_key: 'whatsapp_number',
-      setting_value: '+971500000000',
+      setting_value: '+201554968707',
       description: 'WhatsApp contact number',
     },
     {

@@ -2,13 +2,18 @@
 import { useCopy } from '@/lib/i18n/use-copy';
 
 import { useQuery } from '@tanstack/react-query';
-import { CheckCircle2, MessageCircle } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
+import { WhatsAppIcon } from '@/components/layouts/public-social-links';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/ui/status-badge';
-import { orderKeys, ordersApi, settingsApi, settingsKeys } from '@/lib/api';
-import { statusIntent, whatsappHref } from '@/lib/orders/presentation';
+import { orderKeys, ordersApi } from '@/lib/api';
+import {
+  CUSTOMER_SERVICE_WHATSAPP_NUMBER,
+  statusIntent,
+  whatsappHref,
+} from '@/lib/orders/presentation';
 import { ReviewForm } from './review-form';
 import type { OrderRequirements } from '@/types/domain';
 
@@ -135,10 +140,6 @@ export function OrderDetail(props: Props) {
         ? ordersApi.getByNumber(props.orderNumber, { signal })
         : ordersApi.getById(props.id, { signal }),
   });
-  const settingsQuery = useQuery({
-    queryKey: settingsKeys.public,
-    queryFn: ({ signal }) => settingsApi.getPublic({ signal }),
-  });
   if (orderQuery.isPending)
     return (
       <div
@@ -167,6 +168,9 @@ export function OrderDetail(props: Props) {
     );
   const order = orderQuery.data;
   if (!order) return null;
+  const hasConfirmedPayment = order.payments.some((payment) =>
+    ['paid', 'success'].includes(payment.status),
+  );
   const hasCollectedPayment = order.payments.some(
     (payment) =>
       ['paid', 'success'].includes(payment.status) && payment.amount > 0,
@@ -175,10 +179,12 @@ export function OrderDetail(props: Props) {
   const serviceSummary = [order.packageName, order.secondaryPackageName]
     .filter(Boolean)
     .join(' + ');
-  const localizedServiceSummary = [
-    _copy(order.packageName ?? 'SANAD career service', order.packageNameAr),
+  const arabicServiceSummary = [
+    order.packageNameAr?.trim() ||
+      order.packageName?.trim() ||
+      'خدمة سند المهنية',
     order.secondaryPackageName
-      ? _copy(order.secondaryPackageName, order.secondaryPackageNameAr)
+      ? order.secondaryPackageNameAr?.trim() || order.secondaryPackageName
       : null,
   ]
     .filter(Boolean)
@@ -188,26 +194,15 @@ export function OrderDetail(props: Props) {
     order.discountAmount - order.secondaryDiscountAmount,
   );
   const instructions = serviceInstructions(serviceSummary);
-  const requirementsEn = requirementLines(
-    order.requirements,
-    order.notes,
-    'en',
-  );
   const requirementsAr = requirementLines(
     order.requirements,
     order.notes,
     'ar',
   );
-  const message = props.success
-    ? `Hello SANAD,\n\nI'm contacting you regarding my order.\n\nOrder: #${order.orderNumber}\nServices: ${serviceSummary || 'SANAD career service'}${requirementsEn ? `\n\nMy request details:\n${requirementsEn}` : ''}\n\nI will send the supporting documents in this chat.`
-    : `Hello SANAD,\n\nI'm contacting you regarding:\n\nOrder: #${order.orderNumber}\nServices: ${serviceSummary || 'SANAD career service'}${requirementsEn ? `\n\nMy request details:\n${requirementsEn}` : ''}`;
-  const localizedMessage =
-    _copy.locale === 'ar'
-      ? `مرحبًا سند،\n\nأتواصل معكم بخصوص الطلب رقم #${order.orderNumber}\nالخدمات: ${localizedServiceSummary}${requirementsAr ? `\n\nتفاصيل طلبي:\n${requirementsAr}` : ''}${props.success ? '\n\nسأرسل المستندات المطلوبة في هذه المحادثة.' : ''}`
-      : message;
+  const whatsappMessage = `مرحبًا سند،\n\nأتواصل معكم بخصوص الطلب رقم #${order.orderNumber}\nالخدمات: ${arabicServiceSummary}${requirementsAr ? `\n\nتفاصيل طلبي:\n${requirementsAr}` : ''}${hasConfirmedPayment ? '\n\nسأرسل المستندات المطلوبة في هذه المحادثة.' : ''}`;
   const whatsapp = whatsappHref(
-    settingsQuery.data?.whatsapp_number,
-    localizedMessage,
+    CUSTOMER_SERVICE_WHATSAPP_NUMBER,
+    whatsappMessage,
   );
 
   return (
@@ -221,17 +216,17 @@ export function OrderDetail(props: Props) {
           <div>
             <p className="text-xs font-semibold tracking-[0.16em] text-success uppercase">
               {_copy(
-                hasCollectedPayment ? 'Payment confirmed' : 'Request received',
+                hasConfirmedPayment ? 'Payment confirmed' : 'Request received',
               )}
             </p>
             <h1 className="type-h1 mt-2 text-primary">
               {_copy(
-                hasCollectedPayment ? 'Order Confirmed' : 'Order Received',
+                hasConfirmedPayment ? 'Order Confirmed' : 'Order Received',
               )}
             </h1>
             <p className="mt-3 max-w-2xl text-muted-foreground">
               {_copy(
-                hasCollectedPayment
+                hasConfirmedPayment
                   ? 'Your payment and order are confirmed. Continue with the SANAD team on WhatsApp to send your documents and requirements.'
                   : 'Your request is safely recorded and no payment has been confirmed yet. Continue on WhatsApp to arrange payment and send your requirements.',
               )}
@@ -398,10 +393,10 @@ export function OrderDetail(props: Props) {
           </div>
         </div>
         <aside className="h-fit border border-border bg-surface-muted p-6">
-          <h2 className="type-h4 text-primary">{_copy('What&apos;s Next?')}</h2>
+          <h2 className="type-h4 text-primary">{_copy("What's Next?")}</h2>
           <p className="mt-3 text-sm leading-6 text-muted-foreground">
             {_copy(
-              hasCollectedPayment
+              hasConfirmedPayment
                 ? 'Continue with the SANAD team on WhatsApp to send your documents, requirements, and career information.'
                 : 'Continue with the SANAD team on WhatsApp to receive your payment link or QR code, then send your documents and requirements.',
             )}
@@ -422,10 +417,16 @@ export function OrderDetail(props: Props) {
             </ul>
           </div>
           {whatsapp ? (
-            <Button asChild className="mt-6 w-full">
+            <Button
+              asChild
+              className="mt-6 w-full bg-[#25D366] text-white hover:bg-[#20bd5a] focus-visible:ring-[#25D366]"
+            >
               <a href={whatsapp} rel="noreferrer noopener" target="_blank">
-                <MessageCircle className="size-4" aria-hidden="true" />
-                {_copy('Continue on WhatsApp')}
+                <WhatsAppIcon className="size-4" aria-hidden="true" />
+                {_copy(
+                  'Contact customer service on WhatsApp',
+                  'تواصل مع خدمة العملاء عبر واتساب',
+                )}
               </a>
             </Button>
           ) : (
@@ -433,9 +434,7 @@ export function OrderDetail(props: Props) {
               className="mt-5"
               title={_copy('WhatsApp unavailable')}
               description={_copy(
-                settingsQuery.isPending
-                  ? 'Loading contact details...'
-                  : 'The WhatsApp contact has not been configured yet.',
+                'The WhatsApp contact has not been configured yet.',
               )}
               variant="warning"
             />

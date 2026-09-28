@@ -8,7 +8,10 @@ import { ServicesCatalog } from '@/components/packages/services-catalog';
 import { Button } from '@/components/ui/button';
 import { packagesApi } from '@/lib/api';
 import { getInitialPublicSettings } from '@/lib/api/public-settings-server';
-import { whatsappHref } from '@/lib/orders/presentation';
+import {
+  CUSTOMER_SERVICE_WHATSAPP_NUMBER,
+  whatsappHref,
+} from '@/lib/orders/presentation';
 import { getSecondaryExchangeRates } from '@/lib/packages/exchange-rates';
 
 export const dynamic = 'force-dynamic';
@@ -34,10 +37,9 @@ export default async function PackagesPage() {
   ]);
   const rawPackages = catalog?.items ?? [];
   const packages = [...rawPackages].sort((a, b) => a.sortOrder - b.sortOrder);
-  const defaultWhatsappNumber =
-    process.env.NEXT_PUBLIC_DEFAULT_WHATSAPP_NUMBER || '971500000000';
   const contact = whatsappHref(
-    settingsResult?.whatsapp_number?.trim() || defaultWhatsappNumber,
+    settingsResult?.whatsapp_number?.trim() ||
+      CUSTOMER_SERVICE_WHATSAPP_NUMBER,
     'Hello, I would like help choosing a SANAD service and confirming the scope before ordering.',
   );
   return (

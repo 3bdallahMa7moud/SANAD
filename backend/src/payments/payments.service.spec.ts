@@ -10,6 +10,7 @@ describe('PaymentsService', () => {
   let service: PaymentsService;
   let prisma: any;
   let configService: any;
+  let notificationsService: any;
   const webhookSecret = 'unit_test_webhook_secret_at_least_32_chars';
 
   const sign = (payload: Record<string, unknown>) => {
@@ -34,9 +35,14 @@ describe('PaymentsService', () => {
         create: vi.fn(),
         updateMany: vi.fn().mockResolvedValue({ count: 1 }),
       },
+      users: {
+        findUnique: vi.fn(),
+        findMany: vi.fn().mockResolvedValue([]),
+      },
       order_status_history: { create: vi.fn() },
-      notifications: { create: vi.fn() },
+      notifications: { create: vi.fn(), createMany: vi.fn() },
       email_queue: { create: vi.fn() },
+      settings: { findUnique: vi.fn() },
       admin_activity_log: { create: vi.fn() },
       $queryRaw: vi.fn(),
       $transaction: vi.fn(async (callback) => callback(prisma)),
@@ -51,26 +57,36 @@ describe('PaymentsService', () => {
     const provider = new MockPaymentProvider(
       configService as unknown as ConfigService,
     );
+    notificationsService = {
+      createAdminOrderNotification: vi.fn().mockResolvedValue([]),
+      publishAdminOrderEvent: vi.fn(),
+    };
     service = new PaymentsService(
       prisma as PrismaService,
       provider,
       configService as ConfigService,
+      notificationsService,
     );
   });
 
   describe('createPayment', () => {
-    it('blocks customer gateway creation while manual checkout is active', async () => {
-      configService.get.mockImplementation((key: string) =>
-        key === 'PAYMENT_PROVIDER' ? 'manual' : 'http://localhost:3001',
-      );
+    it.each(['disabled', 'manual'])(
+      'blocks customer gateway creation while %s checkout is active',
+      async (paymentProvider) => {
+        configService.get.mockImplementation((key: string) =>
+          key === 'PAYMENT_PROVIDER'
+            ? paymentProvider
+            : 'http://localhost:3001',
+        );
 
-      await expect(
-        service.createPayment(10, { order_id: 7 }),
-      ).rejects.toMatchObject({
-        response: expect.objectContaining({ code: 'MANUAL_PAYMENT_ONLY' }),
-      });
-      expect(prisma.$transaction).not.toHaveBeenCalled();
-    });
+        await expect(
+          service.createPayment(10, { order_id: 7 }),
+        ).rejects.toMatchObject({
+          response: expect.objectContaining({ code: 'CHECKOUT_DISABLED' }),
+        });
+        expect(prisma.$transaction).not.toHaveBeenCalled();
+      },
+    );
 
     it('confirms a pending order with zero charged amount in bypass mode', async () => {
       configService.get.mockImplementation((key: string) =>
@@ -153,6 +169,143 @@ describe('PaymentsService', () => {
       });
       expect(prisma.payments.create).not.toHaveBeenCalled();
     });
+
+    it('creates a zero-revenue demo session for any authenticated account', async () => {
+      configService.get.mockImplementation((key: string) => {
+        if (key === 'PAYMENT_PROVIDER') return 'demo';
+        if (key === 'FRONTEND_URL') return 'https://sanad.example';
+        return undefined;
+      });
+      prisma.orders.findUnique.mockResolvedValue({
+        id: 7,
+        order_number: 'SANAD-2026-000007',
+        user_id: 10,
+        status: 'pending',
+        final_amount: 500,
+        customer_name: 'Test Customer',
+        customer_email: 'mousaabdo550@gmail.com',
+        customer_phone: '+971500000000',
+        package: {},
+      });
+      prisma.payments.findFirst.mockResolvedValue(null);
+      prisma.payments.create.mockImplementation(async ({ data }: any) => ({
+        id: 70,
+        ...data,
+      }));
+
+      const result = await service.createPayment(10, { order_id: 7 });
+
+      expect(result).toMatchObject({
+        payment_id: 70,
+        amount: 500,
+        charged_amount: 0,
+        status: 'pending',
+        requires_payment: true,
+      });
+      expect(result.payment_url).toContain('/checkout/pay?');
+      expect(prisma.payments.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          payment_method: 'card',
+          amount: 0,
+          status: 'pending',
+          payment_response: expect.objectContaining({
+            testMode: true,
+            displayAmount: 500,
+          }),
+        }),
+      });
+    });
+  });
+
+  describe('confirmDemoPayment', () => {
+    beforeEach(() => {
+      configService.get.mockImplementation((key: string) => {
+        if (key === 'PAYMENT_PROVIDER') return 'demo';
+        return undefined;
+      });
+      prisma.payments.findUnique.mockResolvedValue({
+        id: 70,
+        order_id: 7,
+        transaction_id: 'demo_123',
+        status: 'pending',
+        order: {
+          id: 7,
+          order_number: 'SANAD-2026-000007',
+          user_id: 10,
+          status: 'pending_payment',
+          final_amount: 500,
+          customer_name: 'Test Customer',
+          customer_email: 'mousaabdo550@gmail.com',
+          customer_phone: '+971500000000',
+        },
+      });
+      prisma.users.findMany.mockResolvedValue([{ id: 42 }]);
+      prisma.settings.findUnique.mockResolvedValue({
+        setting_value: 'support@sanad.example',
+      });
+    });
+
+    it('marks the test payment and order paid without recording revenue', async () => {
+      const result = await service.confirmDemoPayment(10, {
+        transaction_id: 'demo_123',
+        card_number: '4242 4242 4242 4242',
+        expiry: '12/30',
+        cvc: '123',
+        cardholder_name: 'SANAD TEST',
+      });
+
+      expect(result).toMatchObject({
+        status: 'paid',
+        amount: 500,
+        charged_amount: 0,
+        redirect_url: '/my-orders?payment=success',
+      });
+      expect(prisma.payments.updateMany).toHaveBeenCalledWith({
+        where: { id: 70, status: 'pending' },
+        data: expect.objectContaining({
+          status: 'paid',
+          payment_response: expect.objectContaining({
+            chargedAmount: 0,
+            lastFour: '4242',
+          }),
+        }),
+      });
+      expect(prisma.orders.updateMany).toHaveBeenCalledWith({
+        where: { id: 7, status: { in: ['pending', 'pending_payment'] } },
+        data: { status: 'paid' },
+      });
+      expect(
+        notificationsService.createAdminOrderNotification,
+      ).toHaveBeenCalledWith(
+        prisma,
+        expect.objectContaining({
+          orderId: 7,
+          type: 'admin_order_paid',
+        }),
+      );
+      expect(notificationsService.publishAdminOrderEvent).toHaveBeenCalledWith(
+        [],
+        expect.objectContaining({ orderId: 7, sound: 'strong' }),
+      );
+      expect(prisma.email_queue.create).toHaveBeenCalledTimes(2);
+    });
+
+    it('rejects any card other than the fixed test card', async () => {
+      await expect(
+        service.confirmDemoPayment(10, {
+          transaction_id: 'demo_123',
+          card_number: '4111 1111 1111 1111',
+          expiry: '12/30',
+          cvc: '123',
+          cardholder_name: 'SANAD TEST',
+        }),
+      ).rejects.toMatchObject({
+        response: expect.objectContaining({
+          code: 'PAYMENT_DEMO_CARD_INVALID',
+        }),
+      });
+      expect(prisma.$transaction).not.toHaveBeenCalled();
+    });
   });
 
   describe('confirmManualPayment', () => {
@@ -165,6 +318,27 @@ describe('PaymentsService', () => {
       customer_name: 'Test Customer',
       customer_email: 'test@example.com',
     };
+
+    beforeEach(() => {
+      configService.get.mockImplementation((key: string) =>
+        key === 'PAYMENT_PROVIDER' ? 'manual' : 'http://localhost:3001',
+      );
+    });
+
+    it('rejects manual confirmation when XPay or disabled checkout is configured', async () => {
+      configService.get.mockReturnValue('disabled');
+
+      await expect(
+        service.confirmManualPayment(42, {
+          order_id: 7,
+          amount: 500,
+          payment_method: 'cash',
+        }),
+      ).rejects.toMatchObject({
+        response: expect.objectContaining({ code: 'MANUAL_PAYMENT_DISABLED' }),
+      });
+      expect(prisma.$transaction).not.toHaveBeenCalled();
+    });
 
     it('records collected money, advances the order, and writes an audit trail', async () => {
       prisma.orders.findUnique.mockResolvedValue(order);

@@ -10,6 +10,7 @@ import {
   IsDateString,
   MaxLength,
   Max,
+  Matches,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
@@ -114,6 +115,35 @@ export class ConfirmManualPaymentDto {
   @IsString()
   @MaxLength(2000)
   note?: string;
+}
+
+export class ConfirmDemoPaymentDto {
+  @ApiProperty({ example: 'demo_8b14337b-fba2-4a7c-aad7-0e951115a9cd' })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(255)
+  transaction_id!: string;
+
+  @ApiProperty({ example: '4242 4242 4242 4242' })
+  @IsString()
+  @Matches(/^[\d ]{16,23}$/)
+  card_number!: string;
+
+  @ApiProperty({ example: '12/30' })
+  @IsString()
+  @Matches(/^(0[1-9]|1[0-2])\/\d{2}$/)
+  expiry!: string;
+
+  @ApiProperty({ example: '123' })
+  @IsString()
+  @Matches(/^\d{3}$/)
+  cvc!: string;
+
+  @ApiProperty({ example: 'SANAD TEST' })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(100)
+  cardholder_name!: string;
 }
 
 export class PaymentFilterDto extends PaginationDto {

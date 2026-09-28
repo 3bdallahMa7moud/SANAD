@@ -411,7 +411,7 @@ export default async function PackageDetailPage({
                       />
                       {pricing.offerDiscountAmount > 0 ? (
                         <p className="mt-1.5 text-xs font-semibold text-accent">
-                          {_copy('Save', 'توفير')}{' '}
+                          {_copy('Save', 'وفر')}{' '}
                           {_copy(
                             _copy.money(
                               pricing.offerDiscountAmount,
@@ -445,7 +445,7 @@ export default async function PackageDetailPage({
                             {_copy(_copy.money(fallbackOriginalPrice))}
                           </span>
                           <p className="mt-1.5 text-xs font-semibold text-accent">
-                            {_copy('Save', 'توفير')}{' '}
+                            {_copy('Save', 'وفر')}{' '}
                             {_copy(_copy.money(fallbackDiscountAmount))}
                           </p>
                         </>

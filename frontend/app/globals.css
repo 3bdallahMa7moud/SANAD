@@ -786,7 +786,12 @@ html[data-theme='dark']
 }
 
 .reviews-loop {
-  overflow: hidden;
+  cursor: grab;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: none;
+  touch-action: pan-y;
   mask-image: linear-gradient(
     to right,
     transparent,
@@ -794,6 +799,15 @@ html[data-theme='dark']
     #000 calc(100% - 1.5rem),
     transparent
   );
+}
+
+.reviews-loop::-webkit-scrollbar {
+  display: none;
+}
+
+.reviews-loop[data-dragging='true'] {
+  cursor: grabbing;
+  user-select: none;
 }
 
 .reviews-loop-track,
@@ -804,11 +818,7 @@ html[data-theme='dark']
 }
 
 .reviews-loop-track {
-  animation: sanad-reviews-left 42s linear infinite;
-}
-
-html[dir='rtl'] .reviews-loop-track {
-  animation-name: sanad-reviews-right;
+  min-width: max-content;
 }
 
 .reviews-loop[data-count='1'] {
@@ -818,7 +828,6 @@ html[dir='rtl'] .reviews-loop-track {
 .reviews-loop[data-count='1'] .reviews-loop-track {
   width: 100%;
   justify-content: center;
-  animation: sanad-reviews-drift 9s ease-in-out infinite;
 }
 
 .reviews-loop[data-count='1'] .reviews-loop-group {
@@ -844,34 +853,6 @@ html[dir='rtl'] .reviews-loop-track {
   width: 100%;
 }
 
-.reviews-loop:hover .reviews-loop-track,
-.reviews-loop:focus-within .reviews-loop-track {
-  animation-play-state: paused;
-}
-
-@keyframes sanad-reviews-left {
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-@keyframes sanad-reviews-right {
-  to {
-    transform: translateX(50%);
-  }
-}
-
-@keyframes sanad-reviews-drift {
-  0%,
-  100% {
-    transform: translateX(-0.75rem);
-  }
-
-  50% {
-    transform: translateX(0.75rem);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .reviews-loop {
     overflow-x: auto;
@@ -883,7 +864,6 @@ html[dir='rtl'] .reviews-loop-track {
   }
 
   .reviews-loop-track {
-    animation: none;
     transform: none;
   }
 

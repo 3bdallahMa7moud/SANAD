@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import type { ReactElement } from 'react';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
@@ -228,7 +228,7 @@ describe('home visual sections', () => {
     );
   });
 
-  it('duplicates a larger feedback list for a seamless loop', () => {
+  it('creates buffered copies of a larger feedback list for dragging and a seamless loop', () => {
     const pagingReviews = [
       ...reviews,
       { ...reviews[0], id: 3, comment: 'Third review' },
@@ -241,8 +241,80 @@ describe('home visual sections', () => {
 
     const groups = container.querySelectorAll('.reviews-loop-group');
 
-    expect(groups).toHaveLength(2);
+    expect(groups).toHaveLength(3);
     expect(groups[0]?.children).toHaveLength(4);
     expect(groups[1]?.children).toHaveLength(4);
+    expect(groups[2]?.children).toHaveLength(4);
+  });
+
+  it('moves the feedback wall automatically', () => {
+    const frames: FrameRequestCallback[] = [];
+    let frameId = 0;
+    const requestFrame = vi
+      .spyOn(window, 'requestAnimationFrame')
+      .mockImplementation((callback) => {
+        frames.push(callback);
+        frameId += 1;
+        return frameId;
+      });
+    const cancelFrame = vi
+      .spyOn(window, 'cancelAnimationFrame')
+      .mockImplementation(() => undefined);
+
+    const { container, unmount } = renderWithEnglish(
+      <TestimonialsCarousel reviews={reviews} />,
+    );
+    const carousel = container.querySelector<HTMLElement>('.reviews-loop')!;
+    Object.defineProperty(carousel, 'scrollWidth', {
+      configurable: true,
+      value: 3_000,
+    });
+
+    const runNextFrame = (time: number) => {
+      const callback = frames.shift();
+      expect(callback).toBeDefined();
+      act(() => callback?.(time));
+    };
+
+    runNextFrame(0);
+    runNextFrame(0);
+    expect(carousel.scrollLeft).toBe(1_000);
+
+    runNextFrame(64);
+    expect(carousel.scrollLeft).toBeGreaterThan(1_000);
+
+    unmount();
+    requestFrame.mockRestore();
+    cancelFrame.mockRestore();
+  });
+
+  it.each(['mouse', 'touch'])('supports free %s dragging', (pointerType) => {
+    const { container } = renderWithEnglish(
+      <TestimonialsCarousel reviews={reviews} />,
+    );
+    const carousel = container.querySelector<HTMLElement>('.reviews-loop')!;
+    Object.defineProperty(carousel, 'scrollWidth', {
+      configurable: true,
+      value: 3_000,
+    });
+    carousel.scrollLeft = 1_000;
+
+    fireEvent.pointerDown(carousel, {
+      button: 0,
+      clientX: 500,
+      pointerId: 7,
+      pointerType,
+    });
+    fireEvent.pointerMove(carousel, {
+      clientX: 350,
+      pointerId: 7,
+      pointerType,
+    });
+
+    expect(carousel).toHaveAttribute('data-dragging', 'true');
+    expect(carousel.scrollLeft).toBe(1_150);
+
+    fireEvent.pointerUp(carousel, { pointerId: 7, pointerType });
+    expect(carousel).toHaveAttribute('data-dragging', 'false');
   });
 });

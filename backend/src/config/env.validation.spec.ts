@@ -24,6 +24,26 @@ describe('environment validation', () => {
     expect(validate(valid)).toMatchObject({ NODE_ENV: 'development' });
   });
 
+  it('does not require a mock webhook secret outside mock payment mode', () => {
+    expect(
+      validate({
+        ...valid,
+        PAYMENT_PROVIDER: 'disabled',
+        PAYMENT_WEBHOOK_SECRET: undefined,
+      }),
+    ).toMatchObject({ PAYMENT_PROVIDER: 'disabled' });
+  });
+
+  it('normalizes an empty optional SMTP_SECURE value to false', () => {
+    expect(validate({ ...valid, SMTP_SECURE: '' }).SMTP_SECURE).toBe('false');
+  });
+
+  it('requires a webhook secret when the mock provider is selected', () => {
+    expect(() =>
+      validate({ ...valid, PAYMENT_WEBHOOK_SECRET: undefined }),
+    ).toThrow(/PAYMENT_WEBHOOK_SECRET/);
+  });
+
   it('validates the optional Google OAuth web client ID', () => {
     expect(
       validate({
@@ -51,6 +71,20 @@ describe('environment validation', () => {
           'replace-with-a-unique-random-value-of-at-least-32-characters',
       }),
     ).toThrow(/insecure default/);
+  });
+
+  it('rejects placeholder XPay credentials', () => {
+    expect(() =>
+      validate({
+        ...valid,
+        NODE_ENV: 'production',
+        TRUST_PROXY: 'false',
+        ...productionServices,
+        PAYMENT_PROVIDER: 'xpay',
+        XPAY_SECRET_KEY: 'replace-with-your-xpay-secret-key',
+        XPAY_WEBHOOK_SECRET: 'replace-with-your-xpay-webhook-signing-secret',
+      }),
+    ).toThrow(/XPAY_SECRET_KEY uses an insecure default value/);
   });
 
   it('rejects malformed trust-proxy addresses and CIDRs', () => {
@@ -82,7 +116,7 @@ describe('environment validation', () => {
         ...valid,
         NODE_ENV: 'production',
         TRUST_PROXY: 'false',
-        PAYMENT_PROVIDER: 'manual',
+        PAYMENT_PROVIDER: 'disabled',
         SMTP_HOST: 'smtp.gmail.com',
       }),
     ).toThrow(/SMTP configuration is incomplete/);
@@ -101,10 +135,39 @@ describe('environment validation', () => {
         NODE_ENV: 'production',
         TRUST_PROXY: 'false',
         ...productionServices,
-        PAYMENT_PROVIDER: 'manual',
+        PAYMENT_PROVIDER: 'disabled',
       }),
-    ).toMatchObject({ NODE_ENV: 'production', PAYMENT_PROVIDER: 'manual' });
+    ).toMatchObject({ NODE_ENV: 'production', PAYMENT_PROVIDER: 'disabled' });
   });
+
+  it('allows the authenticated-account demo provider in production', () => {
+    expect(
+      validate({
+        ...valid,
+        NODE_ENV: 'production',
+        TRUST_PROXY: 'false',
+        ...productionServices,
+        PAYMENT_PROVIDER: 'demo',
+      }),
+    ).toMatchObject({
+      PAYMENT_PROVIDER: 'demo',
+    });
+  });
+
+  it.each(['manual', 'bypass'])(
+    'rejects the %s payment mode in production',
+    (paymentProvider) => {
+      expect(() =>
+        validate({
+          ...valid,
+          NODE_ENV: 'production',
+          TRUST_PROXY: 'false',
+          ...productionServices,
+          PAYMENT_PROVIDER: paymentProvider,
+        }),
+      ).toThrow(new RegExp(`PAYMENT_PROVIDER=${paymentProvider}`));
+    },
+  );
 
   it('rejects the mock payment gateway in production', () => {
     expect(() =>
@@ -125,7 +188,7 @@ describe('environment validation', () => {
         ...productionServices,
         NODE_ENV: 'production',
         TRUST_PROXY: '1',
-        PAYMENT_PROVIDER: 'bypass',
+        PAYMENT_PROVIDER: 'disabled',
         RESEND_API_KEY: 're_placeholder',
       }),
     ).toThrow(/SMTP_HOST or RESEND_API_KEY/);
@@ -138,7 +201,7 @@ describe('environment validation', () => {
         ...productionServices,
         NODE_ENV: 'production',
         TRUST_PROXY: '1',
-        PAYMENT_PROVIDER: 'bypass',
+        PAYMENT_PROVIDER: 'disabled',
         CORS_ORIGINS: 'http://admin.sanad.example',
       }),
     ).toThrow(/CORS_ORIGINS must use HTTPS/);
@@ -149,7 +212,7 @@ describe('environment validation', () => {
         ...productionServices,
         NODE_ENV: 'production',
         TRUST_PROXY: '1',
-        PAYMENT_PROVIDER: 'bypass',
+        PAYMENT_PROVIDER: 'disabled',
         SWAGGER_ENABLED: 'true',
       }),
     ).toThrow(/SWAGGER_ENABLED=false/);
@@ -161,7 +224,7 @@ describe('environment validation', () => {
         ...valid,
         NODE_ENV: 'production',
         TRUST_PROXY: '1',
-        PAYMENT_PROVIDER: 'bypass',
+        PAYMENT_PROVIDER: 'disabled',
         RESEND_API_KEY: 'resend-key',
       }),
     ).toMatchObject({ NODE_ENV: 'production' });
@@ -171,7 +234,7 @@ describe('environment validation', () => {
         ...valid,
         NODE_ENV: 'production',
         TRUST_PROXY: '1',
-        PAYMENT_PROVIDER: 'bypass',
+        PAYMENT_PROVIDER: 'disabled',
         RESEND_API_KEY: 'resend-key',
         R2_PUBLIC_URL: 'https://media.sanad.example',
       }),
@@ -183,7 +246,7 @@ describe('environment validation', () => {
         ...productionServices,
         NODE_ENV: 'production',
         TRUST_PROXY: '1',
-        PAYMENT_PROVIDER: 'bypass',
+        PAYMENT_PROVIDER: 'disabled',
         R2_PUBLIC_URL: 'http://media.sanad.example',
       }),
     ).toThrow(/valid HTTPS URL/);

@@ -115,6 +115,30 @@ describe('CheckoutExperience', () => {
 
   afterEach(() => cleanup());
 
+  it('links to the payment preview without creating an order while XPay activation is pending', async () => {
+    const visitor = userEvent.setup();
+    mocks.auth = authState({ isInitializing: false });
+
+    render(
+      <CheckoutExperience
+        checkoutMode="disabled"
+        packageItem={packageItem}
+        pricing={pricing}
+      />,
+    );
+
+    expect(screen.getByText('Online payment is coming soon')).toBeVisible();
+    expect(screen.getByText(/waiting for XPay to activate/i)).toBeVisible();
+    await visitor.click(
+      screen.getByRole('button', { name: /Complete order/i }),
+    );
+    expect(mocks.routerReplace).toHaveBeenCalledWith(
+      '/checkout/pay?amount=400.00&orderId=SANAD-PREVIEW&txn=xpay-pending-activation',
+    );
+    expect(mocks.orderCreate).not.toHaveBeenCalled();
+    expect(mocks.paymentCreate).not.toHaveBeenCalled();
+  });
+
   it('does not display a customer-data form before submitting the order', async () => {
     const view = render(
       <CheckoutExperience

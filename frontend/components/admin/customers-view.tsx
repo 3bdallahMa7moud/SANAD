@@ -220,7 +220,7 @@ export function CustomersView() {
                   <Button asChild variant="outline">
                     <a href={wa} rel="noreferrer noopener" target="_blank">
                       <MessageCircle className="size-4" />
-                      {_copy('Open WhatsApp')}
+                      {_copy('Open WhatsApp', 'فتح واتساب')}
                     </a>
                   </Button>
                 ) : null}

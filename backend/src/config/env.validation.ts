@@ -158,6 +158,7 @@ class EnvironmentVariables {
 
   @IsString()
   @IsOptional()
+  @Transform(({ value }) => normalizeBooleanEnvironmentValue(value))
   @IsIn(['true', 'false'])
   SMTP_SECURE?: string;
 
@@ -184,7 +185,7 @@ class EnvironmentVariables {
   GOOGLE_CLIENT_ID?: string;
 
   @IsString()
-  @IsIn(['mock', 'manual', 'bypass', 'xpay'])
+  @IsIn(['mock', 'manual', 'bypass', 'disabled', 'demo', 'xpay'])
   PAYMENT_PROVIDER: string = 'mock';
 
   @IsString()
@@ -282,7 +283,10 @@ export function validate(config: Record<string, unknown>) {
     ['JWT_ACCESS_SECRET', validatedConfig.JWT_ACCESS_SECRET],
     ['JWT_REFRESH_SECRET', validatedConfig.JWT_REFRESH_SECRET],
     ['PAYMENT_WEBHOOK_SECRET', validatedConfig.PAYMENT_WEBHOOK_SECRET],
+    ['XPAY_SECRET_KEY', validatedConfig.XPAY_SECRET_KEY],
+    ['XPAY_WEBHOOK_SECRET', validatedConfig.XPAY_WEBHOOK_SECRET],
   ]) {
+    if (!value) continue;
     const normalized = value.toLowerCase();
     if (
       /(change[-_ ]?in[-_ ]?production|replace[-_ ]?with|generate[-_ ]?|your[-_ ]|default|super[-_ ]?secret|mock[-_ ]?payment)/.test(
@@ -292,6 +296,13 @@ export function validate(config: Record<string, unknown>) {
     ) {
       throw new Error(`${name} uses an insecure default value`);
     }
+  }
+
+  if (
+    validatedConfig.PAYMENT_PROVIDER === 'mock' &&
+    !validatedConfig.PAYMENT_WEBHOOK_SECRET?.trim()
+  ) {
+    throw new Error('PAYMENT_PROVIDER=mock requires PAYMENT_WEBHOOK_SECRET.');
   }
 
   if (validatedConfig.NODE_ENV === Environment.Production) {
@@ -392,9 +403,11 @@ export function validate(config: Record<string, unknown>) {
         'Production requires SMTP_HOST or RESEND_API_KEY (SMTP also requires SMTP_USER and SMTP_PASSWORD)',
       );
     }
-    if (validatedConfig.PAYMENT_PROVIDER === 'mock') {
+    if (
+      ['mock', 'manual', 'bypass'].includes(validatedConfig.PAYMENT_PROVIDER)
+    ) {
       throw new Error(
-        'Production cannot use PAYMENT_PROVIDER=mock. Use manual for admin-confirmed external payments, or configure a real payment provider.',
+        `Production cannot use PAYMENT_PROVIDER=${validatedConfig.PAYMENT_PROVIDER}. Use disabled or the authenticated-account demo while XPay activation is pending, then switch to xpay after credentials are issued.`,
       );
     }
   }

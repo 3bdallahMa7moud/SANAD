@@ -8,7 +8,11 @@ import {
 } from '@/components/motion/motion-reveal';
 import { BrandLogo } from '@/components/shared/brand-logo';
 import type { PublicSettings } from '@/lib/api';
-import { PublicSocialLinks } from './public-social-links';
+import {
+  CUSTOMER_SERVICE_WHATSAPP_DISPLAY,
+  CUSTOMER_SERVICE_WHATSAPP_NUMBER,
+} from '@/lib/orders/presentation';
+import { PublicSocialLinks, WhatsAppIcon } from './public-social-links';
 
 const footerLinkClassName =
   'inline-flex min-h-11 items-center text-sm leading-6 text-primary-foreground/75 transition-colors duration-200 hover:text-primary-foreground';
@@ -113,6 +117,20 @@ export async function PublicFooter({
                       </Link>
                     </li>
                   ))}
+                  {group.id === 'support' ? (
+                    <li>
+                      <a
+                        aria-label={_copy('Contact us on WhatsApp')}
+                        className={`${footerLinkClassName} gap-2`}
+                        href={`https://wa.me/${CUSTOMER_SERVICE_WHATSAPP_NUMBER}`}
+                        rel="noreferrer noopener"
+                        target="_blank"
+                      >
+                        <WhatsAppIcon aria-hidden="true" className="size-4" />
+                        <bdi dir="ltr">{CUSTOMER_SERVICE_WHATSAPP_DISPLAY}</bdi>
+                      </a>
+                    </li>
+                  ) : null}
                 </ul>
               </nav>
             </MotionReveal>
@@ -123,7 +141,12 @@ export async function PublicFooter({
 
         <MotionReveal delay={0.2} direction="none" initialOpacity={0.65}>
           <div className="flex flex-col gap-4 text-sm text-primary-foreground/70 sm:flex-row sm:items-center sm:justify-between">
-            <p>{_copy(t('footer.copyright', { year }))}</p>
+            <div className="grid gap-1">
+              <p>{_copy(t('footer.copyright', { year }))}</p>
+              <p className="text-xs text-primary-foreground/60">
+                <bdi dir="ltr">Menofia, Egypt</bdi>
+              </p>
+            </div>
             <nav aria-label={_copy(t('footer.legalLinks'))}>
               <ul className="flex flex-wrap gap-x-6 gap-y-1">
                 {legalLinks.map((item) => (

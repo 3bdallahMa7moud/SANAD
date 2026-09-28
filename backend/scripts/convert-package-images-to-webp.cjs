@@ -1,9 +1,13 @@
 const fs = require('node:fs/promises');
 const path = require('node:path');
+const { execFile } = require('node:child_process');
+const { promisify } = require('node:util');
 
 const { PrismaClient } = require('@prisma/client');
 const dotenv = require('dotenv');
-const sharp = require('sharp');
+const { imageSize } = require('image-size');
+
+const runFile = promisify(execFile);
 
 dotenv.config({
   path: process.env.SANAD_ENV_FILE || '/etc/sanad/sanad.env',
@@ -54,18 +58,50 @@ async function main() {
     const destination = resolveUpload(webpPath);
     const temporaryPath = `${destination.resolved}.tmp-${process.pid}`;
     const sourceStat = await fs.stat(source.resolved);
+    const dimensions = imageSize(await fs.readFile(source.resolved));
+    if (
+      !dimensions.width ||
+      !dimensions.height ||
+      dimensions.width * dimensions.height > 40_000_000
+    ) {
+      throw new Error(`Image #${image.id} exceeds the pixel limit`);
+    }
+    const scale = Math.min(
+      1,
+      2400 / dimensions.width,
+      2400 / dimensions.height,
+    );
 
     await fs.mkdir(path.dirname(destination.resolved), { recursive: true });
-    await sharp(source.resolved, { limitInputPixels: 40_000_000 })
-      .rotate()
-      .resize({
-        fit: 'inside',
-        height: 2400,
-        width: 2400,
-        withoutEnlargement: true,
-      })
-      .webp({ effort: 4, quality: 82 })
-      .toFile(temporaryPath);
+    const resizeArguments =
+      scale < 1
+        ? [
+            '-resize',
+            String(Math.max(1, Math.round(dimensions.width * scale))),
+            String(Math.max(1, Math.round(dimensions.height * scale))),
+          ]
+        : [];
+    await runFile(
+      process.env.CWEBP_PATH?.trim() || 'cwebp',
+      [
+        '-preset',
+        'picture',
+        '-quiet',
+        '-noasm',
+        '-q',
+        '82',
+        '-m',
+        '4',
+        '-metadata',
+        'none',
+        '-low_memory',
+        ...resizeArguments,
+        source.resolved,
+        '-o',
+        temporaryPath,
+      ],
+      { maxBuffer: 64 * 1024, timeout: 20_000 },
+    );
 
     await fs.rename(temporaryPath, destination.resolved);
 

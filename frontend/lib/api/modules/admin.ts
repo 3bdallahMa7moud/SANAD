@@ -127,9 +127,12 @@ export interface AdminOrder {
     currency?: string;
     payment_date?: string | null;
     payment_response?: {
+      displayAmount?: number;
       source?: string;
       external_reference?: string;
       note?: string;
+      provider?: string;
+      testMode?: boolean;
     } | null;
   }>;
   order_status_history?: Array<{

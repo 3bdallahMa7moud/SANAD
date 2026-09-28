@@ -6,10 +6,12 @@
 - The systemd services run as an unprivileged user, block privilege escalation,
   and provide restart and readiness checks.
 - Production validation rejects insecure secrets, HTTP frontend/CORS origins,
-  enabled Swagger, incomplete R2 storage, missing email delivery, and the mock
-  payment provider. `PAYMENT_PROVIDER=xpay` enables hosted bank-card checkout;
-  `PAYMENT_PROVIDER=manual` remains available only for reconciled external
-  payments arranged through WhatsApp.
+  enabled Swagger, incomplete R2 storage, missing email delivery, and the mock,
+  bypass, and manual payment modes. `PAYMENT_PROVIDER=disabled` safely pauses
+  ordering while XPay activation is pending. The temporary `demo` mode is
+  available to every authenticated account and always records a zero collected
+  amount. `PAYMENT_PROVIDER=xpay` enables real hosted bank-card checkout after
+  credentials are issued.
 
 ## Before every deployment
 
@@ -83,6 +85,10 @@ npm run db:restore:check -- backups/sanad_db-TIMESTAMP.dump
 Run the drill after the first production backup and at least monthly. A backup
 is not proven until this command completes successfully.
 
+The API image processor also requires the `cwebp` executable (the `webp`
+package on Ubuntu/Debian). Production preflight verifies it before deployment;
+set `CWEBP_PATH` only when the executable is installed in a non-standard path.
+
 ## Rollback
 
 1. Stop new traffic or put the site in maintenance mode.
@@ -96,8 +102,10 @@ is not proven until this command completes successfully.
 
 - Add real R2, email, Sentry, domain/TLS, and hosting secrets.
 - Enable email verification after existing users are backfilled.
-- For manual payments, train administrators to confirm an order only after the
-  funds appear in the provider or bank account. If on-site checkout is enabled
-  later, connect the contracted gateway and switch both backend and frontend
-  checkout modes together.
+- Keep backend `PAYMENT_PROVIDER=disabled` and frontend
+  `NEXT_PUBLIC_CHECKOUT_MODE=disabled` until XPay supplies the production
+  credentials. A short controlled UI test may switch them together to `demo`;
+  every authenticated account can use the fixed no-charge test card in that
+  mode. For live charging, switch them together to `xpay` and `gateway`;
+  there is no manual-payment fallback.
 - Configure scheduled encrypted backups and alerting in the hosting platform.

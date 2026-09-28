@@ -122,6 +122,59 @@ describe('AuthService token security', () => {
     expect(prisma.user_sessions.create).not.toHaveBeenCalled();
   });
 
+  it('never auto-unlocks an administrator-disabled account', async () => {
+    prisma.users.findUnique.mockResolvedValue({
+      id: 7,
+      email: 'admin@example.com',
+      password_hash: 'not-used',
+      failed_login_attempts: 0,
+      account_locked: true,
+      locked_until: null,
+    });
+
+    await expect(
+      service.login({
+        email: 'admin@example.com',
+        password: 'Correct-Passphrase-2026',
+      }),
+    ).rejects.toMatchObject({
+      response: expect.objectContaining({ code: 'ACCOUNT_LOCKED' }),
+    });
+    expect(prisma.users.update).not.toHaveBeenCalled();
+    expect(prisma.user_sessions.create).not.toHaveBeenCalled();
+  });
+
+  it('resets the failed-attempt counter after a temporary lock expires', async () => {
+    const passwordHash = await argon2.hash('Correct-Passphrase-2026');
+    prisma.users.findUnique.mockResolvedValue({
+      id: 7,
+      email: 'user@example.com',
+      password_hash: passwordHash,
+      failed_login_attempts: 5,
+      account_locked: true,
+      locked_until: new Date(Date.now() - 60_000),
+    });
+
+    await expect(
+      service.login({
+        email: 'user@example.com',
+        password: 'Wrong-Passphrase-2026',
+      }),
+    ).rejects.toBeInstanceOf(UnauthorizedException);
+    expect(prisma.users.update).toHaveBeenNthCalledWith(1, {
+      where: { id: 7 },
+      data: {
+        account_locked: false,
+        locked_until: null,
+        failed_login_attempts: 0,
+      },
+    });
+    expect(prisma.users.update).toHaveBeenNthCalledWith(2, {
+      where: { id: 7 },
+      data: { failed_login_attempts: 1 },
+    });
+  });
+
   it('creates a hashed refresh session after a successful login', async () => {
     const passwordHash = await argon2.hash('Correct-Passphrase-2026');
     prisma.users.findUnique.mockResolvedValue({

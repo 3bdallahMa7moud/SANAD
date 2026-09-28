@@ -177,11 +177,16 @@ export class AuthService {
       });
     }
 
-    // Check if account is locked
+    let failedLoginAttempts = user.failed_login_attempts || 0;
+
+    // A lock without an expiry is an administrative/permanent lock. Only
+    // temporary locks with an elapsed expiry may be cleared automatically.
     if (user.account_locked) {
-      if (user.locked_until && new Date() < user.locked_until) {
+      if (!user.locked_until || new Date() < user.locked_until) {
         throw new UnauthorizedException({
-          message: 'Account is temporarily locked. Please try again later.',
+          message: user.locked_until
+            ? 'Account is temporarily locked. Please try again later.'
+            : 'Account is locked. Please contact support.',
           code: 'ACCOUNT_LOCKED',
         });
       } else {
@@ -194,6 +199,7 @@ export class AuthService {
             failed_login_attempts: 0,
           },
         });
+        failedLoginAttempts = 0;
       }
     }
 
@@ -204,7 +210,7 @@ export class AuthService {
     );
 
     if (!passwordValid) {
-      const failedAttempts = (user.failed_login_attempts || 0) + 1;
+      const failedAttempts = failedLoginAttempts + 1;
       const updateData: Record<string, unknown> = {
         failed_login_attempts: failedAttempts,
       };
@@ -1041,11 +1047,12 @@ export class AuthService {
       // Check account lockout
       if (
         user.account_locked &&
-        user.locked_until &&
-        new Date() < user.locked_until
+        (!user.locked_until || new Date() < user.locked_until)
       ) {
         throw new UnauthorizedException({
-          message: 'Account is temporarily locked. Please try again later.',
+          message: user.locked_until
+            ? 'Account is temporarily locked. Please try again later.'
+            : 'Account is locked. Please contact support.',
           code: 'ACCOUNT_LOCKED',
         });
       }
@@ -1141,11 +1148,12 @@ export class AuthService {
       }
       if (
         user.account_locked &&
-        user.locked_until &&
-        new Date() < user.locked_until
+        (!user.locked_until || new Date() < user.locked_until)
       ) {
         throw new UnauthorizedException({
-          message: 'Account is temporarily locked. Please try again later.',
+          message: user.locked_until
+            ? 'Account is temporarily locked. Please try again later.'
+            : 'Account is locked. Please contact support.',
           code: 'ACCOUNT_LOCKED',
         });
       }

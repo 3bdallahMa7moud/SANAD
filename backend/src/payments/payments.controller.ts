@@ -18,6 +18,7 @@ import {
 } from '@nestjs/swagger';
 import { PaymentsService } from './payments.service';
 import {
+  ConfirmDemoPaymentDto,
   ConfirmManualPaymentDto,
   CreatePaymentDto,
   PaymentFilterDto,
@@ -48,6 +49,18 @@ export class PaymentsController {
     @Body() dto: CreatePaymentDto,
   ) {
     return this.paymentsService.createPayment(userId, dto);
+  }
+
+  @ApiBearerAuth('bearer')
+  @Post('demo/confirm')
+  @ApiOperation({
+    summary: 'Confirm an authenticated, no-charge demo card payment',
+  })
+  async confirmDemoPayment(
+    @CurrentUser('id') userId: number,
+    @Body() dto: ConfirmDemoPaymentDto,
+  ) {
+    return this.paymentsService.confirmDemoPayment(userId, dto);
   }
 
   @ApiBearerAuth('bearer')

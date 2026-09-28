@@ -12,7 +12,7 @@ import { validatePublicEnvironment } from './public-env-schema';
 let cachedEnvironment:
   | {
       apiBaseUrl: string;
-      checkoutMode: 'manual' | 'gateway';
+      checkoutMode: 'manual' | 'disabled' | 'demo' | 'gateway';
       mediaBaseUrl: string;
       siteUrl: string;
       xpayPublishableKey?: string;
@@ -28,7 +28,8 @@ function getPublicEnvironment() {
       NEXT_PUBLIC_CHECKOUT_MODE: process.env.NEXT_PUBLIC_CHECKOUT_MODE,
       NEXT_PUBLIC_MEDIA_BASE_URL: process.env.NEXT_PUBLIC_MEDIA_BASE_URL,
       NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
-      NEXT_PUBLIC_XPAY_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_XPAY_PUBLISHABLE_KEY,
+      NEXT_PUBLIC_XPAY_PUBLISHABLE_KEY:
+        process.env.NEXT_PUBLIC_XPAY_PUBLISHABLE_KEY,
     },
     { requireAll: true },
   );
@@ -64,7 +65,7 @@ export function getMediaBaseUrl(): string {
   return getPublicEnvironment().mediaBaseUrl;
 }
 
-export function getCheckoutMode(): 'manual' | 'gateway' {
+export function getCheckoutMode(): 'manual' | 'disabled' | 'demo' | 'gateway' {
   return getPublicEnvironment().checkoutMode;
 }
 

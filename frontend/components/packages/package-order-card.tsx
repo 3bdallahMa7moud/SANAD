@@ -23,7 +23,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/use-auth';
 import { useAuthModal } from '@/components/auth/auth-modal';
-import { checkoutApi, isApiError, ordersApi } from '@/lib/api';
+import { checkoutApi, isApiError, ordersApi, paymentsApi } from '@/lib/api';
 import {
   getBestPackageOffer,
   formatDeliveryEstimate,
@@ -35,7 +35,7 @@ interface PackageOrderCardProps {
   packageItem: CareerPackage;
   pricing: CheckoutPricing | null;
   rates?: SecondaryExchangeRates | null;
-  checkoutMode: 'manual' | 'gateway';
+  checkoutMode: 'manual' | 'disabled' | 'demo' | 'gateway';
 }
 
 export function PackageOrderCard({
@@ -88,6 +88,15 @@ export function PackageOrderCard({
   }
 
   async function startOrder() {
+    if (checkoutMode === 'disabled') {
+      const query = new URLSearchParams({
+        amount: (displayPricing?.finalAmount ?? packageItem.price).toFixed(2),
+        orderId: 'SANAD-PREVIEW',
+        txn: 'xpay-pending-activation',
+      });
+      router.push(`/checkout/pay?${query.toString()}`);
+      return;
+    }
     if (checkoutMode === 'gateway') {
       const query = displayPricing?.couponCode
         ? `?coupon=${encodeURIComponent(displayPricing.couponCode)}`
@@ -108,6 +117,20 @@ export function PackageOrderCard({
         couponCode: displayPricing?.couponCode ?? undefined,
         customerPhone: user.phone?.trim() ?? '',
       });
+      if (checkoutMode === 'demo') {
+        const payment = await paymentsApi.create({
+          orderId: order.id,
+          paymentMethod: 'card',
+        });
+        if (!payment.paymentUrl) {
+          throw new Error('The payment session did not return a payment URL.');
+        }
+        const destination = new URL(payment.paymentUrl, window.location.origin);
+        router.push(
+          `${destination.pathname}${destination.search}${destination.hash}`,
+        );
+        return;
+      }
       const query = new URLSearchParams({
         amount: order.finalAmount.toFixed(2),
         orderId: order.orderNumber,
@@ -199,7 +222,7 @@ export function PackageOrderCard({
               displayPricing.couponDiscountAmount >
             0 ? (
               <p className="mt-2 text-xs font-semibold text-success">
-                {_copy('Save', 'توفير')}{' '}
+                {_copy('Save', 'وفر')}{' '}
                 {_copy(
                   _copy.money(
                     displayPricing.offerDiscountAmount +
@@ -333,13 +356,23 @@ export function PackageOrderCard({
           type="button"
         >
           {isStartingOrder
-            ? _copy('Starting order...', 'جارٍ تجهيز الطلب...')
-            : _copy('Continue to payment', 'متابعة الدفع')}
+            ? _copy('Starting secure payment...', 'جارٍ تجهيز الدفع الآمن...')
+            : checkoutMode === 'disabled' || checkoutMode === 'demo'
+              ? _copy('Complete order', 'إتمام الطلب')
+              : _copy('Continue to payment', 'متابعة الدفع')}
           <ArrowRight
             aria-hidden="true"
             className="size-4 transition-transform duration-200 motion-safe:group-hover:translate-x-0.5 motion-reduce:transition-none"
           />
         </Button>
+        {checkoutMode === 'disabled' ? (
+          <p className="mt-3 text-center text-xs leading-5 text-muted-foreground">
+            {_copy(
+              'Visual preview only. No order or payment will be created.',
+              'معاينة مرئية فقط. لن يتم إنشاء طلب أو تحصيل أي مبلغ.',
+            )}
+          </p>
+        ) : null}
         <Button asChild className="mt-3 w-full" size="lg" variant="outline">
           <Link href="#included-heading">
             {_copy('Review the service scope')}

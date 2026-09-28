@@ -21,6 +21,7 @@ export const dynamic = 'force-dynamic';
 
 interface CheckoutPageProps {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ coupon?: string | string[] }>;
 }
 
 const getPackage = cache((id: number) => packagesApi.getById(id));
@@ -57,21 +58,42 @@ export async function generateMetadata({
   });
 }
 
-export default async function CheckoutPage({ params }: CheckoutPageProps) {
+export default async function CheckoutPage({
+  params,
+  searchParams,
+}: CheckoutPageProps) {
   const _copy = await getCopy();
   const checkoutMode = getCheckoutMode();
 
   const { slug } = await params;
+  const query = await searchParams;
+  const rawCoupon = Array.isArray(query.coupon)
+    ? query.coupon[0]
+    : query.coupon;
+  const couponCode = rawCoupon?.trim().slice(0, 50) || '';
   const packageItem = await resolvePackage(slug);
 
   if (slug !== getPackageSlug(packageItem)) {
-    redirect(`/checkout/${getPackageSlug(packageItem)}`);
+    const suffix = couponCode
+      ? `?coupon=${encodeURIComponent(couponCode)}`
+      : '';
+    redirect(`/checkout/${getPackageSlug(packageItem)}${suffix}`);
+  }
+
+  // Demo checkout starts the order and opens the card page directly from the
+  // package CTA. Keep old/bookmarked review links out of the active flow.
+  if (checkoutMode === 'demo') {
+    redirect(getPackageHref(packageItem));
   }
 
   const offer = getBestPackageOffer(packageItem);
   const localizedPackageName = _copy(packageItem.name, packageItem.nameAr);
   const [pricing, rates] = await Promise.all([
-    checkoutApi.preview({ packageId: packageItem.id, offerId: offer?.id }),
+    checkoutApi.preview({
+      packageId: packageItem.id,
+      offerId: offer?.id,
+      ...(couponCode ? { couponCode } : {}),
+    }),
     getSecondaryExchangeRates(),
   ]);
 
@@ -121,12 +143,16 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">
             {_copy(
-              checkoutMode === 'manual'
-                ? 'Add the context we need, review the final total, then continue with the SANAD team on WhatsApp.'
-                : 'Add the context we need, review the final total, and continue to secure payment.',
-              checkoutMode === 'manual'
-                ? 'أضف التفاصيل المطلوبة، وراجع المبلغ النهائي، ثم تواصل مع فريق سند عبر واتساب.'
-                : 'أضف التفاصيل المطلوبة، وراجع المبلغ النهائي، ثم تابع إلى الدفع الآمن.',
+              checkoutMode === 'disabled'
+                ? 'Card payments will open after XPay completes account activation.'
+                : checkoutMode === 'manual'
+                  ? 'Add the context we need, review the final total, then continue with the SANAD team on WhatsApp.'
+                  : 'Add the context we need, review the final total, and continue to secure payment.',
+              checkoutMode === 'disabled'
+                ? 'سيُفتح الدفع بالبطاقات بعد اكتمال تفعيل الحساب من XPay.'
+                : checkoutMode === 'manual'
+                  ? 'أضف التفاصيل المطلوبة، وراجع المبلغ النهائي، ثم تواصل مع فريق سند عبر واتساب.'
+                  : 'أضف التفاصيل المطلوبة، وراجع المبلغ النهائي، ثم تابع إلى الدفع الآمن.',
             )}
           </p>
         </div>
@@ -134,6 +160,7 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
       <section className="layout-container py-10 sm:py-14 lg:py-18">
         <CheckoutExperience
           checkoutMode={checkoutMode}
+          initialCouponCode={couponCode}
           packageItem={packageItem}
           pricing={pricing}
           rates={rates}

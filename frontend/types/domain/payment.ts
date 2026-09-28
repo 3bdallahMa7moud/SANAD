@@ -19,3 +19,23 @@ export interface PaymentResult {
   requiresPayment: boolean;
   reused: boolean;
 }
+
+export interface ConfirmDemoPaymentInput {
+  transactionId: string;
+  cardNumber: string;
+  expiry: string;
+  cvc: string;
+  cardholderName: string;
+}
+
+export interface DemoPaymentConfirmation {
+  orderId: number;
+  orderNumber: string;
+  status: string;
+  amount: number;
+  chargedAmount: number;
+  currency: string;
+  testMode: boolean;
+  idempotent: boolean;
+  redirectUrl: string;
+}

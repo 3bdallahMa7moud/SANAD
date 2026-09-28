@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { AdminNotificationStreamService } from './admin-notification-stream.service';
 
 const query = (overrides: Record<string, unknown> = {}) =>
   ({ page: 1, limit: 20, skip: 0, ...overrides }) as never;
@@ -9,6 +10,7 @@ const query = (overrides: Record<string, unknown> = {}) =>
 describe('NotificationsService', () => {
   let service: NotificationsService;
   let prisma: any;
+  let adminStream: any;
 
   beforeEach(() => {
     prisma = {
@@ -19,9 +21,15 @@ describe('NotificationsService', () => {
         update: vi.fn(),
         updateMany: vi.fn().mockResolvedValue({ count: 0 }),
         create: vi.fn(),
+        createMany: vi.fn(),
       },
+      users: { findMany: vi.fn().mockResolvedValue([]) },
     };
-    service = new NotificationsService(prisma as PrismaService);
+    adminStream = { streamFor: vi.fn(), publish: vi.fn() };
+    service = new NotificationsService(
+      prisma as PrismaService,
+      adminStream as AdminNotificationStreamService,
+    );
   });
 
   describe('findAll', () => {
@@ -49,9 +57,18 @@ describe('NotificationsService', () => {
 
       const result = await service.findAll(7, query({ unread_only: true }));
 
-      expect(result.unread_count).toBe(4);
+      expect(result.data.unread_count).toBe(4);
       expect(prisma.notifications.count).toHaveBeenLastCalledWith({
         where: { user_id: 7, is_read: false },
+      });
+    });
+
+    it('can scope the administrative bell to admin notifications', async () => {
+      await service.findAll(7, query({ admin_only: true }));
+
+      expect(prisma.notifications.findMany.mock.calls[0][0].where).toEqual({
+        user_id: 7,
+        notification_type: { startsWith: 'admin_' },
       });
     });
   });
@@ -128,6 +145,33 @@ describe('NotificationsService', () => {
           message_en: 'Message',
           notification_type: 'order_paid',
         },
+      });
+    });
+  });
+
+  describe('createAdminOrderNotification', () => {
+    it('only creates alerts for super admins and admins with orders.view', async () => {
+      prisma.users.findMany.mockResolvedValue([
+        { id: 1, role: 'super_admin', admin_permissions: [] },
+        { id: 2, role: 'admin', admin_permissions: ['orders.view'] },
+        { id: 3, role: 'admin', admin_permissions: ['pages.view'] },
+      ]);
+
+      const recipients = await service.createAdminOrderNotification(prisma, {
+        orderId: 12,
+        titleAr: 'طلب جديد',
+        titleEn: 'New order',
+        messageAr: 'رسالة',
+        messageEn: 'Message',
+        type: 'admin_order_created',
+      });
+
+      expect(recipients).toEqual([1, 2]);
+      expect(prisma.notifications.createMany).toHaveBeenCalledWith({
+        data: expect.arrayContaining([
+          expect.objectContaining({ user_id: 1, order_id: 12 }),
+          expect.objectContaining({ user_id: 2, order_id: 12 }),
+        ]),
       });
     });
   });

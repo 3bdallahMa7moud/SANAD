@@ -74,15 +74,15 @@ export function ReviewsView() {
       <AdminPageHeader
         title={_copy('Reviews')}
         description={_copy(
-          'Publish verified reviews, then choose up to three for the home page without changing the customer’s words.',
-          'انشر التقييمات الموثقة، ثم اختر حتى ثلاثة منها للصفحة الرئيسية دون تعديل كلام العميل.',
+          'Publish verified reviews, then choose exactly which ones appear on the home page without changing the customer’s words.',
+          'انشر التقييمات الموثقة، ثم اختر بنفسك أي تقييمات تظهر في الصفحة الرئيسية دون تعديل كلام العميل.',
         )}
       />
       <div className="mb-5 flex flex-wrap items-center gap-3">
         <p className="text-sm font-semibold text-primary">
           {_copy('Home page selections', 'المختارة للصفحة الرئيسية')}
           {featuredQuery.data
-            ? `: ${featuredQuery.data.summary.totalReviews}/3`
+            ? `: ${_copy.number(featuredQuery.data.summary.totalReviews)}`
             : null}
         </p>
         <p className="text-sm text-muted-foreground">
@@ -95,14 +95,7 @@ export function ReviewsView() {
       {featuring.error ? (
         <Alert
           className="mb-5"
-          description={
-            featuring.error.code === 'HOME_REVIEWS_FULL'
-              ? _copy(
-                  'Remove one of the three selected reviews before adding another.',
-                  'أزل أحد التقييمات الثلاثة المختارة قبل إضافة تقييم آخر.',
-                )
-              : _copy(featuring.error.userMessage)
-          }
+          description={_copy(featuring.error.userMessage)}
           variant="error"
         />
       ) : null}

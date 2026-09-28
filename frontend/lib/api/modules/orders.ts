@@ -136,9 +136,8 @@ function toCustomerOrder(
     createdAt: payload.created_at ?? null,
     updatedAt: payload.updated_at ?? null,
     paymentStatus:
-      payload.payments?.find(
-        (payment) =>
-          ['paid', 'success'].includes(payment.status) && payment.amount > 0,
+      payload.payments?.find((payment) =>
+        ['paid', 'success'].includes(payment.status),
       )?.status ?? 'pending',
     currency: payload.payments?.[0]?.currency ?? 'AED',
     offerName: payload.offer?.name_en ?? payload.offers?.name_en ?? null,

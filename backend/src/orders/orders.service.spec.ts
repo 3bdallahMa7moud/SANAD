@@ -91,6 +91,10 @@ describe('OrdersService', () => {
       prisma as PrismaService,
       checkoutService as CheckoutService,
       configService as ConfigService,
+      {
+        createAdminOrderNotification: vi.fn().mockResolvedValue([]),
+        publishAdminOrderEvent: vi.fn(),
+      } as never,
     );
   });
 
@@ -263,6 +267,34 @@ describe('OrdersService', () => {
           customer_phone: '+971555555555',
         }),
       );
+    });
+
+    it('allows any authenticated role to create a demo order tied to its account', async () => {
+      activeCustomer({
+        email: 'administrator@sanad.ae',
+        role: 'admin',
+      });
+      configService.get.mockImplementation((key: string) => {
+        if (key === 'PAYMENT_PROVIDER') return 'demo';
+        return undefined;
+      });
+
+      await service.create(1, {
+        package_id: 1,
+        customer_email: 'someone-else@example.com',
+      });
+
+      expect(prisma.orders.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          customer_email: 'administrator@sanad.ae',
+          admin_notes: 'TEST PAYMENT — no funds will be collected',
+        }),
+      });
+      expect(prisma.order_status_history.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          note: 'Test order created; no funds collected',
+        }),
+      });
     });
 
     it('tolerates an account with no stored phone number', async () => {
@@ -457,28 +489,23 @@ describe('OrdersService', () => {
     });
   });
 
-  describe('create — manual payment mode', () => {
-    it('creates an awaiting-payment order without a fake payment record', async () => {
-      configService.get.mockReturnValue('manual');
-      activeCustomer();
-      prisma.orders.create.mockResolvedValue(
-        storedOrder({ status: OrderStatus.PENDING_PAYMENT }),
-      );
-      prisma.orders.findUnique.mockResolvedValue(
-        storedOrder({ status: OrderStatus.PENDING_PAYMENT }),
-      );
+  describe('create — disabled checkout', () => {
+    it.each(['disabled', 'manual'])(
+      'rejects order creation in %s mode before opening a transaction',
+      async (paymentProvider) => {
+        configService.get.mockReturnValue(paymentProvider);
+        activeCustomer();
 
-      const order = await service.create(1, { package_id: 1 });
+        await expect(
+          service.create(1, { package_id: 1 }),
+        ).rejects.toMatchObject({
+          response: expect.objectContaining({ code: 'CHECKOUT_DISABLED' }),
+        });
 
-      expect(order.status).toBe(OrderStatus.PENDING_PAYMENT);
-      expect(prisma.orders.create.mock.calls[0][0].data.status).toBe(
-        OrderStatus.PENDING_PAYMENT,
-      );
-      expect(prisma.payments.create).not.toHaveBeenCalled();
-      expect(
-        prisma.order_status_history.create.mock.calls[0][0].data.note,
-      ).toContain('external payment');
-    });
+        expect(prisma.$transaction).not.toHaveBeenCalled();
+        expect(prisma.orders.create).not.toHaveBeenCalled();
+      },
+    );
   });
 
   describe('findAllCustomer', () => {
@@ -912,6 +939,35 @@ describe('OrdersService', () => {
       expect(prisma.orders.updateMany).not.toHaveBeenCalled();
     });
 
+    it('allows a confirmed demo payment to complete the test workflow', async () => {
+      configService.get.mockImplementation((key: string) =>
+        key === 'PAYMENT_PROVIDER' ? 'demo' : 'mock',
+      );
+      prisma.orders.findUnique
+        .mockResolvedValueOnce(stored(OrderStatus.PAID))
+        .mockResolvedValueOnce({
+          ...stored(OrderStatus.PAID),
+          status: OrderStatus.COMPLETED,
+        });
+      prisma.payments.count.mockResolvedValue(1);
+
+      await service.updateStatusAdmin(300, 42, {
+        status: OrderStatus.COMPLETED,
+      } as never);
+
+      expect(prisma.payments.count).toHaveBeenCalledWith({
+        where: {
+          order_id: 300,
+          status: { in: ['paid', 'success'] },
+          OR: [
+            { amount: { gt: 0 } },
+            { transaction_id: { startsWith: 'demo_' } },
+          ],
+        },
+      });
+      expect(prisma.orders.updateMany).toHaveBeenCalled();
+    });
+
     it.each([
       [OrderStatus.PENDING, OrderStatus.COMPLETED],
       [OrderStatus.COMPLETED, OrderStatus.PAID],
@@ -1128,6 +1184,30 @@ describe('OrdersService', () => {
         'COLLECTED_PAYMENT_REQUIRED',
       );
       expect(prisma.orders.updateMany).not.toHaveBeenCalled();
+    });
+
+    it('allows confirmed demo payments in the bulk completion workflow', async () => {
+      configService.get.mockImplementation((key: string) =>
+        key === 'PAYMENT_PROVIDER' ? 'demo' : 'mock',
+      );
+      prisma.orders.findMany.mockResolvedValue([
+        {
+          ...paidOrder(10, OrderStatus.PAID),
+          payments: [
+            {
+              status: 'paid',
+              amount: 0,
+              transaction_id: 'demo_confirmed-payment',
+            },
+          ],
+        },
+      ]);
+      prisma.orders.updateMany.mockResolvedValue({ count: 1 });
+
+      await expect(service.completeBulkAdmin([10], 42)).resolves.toEqual({
+        completed_count: 1,
+        order_ids: [10],
+      });
     });
 
     it('rejects terminal or unpaid-workflow statuses', async () => {

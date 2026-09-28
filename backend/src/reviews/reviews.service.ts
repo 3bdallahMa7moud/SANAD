@@ -35,7 +35,11 @@ export class ReviewsService {
     );
   }
 
-  async listPublished(query: PublicReviewFilterDto, featuredOnly = false) {
+  async listPublished(
+    query: PublicReviewFilterDto,
+    featuredOnly = false,
+    paginate = true,
+  ) {
     const where: Prisma.package_reviewsWhereInput = {
       status: ReviewStatus.PUBLISHED,
       ...(featuredOnly ? { is_home_featured: true } : {}),
@@ -50,8 +54,7 @@ export class ReviewsService {
           order: { select: { id: true, order_number: true, status: true } },
         },
         orderBy: { created_at: 'desc' },
-        skip: query.skip,
-        take: query.limit,
+        ...(paginate ? { skip: query.skip, take: query.limit } : {}),
       }),
       this.prisma.package_reviews.count({ where }),
       this.prisma.package_reviews.aggregate({ where, _avg: { rating: true } }),
@@ -69,7 +72,7 @@ export class ReviewsService {
       })),
       total,
       query.page,
-      query.limit,
+      paginate ? query.limit : Math.max(total, 1),
     );
     return {
       ...page,
@@ -93,9 +96,8 @@ export class ReviewsService {
   listFeatured() {
     const query = Object.assign(new PublicReviewFilterDto(), {
       page: 1,
-      limit: 3,
     });
-    return this.listPublished(query, true);
+    return this.listPublished(query, true, false);
   }
 
   async findForOrder(orderId: number, userId: number) {
@@ -301,17 +303,6 @@ export class ReviewsService {
         });
       }
       if (review.is_home_featured === featured) return review;
-      if (featured) {
-        const count = await tx.package_reviews.count({
-          where: { is_home_featured: true, status: ReviewStatus.PUBLISHED },
-        });
-        if (count >= 3) {
-          throw new ConflictException({
-            message: 'The home page can show up to three reviews',
-            code: 'HOME_REVIEWS_FULL',
-          });
-        }
-      }
       const updated = await tx.package_reviews.update({
         where: { id },
         data: { is_home_featured: featured, updated_at: new Date() },

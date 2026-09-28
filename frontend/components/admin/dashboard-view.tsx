@@ -462,7 +462,18 @@ export function DashboardView() {
       >
         {data ? (
           <>
-            {data.payment_mode === 'bypass' ? (
+            {data.payment_mode === 'demo' ? (
+              <Alert
+                className="mb-6"
+                icon={<CreditCard />}
+                title={_copy('Demo payment is active', 'الدفع التجريبي مفعّل')}
+                description={_copy(
+                  'Every authenticated account can complete the fixed test card flow. Test orders appear in operational queues, while collected revenue, paid-order metrics, and customer spend remain unchanged because the recorded charge is 0 AED.',
+                  'يمكن لأي حساب مسجل الدخول إكمال الدفع ببطاقة الاختبار الثابتة. تظهر الطلبات التجريبية في قوائم التشغيل، بينما تظل الإيرادات المحصلة ومؤشرات الدفع وإنفاق العملاء دون تغيير لأن المبلغ المحصل المسجل هو 0 درهم.',
+                )}
+                variant="warning"
+              />
+            ) : data.payment_mode === 'bypass' ? (
               <Alert
                 className="mb-6"
                 icon={<CreditCard />}
@@ -475,6 +486,20 @@ export function DashboardView() {
                   'قد تُسجل الطلبات كمدفوعة دون تحصيل أموال. ستظهر في كروت التشغيل، لكن الإيراد المحصّل ومؤشرات الدفع وإنفاق العملاء تستبعد سجلات الدفع التجريبي ذات القيمة صفر.',
                 )}
                 variant="warning"
+              />
+            ) : data.payment_mode === 'disabled' ? (
+              <Alert
+                className="mb-6"
+                icon={<CreditCard />}
+                title={_copy(
+                  'Online ordering is paused',
+                  'الطلبات الإلكترونية متوقفة مؤقتًا',
+                )}
+                description={_copy(
+                  'The site is waiting for XPay card-payment activation. Customers cannot create orders or make payments, and there is no manual-payment fallback.',
+                  'الموقع بانتظار تفعيل الدفع بالبطاقات من XPay. لا يمكن للعملاء إنشاء طلبات أو الدفع، ولا يوجد بديل للدفع اليدوي.',
+                )}
+                variant="info"
               />
             ) : data.payment_mode === 'manual' ? (
               <Alert

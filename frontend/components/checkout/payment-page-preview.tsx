@@ -118,6 +118,17 @@ export function PaymentPagePreview({
               </button>
             </div>
 
+            <Alert
+              className="mt-7"
+              description={_copy(
+                'This published page is a visual preview while XPay activation is pending. Do not enter real card details; nothing on this page is submitted or charged.',
+                'هذه الصفحة المنشورة معاينة مرئية أثناء انتظار تفعيل XPay. لا تُدخل بيانات بطاقة حقيقية؛ لن تُرسل أي بيانات ولن يُخصم أي مبلغ.',
+              )}
+              icon={<Info />}
+              title={_copy('Preview only', 'معاينة فقط')}
+              variant="warning"
+            />
+
             <div className="mt-8 grid gap-5" data-testid="card-preview">
               <div>
                 <label
@@ -138,6 +149,7 @@ export function PaymentPagePreview({
                     inputMode="numeric"
                     maxLength={19}
                     placeholder="4242 4242 4242 4242"
+                    readOnly
                   />
                   <div
                     aria-label="Visa and Mastercard accepted"
@@ -168,6 +180,7 @@ export function PaymentPagePreview({
                   className="mt-2"
                   id="preview-card-name"
                   placeholder={_copy('CARDHOLDER NAME', 'اسم حامل البطاقة')}
+                  readOnly
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -185,6 +198,7 @@ export function PaymentPagePreview({
                     inputMode="numeric"
                     maxLength={5}
                     placeholder="MM/YY"
+                    readOnly
                   />
                 </div>
                 <div>
@@ -201,6 +215,7 @@ export function PaymentPagePreview({
                     inputMode="numeric"
                     maxLength={4}
                     placeholder="•••"
+                    readOnly
                     type="password"
                   />
                 </div>

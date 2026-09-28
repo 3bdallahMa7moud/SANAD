@@ -12,7 +12,12 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { adminApi, adminKeys } from '@/lib/api';
 import { useAdminPermission } from '@/hooks/use-admin-permission';
-import { statusIntent, whatsappHref } from '@/lib/orders/presentation';
+import {
+  getPaymentDisplayAmount,
+  isConfirmedDemoPayment,
+  statusIntent,
+  whatsappHref,
+} from '@/lib/orders/presentation';
 import { AdminPageHeader, ConfirmDialog, DataState } from './admin-ui';
 
 const transitions: Record<string, string[]> = {
@@ -65,7 +70,12 @@ const requirementLabels = [
 export function OrderDetailView({ id }: { id: number }) {
   const _copy = useCopy();
   const canManageOrders = useAdminPermission('orders.manage');
-  const canConfirmManualPayment = useAdminPermission('payments.confirm_manual');
+  const hasManualPaymentPermission = useAdminPermission(
+    'payments.confirm_manual',
+  );
+  const canConfirmManualPayment =
+    process.env.NEXT_PUBLIC_CHECKOUT_MODE === 'manual' &&
+    hasManualPaymentPermission;
 
   const queryClient = useQueryClient();
   const [nextStatus, setNextStatus] = useState('');
@@ -109,7 +119,9 @@ export function OrderDetailView({ id }: { id: number }) {
     order?.payments.some(
       (payment) =>
         ['paid', 'success'].includes(payment.status) &&
-        Number(payment.amount) > 0,
+        (Number(payment.amount) > 0 ||
+          (process.env.NEXT_PUBLIC_CHECKOUT_MODE === 'demo' &&
+            isConfirmedDemoPayment(payment))),
     ),
   );
   const canConfirmPayment =
@@ -168,7 +180,8 @@ export function OrderDetailView({ id }: { id: number }) {
       });
     },
   });
-  const customerPhone = order?.user?.phone ?? order?.customer_phone;
+  const customerPhone =
+    order?.user?.phone?.trim() || order?.customer_phone?.trim();
   const wa = order
     ? whatsappHref(
         customerPhone,
@@ -273,10 +286,24 @@ export function OrderDetailView({ id }: { id: number }) {
                   <Button asChild className="mt-6" variant="outline">
                     <a href={wa} target="_blank" rel="noreferrer noopener">
                       <MessageCircle className="size-4" />
-                      {_copy('Open WhatsApp')}
+                      {_copy('Open WhatsApp', 'فتح واتساب')}
                     </a>
                   </Button>
-                ) : null}
+                ) : (
+                  <Alert
+                    className="mt-6"
+                    description={_copy(
+                      customerPhone
+                        ? 'The customer phone number is not valid for WhatsApp. Save it with the country code, for example +971 or +20.'
+                        : 'This customer has no phone number saved.',
+                      customerPhone
+                        ? 'رقم العميل غير صالح لواتساب. احفظه مع كود الدولة، مثل +971 أو +20.'
+                        : 'لا يوجد رقم هاتف محفوظ لهذا العميل.',
+                    )}
+                    title={_copy('WhatsApp unavailable', 'واتساب غير متاح')}
+                    variant="warning"
+                  />
+                )}
               </section>
               {requirementEntries.length > 0 || order.notes ? (
                 <section className="border border-border bg-surface p-6">
@@ -377,34 +404,51 @@ export function OrderDetailView({ id }: { id: number }) {
                   </div>
                 </dl>
                 <div className="mt-6 grid gap-3">
-                  {order.payments.map((payment) => (
-                    <div
-                      className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4 text-sm"
-                      key={payment.id}
-                    >
-                      <div>
-                        <p className="font-semibold">
-                          {_copy(
-                            payment.transaction_id ?? `Payment #${payment.id}`,
-                          )}
-                        </p>
-                        <p className="text-muted-foreground">
-                          {_copy(_copy.status(payment.payment_method))}
-                          {_copy(
-                            ` · ${_copy.money(Number(payment.amount), payment.currency ?? 'AED')}`,
-                          )}
-                        </p>
-                        {payment.payment_date ? (
-                          <p className="mt-1 text-xs text-muted-foreground">
-                            {_copy(_copy.date(payment.payment_date))}
+                  {order.payments.map((payment) => {
+                    const demoPayment = isConfirmedDemoPayment(payment);
+                    const displayAmount = getPaymentDisplayAmount(
+                      payment,
+                      order.final_amount,
+                    );
+
+                    return (
+                      <div
+                        className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4 text-sm"
+                        key={payment.id}
+                      >
+                        <div>
+                          <p className="font-semibold">
+                            {_copy(
+                              payment.transaction_id ??
+                                `Payment #${payment.id}`,
+                            )}
                           </p>
-                        ) : null}
+                          <p className="text-muted-foreground">
+                            {_copy(_copy.status(payment.payment_method))}
+                            {_copy(
+                              ` · ${_copy.money(displayAmount, payment.currency ?? 'AED')}`,
+                            )}
+                          </p>
+                          {demoPayment ? (
+                            <p className="mt-1 text-xs font-medium text-warning">
+                              {_copy(
+                                'Test payment — no money was charged.',
+                                'دفعة تجريبية — لم يتم خصم أي مبلغ حقيقي.',
+                              )}
+                            </p>
+                          ) : null}
+                          {payment.payment_date ? (
+                            <p className="mt-1 text-xs text-muted-foreground">
+                              {_copy(_copy.date(payment.payment_date))}
+                            </p>
+                          ) : null}
+                        </div>
+                        <StatusBadge intent={statusIntent(payment.status)}>
+                          {_copy(_copy.status(payment.status))}
+                        </StatusBadge>
                       </div>
-                      <StatusBadge intent={statusIntent(payment.status)}>
-                        {_copy(_copy.status(payment.status))}
-                      </StatusBadge>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 {canConfirmPayment ? (
                   <div className="mt-7 border-t border-border pt-6">

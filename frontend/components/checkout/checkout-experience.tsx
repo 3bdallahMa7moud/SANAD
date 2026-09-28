@@ -38,7 +38,8 @@ import type {
 } from '@/types/domain';
 
 interface CheckoutExperienceProps {
-  checkoutMode: 'manual' | 'gateway';
+  checkoutMode: 'manual' | 'disabled' | 'demo' | 'gateway';
+  initialCouponCode?: string;
   packageItem: CareerPackage;
   pricing: CheckoutPricing;
   rates?: SecondaryExchangeRates | null;
@@ -178,46 +179,9 @@ function getServiceKind(packageItem: CareerPackage): ServiceKind {
   return 'general';
 }
 
-const SERVICE_GUIDANCE: Record<
-  ServiceKind,
-  { title: string; titleAr: string; description: string; descriptionAr: string }
-> = {
-  cv: {
-    title: 'Preparing your CV request',
-    titleAr: 'تجهيز طلب السيرة الذاتية',
-    description:
-      'If this is your first CV, that is completely fine. Add your education, experience and skills below, then send any certificates or existing documents on WhatsApp.',
-    descriptionAr:
-      'إذا كانت هذه أول سيرة ذاتية لك فلا مشكلة. أضف تعليمك وخبراتك ومهاراتك أدناه، ثم أرسل الشهادات أو المستندات المتاحة عبر واتساب.',
-  },
-  cover_letter: {
-    title: 'Preparing your cover letter request',
-    titleAr: 'تجهيز طلب خطاب التقديم',
-    description:
-      'Add the target company and job posting when available. Your saved career profile will provide the shared background information.',
-    descriptionAr:
-      'أضف الشركة المستهدفة ورابط إعلان الوظيفة إن توفر. سنستخدم بيانات ملفك المهني للمعلومات المشتركة.',
-  },
-  linkedin: {
-    title: 'Preparing your LinkedIn request',
-    titleAr: 'تجهيز طلب لينكدإن',
-    description:
-      'Add your LinkedIn profile link and the role or market you want to target. You will not need to repeat saved career information.',
-    descriptionAr:
-      'أضف رابط حسابك على لينكدإن والوظيفة أو السوق الذي تستهدفه. لن تحتاج إلى تكرار بياناتك المهنية المحفوظة.',
-  },
-  general: {
-    title: 'Information for your service',
-    titleAr: 'معلومات الخدمة',
-    description:
-      'Add the context that will help the SANAD team understand your goal. Saved career details are reused automatically.',
-    descriptionAr:
-      'أضف المعلومات التي تساعد فريق سند على فهم هدفك. نعيد استخدام بياناتك المهنية المحفوظة تلقائيًا.',
-  },
-};
-
 export function CheckoutExperience({
   checkoutMode,
+  initialCouponCode = '',
   packageItem,
   pricing,
   rates = null,
@@ -244,7 +208,7 @@ export function CheckoutExperience({
     firstCv: false,
     notes: '',
     paymentMethod: 'card',
-    couponCode: '',
+    couponCode: initialCouponCode,
   });
   const [displayPricing, setDisplayPricing] = useState(pricing);
   const [packages, setPackages] = useState<CareerPackage[]>([]);
@@ -375,6 +339,7 @@ export function CheckoutExperience({
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (checkoutMode === 'disabled') return;
     setError(null);
     setPendingPayment(null);
     setIsSubmitting(true);
@@ -436,6 +401,50 @@ export function CheckoutExperience({
           {_copy('Restoring your secure session...')}
         </div>
       </div>
+    );
+  }
+
+  if (checkoutMode === 'disabled') {
+    const previewQuery = new URLSearchParams({
+      amount: displayPricing.finalAmount.toFixed(2),
+      orderId: 'SANAD-PREVIEW',
+      txn: 'xpay-pending-activation',
+    });
+    return (
+      <section className="mx-auto max-w-xl rounded-xl border border-border bg-surface p-7 text-center shadow-sm sm:p-10">
+        <span className="mx-auto grid size-14 place-items-center rounded-full bg-primary text-primary-foreground">
+          <CreditCard aria-hidden="true" className="size-6" />
+        </span>
+        <h2 className="type-h3 mt-6 text-primary">
+          {_copy(
+            'Online payment is coming soon',
+            'الدفع الإلكتروني سيتاح قريبًا',
+          )}
+        </h2>
+        <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-muted-foreground">
+          {_copy(
+            'We are waiting for XPay to activate card payments. Orders and payments are paused until activation is complete.',
+            'ننتظر تفعيل الدفع بالبطاقات من XPay. الطلبات والمدفوعات متوقفة حتى اكتمال التفعيل.',
+          )}
+        </p>
+        <Button
+          className="mt-7 min-w-52"
+          onClick={() =>
+            router.replace(`/checkout/pay?${previewQuery.toString()}`)
+          }
+          size="lg"
+          type="button"
+        >
+          {_copy('Complete order', 'إتمام الطلب')}
+          <CreditCard aria-hidden="true" className="size-4" />
+        </Button>
+        <p className="mt-3 text-xs leading-5 text-muted-foreground">
+          {_copy(
+            'Preview only — no order or payment will be created.',
+            'للمعاينة فقط — لن يتم إنشاء طلب أو تحصيل أي مبلغ.',
+          )}
+        </p>
+      </section>
     );
   }
 
@@ -1169,7 +1178,7 @@ export function CheckoutExperience({
             </div>
           ) : null}
 
-          {checkoutMode === 'gateway' ? (
+          {checkoutMode === 'gateway' || checkoutMode === 'demo' ? (
             <fieldset className="mt-7">
               <legend className="type-label text-foreground">
                 {_copy('Payment method')}

@@ -6,9 +6,11 @@ import {
   ForbiddenException,
   Inject,
   Logger,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import {
+  ConfirmDemoPaymentDto,
   ConfirmManualPaymentDto,
   CreatePaymentDto,
   PaymentFilterDto,
@@ -21,11 +23,18 @@ import {
   PAYMENT_BYPASS_PROVIDER,
   PAYMENT_BYPASS_TRANSACTION_PREFIX,
 } from './payment-bypass';
+import {
+  normalizeDemoCardNumber,
+  PAYMENT_DEMO_CARD,
+  PAYMENT_DEMO_PROVIDER,
+  PAYMENT_DEMO_TRANSACTION_PREFIX,
+} from './payment-demo';
 import * as crypto from 'crypto';
 import {
   PAYMENT_PROVIDER_TOKEN,
   PaymentProvider,
 } from './interfaces/payment-provider.interface';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class PaymentsService {
@@ -36,21 +45,23 @@ export class PaymentsService {
     @Inject(PAYMENT_PROVIDER_TOKEN)
     private readonly paymentProvider: PaymentProvider,
     private readonly configService: ConfigService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   // Customer initiates payment for an order
   async createPayment(userId: number, dto: CreatePaymentDto) {
-    if (this.configService.get<string>('PAYMENT_PROVIDER') === 'manual') {
-      throw new BadRequestException({
+    const configuredProvider =
+      this.configService.get<string>('PAYMENT_PROVIDER') || 'mock';
+    if (configuredProvider === 'disabled' || configuredProvider === 'manual') {
+      throw new ServiceUnavailableException({
         message:
-          'Online checkout is disabled. Continue with the SANAD team on WhatsApp to arrange payment.',
-        code: 'MANUAL_PAYMENT_ONLY',
+          'Online checkout is temporarily unavailable while card payments are being activated.',
+        code: 'CHECKOUT_DISABLED',
       });
     }
 
-    const paymentBypassed =
-      this.configService.get<string>('PAYMENT_PROVIDER') ===
-      PAYMENT_BYPASS_PROVIDER;
+    const paymentBypassed = configuredProvider === PAYMENT_BYPASS_PROVIDER;
+    const paymentDemo = configuredProvider === PAYMENT_DEMO_PROVIDER;
 
     if (dto.payment_method && dto.payment_method !== 'card') {
       throw new BadRequestException({
@@ -229,15 +240,89 @@ export class PaymentsService {
         });
         if (pending) {
           const response = pending.payment_response as Record<string, unknown>;
+          const pendingProvider = response?.provider;
+          const belongsToConfiguredProvider = paymentDemo
+            ? pendingProvider === 'sanad_demo' &&
+              pending.transaction_id.startsWith(PAYMENT_DEMO_TRANSACTION_PREFIX)
+            : configuredProvider === 'xpay'
+              ? pendingProvider === 'xpay' &&
+                pending.transaction_id.startsWith('cs_')
+              : configuredProvider === 'mock'
+                ? pendingProvider === 'mock_gateway'
+                : false;
+          if (belongsToConfiguredProvider) {
+            return {
+              payment_id: pending.id,
+              transaction_id: pending.transaction_id,
+              payment_url: response?.paymentUrl,
+              client_secret: response?.clientSecret,
+              amount:
+                paymentDemo && typeof response?.displayAmount === 'number'
+                  ? response.displayAmount
+                  : Number(pending.amount),
+              charged_amount: Number(pending.amount),
+              currency: pending.currency,
+              status: pending.status,
+              requires_payment: true,
+              reused: true,
+            };
+          }
+
+          // A checkout-mode switch must not revive a session created by a
+          // different provider (especially a no-charge demo session).
+          await tx.payments.updateMany({
+            where: { id: pending.id, status: 'pending' },
+            data: { status: 'failed', payment_date: new Date() },
+          });
+        }
+
+        if (paymentDemo) {
+          const transactionId = `${PAYMENT_DEMO_TRANSACTION_PREFIX}${crypto.randomUUID()}`;
+          const paymentUrl = new URL(
+            '/checkout/pay',
+            this.configService.get<string>('FRONTEND_URL') ||
+              'http://localhost:3001',
+          );
+          paymentUrl.searchParams.set('txn', transactionId);
+          paymentUrl.searchParams.set('orderId', order.order_number);
+          paymentUrl.searchParams.set(
+            'amount',
+            Number(order.final_amount).toFixed(2),
+          );
+
+          const payment = await tx.payments.create({
+            data: {
+              order_id: order.id,
+              transaction_id: transactionId,
+              payment_method: 'card',
+              // Demo checkout never records collected revenue.
+              amount: 0,
+              currency: 'AED',
+              status: 'pending',
+              payment_response: {
+                provider: 'sanad_demo',
+                testMode: true,
+                displayAmount: Number(order.final_amount),
+                paymentUrl: paymentUrl.toString(),
+              },
+            },
+          });
+          if (order.status === 'pending') {
+            await tx.orders.update({
+              where: { id: order.id },
+              data: { status: 'pending_payment' },
+            });
+          }
+
           return {
-            payment_id: pending.id,
-            transaction_id: pending.transaction_id,
-            payment_url: response?.paymentUrl,
-            client_secret: response?.clientSecret,
-            amount: Number(pending.amount),
-            currency: pending.currency,
-            status: pending.status,
-            reused: true,
+            payment_id: payment.id,
+            transaction_id: transactionId,
+            payment_url: paymentUrl.toString(),
+            amount: Number(order.final_amount),
+            charged_amount: 0,
+            currency: 'AED',
+            status: 'pending',
+            requires_payment: true,
           };
         }
 
@@ -283,9 +368,239 @@ export class PaymentsService {
     );
   }
 
+  async confirmDemoPayment(userId: number, dto: ConfirmDemoPaymentDto) {
+    if (
+      this.configService.get<string>('PAYMENT_PROVIDER') !==
+      PAYMENT_DEMO_PROVIDER
+    ) {
+      throw new BadRequestException({
+        message: 'Test payment confirmation is disabled.',
+        code: 'PAYMENT_DEMO_DISABLED',
+      });
+    }
+
+    const validCard =
+      normalizeDemoCardNumber(dto.card_number) === PAYMENT_DEMO_CARD.number &&
+      dto.expiry.trim() === PAYMENT_DEMO_CARD.expiry &&
+      dto.cvc.trim() === PAYMENT_DEMO_CARD.cvc &&
+      dto.cardholder_name.trim().toUpperCase() ===
+        PAYMENT_DEMO_CARD.cardholderName;
+    if (!validCard) {
+      throw new BadRequestException({
+        message: 'The test card details are not valid.',
+        code: 'PAYMENT_DEMO_CARD_INVALID',
+      });
+    }
+
+    const result = await this.prisma.$transaction(
+      async (tx) => {
+        const payment = await tx.payments.findUnique({
+          where: { transaction_id: dto.transaction_id },
+          include: { order: true },
+        });
+        if (
+          !payment ||
+          !payment.transaction_id.startsWith(PAYMENT_DEMO_TRANSACTION_PREFIX)
+        ) {
+          throw new NotFoundException({
+            message: 'Test payment session not found.',
+            code: 'PAYMENT_DEMO_NOT_FOUND',
+          });
+        }
+        if (payment.order.user_id !== userId) {
+          throw new ForbiddenException({
+            message: 'You do not have access to this payment session.',
+            code: 'PAYMENT_FORBIDDEN',
+          });
+        }
+
+        await tx.$queryRaw`SELECT id FROM orders WHERE id = ${payment.order_id} FOR UPDATE`;
+        if (payment.status === 'paid') {
+          return {
+            orderId: payment.order.id,
+            orderNumber: payment.order.order_number,
+            amount: Number(payment.order.final_amount),
+            idempotent: true,
+            adminRecipientIds: [] as number[],
+          };
+        }
+        if (payment.status !== 'pending') {
+          throw new ConflictException({
+            message: 'This test payment session is no longer active.',
+            code: 'PAYMENT_DEMO_NOT_PENDING',
+          });
+        }
+        if (!['pending', 'pending_payment'].includes(payment.order.status)) {
+          throw new ConflictException({
+            message: 'The order is no longer awaiting payment.',
+            code: 'ORDER_STATUS_CONFLICT',
+          });
+        }
+
+        const now = new Date();
+        const updatedPayment = await tx.payments.updateMany({
+          where: { id: payment.id, status: 'pending' },
+          data: {
+            status: 'paid',
+            payment_date: now,
+            payment_response: {
+              provider: 'sanad_demo',
+              testMode: true,
+              displayAmount: Number(payment.order.final_amount),
+              chargedAmount: 0,
+              lastFour: '4242',
+              confirmedAt: now.toISOString(),
+            },
+          },
+        });
+        if (updatedPayment.count !== 1) {
+          throw new ConflictException({
+            message: 'This test payment was already processed.',
+            code: 'PAYMENT_STATUS_CONFLICT',
+          });
+        }
+
+        const updatedOrder = await tx.orders.updateMany({
+          where: {
+            id: payment.order.id,
+            status: { in: ['pending', 'pending_payment'] },
+          },
+          data: { status: 'paid' },
+        });
+        if (updatedOrder.count !== 1) {
+          throw new ConflictException({
+            message: 'Order status changed and cannot accept this payment.',
+            code: 'ORDER_STATUS_CONFLICT',
+          });
+        }
+
+        await tx.order_status_history.create({
+          data: {
+            order_id: payment.order.id,
+            from_status: payment.order.status,
+            to_status: 'paid',
+            changed_by: userId,
+            note: `TEST PAYMENT confirmed (${payment.transaction_id}); no funds collected`,
+          },
+        });
+        await tx.notifications.create({
+          data: {
+            user_id: userId,
+            order_id: payment.order.id,
+            title_ar: 'تم تأكيد الدفع بنجاح',
+            title_en: 'Payment confirmed successfully',
+            message_ar: `تم تأكيد الدفع التجريبي للطلب رقم ${payment.order.order_number}. سيتواصل معك فريق خدمة العملاء قريبًا. لم يتم خصم أي مبلغ.`,
+            message_en: `The test payment for order #${payment.order.order_number} was confirmed. Customer service will contact you soon. No money was charged.`,
+            notification_type: 'payment_confirmed',
+          },
+        });
+
+        const adminRecipientIds =
+          await this.notificationsService.createAdminOrderNotification(tx, {
+            orderId: payment.order.id,
+            titleAr: 'طلب مدفوع يحتاج متابعة',
+            titleEn: 'Paid order needs follow-up',
+            messageAr: `أتم العميل ${payment.order.customer_name} الدفع التجريبي للطلب ${payment.order.order_number}. يرجى التواصل معه.`,
+            messageEn: `${payment.order.customer_name} completed the test payment for order ${payment.order.order_number}. Please contact the customer.`,
+            type: 'admin_order_paid',
+          });
+
+        await tx.email_queue.create({
+          data: {
+            recipient_email: payment.order.customer_email,
+            recipient_name: payment.order.customer_name,
+            subject: `تم تأكيد الدفع - طلب ${payment.order.order_number}`,
+            body_html: `<p>تم تأكيد الدفع التجريبي لطلبك رقم <strong>${payment.order.order_number}</strong>.</p><p>سيتواصل معك فريق خدمة العملاء قريبًا. لم يتم خصم أي مبلغ حقيقي.</p>`,
+            body_text: `تم تأكيد الدفع التجريبي لطلبك رقم ${payment.order.order_number}. سيتواصل معك فريق خدمة العملاء قريبًا. لم يتم خصم أي مبلغ حقيقي.`,
+            template_name: 'demo_payment_confirmation',
+            template_data: {
+              order_number: payment.order.order_number,
+              display_amount: Number(payment.order.final_amount),
+              charged_amount: 0,
+              currency: 'AED',
+              test_mode: true,
+            },
+            status: 'pending',
+          },
+        });
+
+        const supportSetting = await tx.settings.findUnique({
+          where: { setting_key: 'support_email' },
+          select: { setting_value: true },
+        });
+        const supportEmail = supportSetting?.setting_value?.trim();
+        if (supportEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(supportEmail)) {
+          await tx.email_queue.create({
+            data: {
+              recipient_email: supportEmail,
+              recipient_name: 'SANAD Customer Service',
+              subject: `متابعة طلب تجريبي مدفوع ${payment.order.order_number}`,
+              body_html: `<p>أتم العميل <strong>${payment.order.customer_name}</strong> (${payment.order.customer_email}) الدفع التجريبي للطلب <strong>${payment.order.order_number}</strong>.</p><p>يرجى التواصل معه. لم يتم تحصيل أي مبلغ حقيقي.</p>`,
+              body_text: `أتم العميل ${payment.order.customer_name} (${payment.order.customer_email}) الدفع التجريبي للطلب ${payment.order.order_number}. يرجى التواصل معه. لم يتم تحصيل أي مبلغ حقيقي.`,
+              template_name: 'demo_payment_support_follow_up',
+              template_data: {
+                order_number: payment.order.order_number,
+                customer_name: payment.order.customer_name,
+                customer_email: payment.order.customer_email,
+                customer_phone: payment.order.customer_phone,
+                charged_amount: 0,
+                test_mode: true,
+              },
+              status: 'pending',
+            },
+          });
+        }
+
+        return {
+          orderId: payment.order.id,
+          orderNumber: payment.order.order_number,
+          amount: Number(payment.order.final_amount),
+          idempotent: false,
+          adminRecipientIds,
+        };
+      },
+      { isolationLevel: 'Serializable', maxWait: 5_000, timeout: 15_000 },
+    );
+
+    if (!result.idempotent) {
+      this.notificationsService.publishAdminOrderEvent(
+        result.adminRecipientIds,
+        {
+          kind: 'admin_order_paid',
+          orderId: result.orderId,
+          orderNumber: result.orderNumber,
+          createdAt: new Date().toISOString(),
+          sound: 'strong',
+        },
+      );
+    }
+
+    this.logger.warn(
+      `No-charge demo payment confirmed for order ${result.orderNumber}; charged amount is 0 AED`,
+    );
+    return {
+      order_id: result.orderId,
+      order_number: result.orderNumber,
+      status: 'paid',
+      amount: result.amount,
+      charged_amount: 0,
+      currency: 'AED',
+      test_mode: true,
+      idempotent: result.idempotent,
+      redirect_url: '/my-orders?payment=success',
+    };
+  }
+
   // Admin confirms money collected outside the website (payment link, QR,
   // bank transfer, cash, or another reconciled channel).
   async confirmManualPayment(adminId: number, dto: ConfirmManualPaymentDto) {
+    if (this.configService.get<string>('PAYMENT_PROVIDER') !== 'manual') {
+      throw new BadRequestException({
+        message: 'Manual payment confirmation is disabled.',
+        code: 'MANUAL_PAYMENT_DISABLED',
+      });
+    }
+
     const paymentDate = dto.payment_date
       ? new Date(dto.payment_date)
       : new Date();
@@ -495,14 +810,8 @@ export class PaymentsService {
   }
 
   // Process a verified gateway callback idempotently.
-  async handleWebhook(
-    payload: unknown,
-    signature: string,
-    rawBody: Buffer,
-  ) {
-    this.logger.log(
-      'Processing payment webhook callback',
-    );
+  async handleWebhook(payload: unknown, signature: string, rawBody: Buffer) {
+    this.logger.log('Processing payment webhook callback');
 
     const verified = await this.paymentProvider.verifyWebhook(
       payload,
@@ -584,7 +893,11 @@ export class PaymentsService {
         },
       });
 
-      if (updatedPayment.count === 0) return { idempotent: true };
+      if (updatedPayment.count === 0) {
+        return { idempotent: true, adminRecipientIds: [] as number[] };
+      }
+
+      let adminRecipientIds: number[] = [];
 
       if (status === 'paid') {
         if (['cancelled', 'refunded'].includes(order.status)) {
@@ -646,9 +959,19 @@ export class PaymentsService {
             },
           });
         }
+
+        adminRecipientIds =
+          await this.notificationsService.createAdminOrderNotification(tx, {
+            orderId,
+            titleAr: 'تم دفع طلب جديد',
+            titleEn: 'New order payment received',
+            messageAr: `أتم العميل ${order.customer_name} دفع الطلب ${order.order_number}.`,
+            messageEn: `${order.customer_name} paid for order ${order.order_number}.`,
+            type: 'admin_order_paid',
+          });
       }
 
-      return { idempotent: false };
+      return { idempotent: false, adminRecipientIds };
     });
 
     if (outcome.idempotent) {
@@ -657,6 +980,19 @@ export class PaymentsService {
         idempotent: true,
         message: 'Payment already processed and verified',
       };
+    }
+
+    if (status === 'paid') {
+      this.notificationsService.publishAdminOrderEvent(
+        outcome.adminRecipientIds,
+        {
+          kind: 'admin_order_paid',
+          orderId,
+          orderNumber: order.order_number,
+          createdAt: new Date().toISOString(),
+          sound: 'strong',
+        },
+      );
     }
 
     return {
